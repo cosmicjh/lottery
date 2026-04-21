@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>복권 카이제곱 적합도 검정 · Chi-Square GoF Tester</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0e14;
+    --panel: #12181f;
+    --panel-2: #0d131a;
+    --border: #1f2937;
+    --text: #e5e7eb;
+    --text-dim: #9ca3af;
+    --accent: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --mono: ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px; }
+  h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-dim); font-size: 12px; margin-top: 4px; font-family: var(--mono); }
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .tab {
+    padding: 10px 16px; background: none; border: none; color: var(--text-dim);
+    cursor: pointer; font-size: 14px; border-bottom: 2px solid transparent;
+    transition: all 0.15s; font-family: inherit;
+  }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+  .panel-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-dim); margin-bottom: 10px; font-family: var(--mono);
+  }
+  textarea {
+    width: 100%; min-height: 140px; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 10px;
+    font-family: var(--mono); font-size: 12px; resize: vertical;
+  }
+  textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+  .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  button {
+    padding: 8px 14px; background: var(--panel-2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px; cursor: pointer; font-size: 13px;
+    transition: all 0.15s; font-family: inherit;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+  button.primary:hover { background: #0ea674; border-color: #0ea674; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .stat { padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
+  .stat-label { font-size: 10px; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); letter-spacing: 0.06em; }
+  .stat-value { font-family: var(--mono); font-size: 17px; font-weight: 600; margin-top: 2px; }
+  .verdict { padding: 12px; border-radius: 6px; font-family: var(--mono); font-size: 13px; line-height: 1.6; }
+  .verdict.pass { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.5); color: var(--accent); }
+  .verdict.fail { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.5); color: var(--danger); }
+  .verdict.warn { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.5); color: var(--warning); }
+  .chart { width: 100%; overflow-x: auto; }
+  svg { display: block; max-width: 100%; height: auto; }
+  footer { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-dim); font-family: var(--mono); line-height: 1.7; }
+  footer code { color: var(--accent); }
+  .hidden { display: none; }
+  .info {
+    background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.3);
+    color: var(--warning); padding: 8px 12px; border-radius: 6px;
+    font-size: 12px; margin-bottom: 12px; line-height: 1.5;
+  }
+  code { font-family: var(--mono); background: var(--panel-2); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: var(--text); }
+  .h0-text { font-family: var(--mono); font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+  .sub-test { padding: 12px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; }
+  .sub-test-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; }
+  .sub-test-name { font-weight: 600; font-size: 13px; }
+  .sub-test-stat { font-family: var(--mono); font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>복권 카이제곱 적합도 검정</h1>
+    <div class="subtitle">Lottery Chi-Square Goodness-of-Fit Tester · H₀: uniform draw</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-mode="lotto">로또 6/45</button>
+    <button class="tab" data-mode="pension">연금복권720+</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">귀무가설 H₀</div>
+    <div class="h0-text" id="h0"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">데이터 입력</div>
+    <div class="info" id="data-info"></div>
+    <textarea id="data-input" spellcheck="false"></textarea>
+    <div class="buttons">
+      <button class="primary" id="run-btn">검정 실행</button>
+      <button id="load-sample">샘플 불러오기</button>
+      <button id="upload-btn">CSV 업로드</button>
+      <button id="clear-btn">지우기</button>
+      <input type="file" id="file-input" accept=".csv,.txt" style="display:none;">
+    </div>
+  </div>
+
+  <div id="results" class="hidden">
+    <div class="panel">
+      <div class="panel-title">검정 통계량</div>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div id="verdict" class="verdict"></div>
+    </div>
+    <div class="panel" id="chart-panel">
+      <div class="panel-title">관측 빈도 vs 기댓값</div>
+      <div class="chart" id="chart"></div>
+    </div>
+    <div class="panel" id="detail-panel">
+      <div class="panel-title">상세 통계</div>
+      <div id="detail"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div><strong>배포</strong>: 레포 루트에 <code>index.html</code> 저장 → Settings → Pages → Source: <code>main</code> 브랜치 → Save</div>
+    <div><strong>데이터 수집</strong>: dhlottery.co.kr → 당첨결과 → 전체보기 엑셀 다운로드 후 CSV로 정리</div>
+    <div style="margin-top: 6px; color: #6b7280;">⚠️ 각 추첨은 독립사건입니다. 본 도구는 기계 편향 탐지용이며 번호 예측에는 쓸 수 없습니다.</div>
+  </footer>
+</div>
+
+<script>
+// ============================================================
+// Sample data (demo용 소량 — 실제 검정엔 100회 이상 권장)
+// ============================================================
+const SAMPLE_LOTTO = `# 형식: 회차,n1,n2,n3,n4,n5,n6,보너스
+1220,2,22,25,28,34,43,16
+1219,1,2,15,28,39,45,31
+1218,3,28,31,32,42,45,25
+1217,8,10,15,20,29,31,41
+1216,3,10,14,15,23,24,25
+1215,13,15,19,21,44,45,39
+1214,10,15,19,27,30,33,14
+1213,5,11,25,27,36,38,2
+1212,5,8,25,31,41,44,45`;
+
+const SAMPLE_PENSION = `# 형식: 회차,조,d1,d2,d3,d4,d5,d6
+311,4,3,8,2,2,6,8
+310,3,0,5,6,2,0,4
+309,4,8,6,7,5,4,9
+308,5,9,2,0,3,8,8
+307,1,9,8,7,6,4,5
+306,4,5,4,5,3,8,0
+305,2,3,3,1,3,1,6
+304,5,2,3,4,9,3,1
+303,4,6,3,9,5,6,6
+302,4,6,3,9,9,2,7
+301,4,7,4,8,5,5,9
+300,1,4,5,5,4,9,0
+299,2,2,8,2,9,4,5
+298,3,9,6,0,2,1,1
+297,5,4,4,4,1,6,3
+296,1,6,6,7,9,7,5`;
+
+// ============================================================
+// Statistical functions
+// ============================================================
+
+// log Gamma (Lanczos approximation, g=7)
+function logGamma(x) {
+  const g = 7;
+  const c = [
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+    771.32342877765313, -176.61502916214059, 12.507343278686905,
+    -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7
+  ];
+  if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - logGamma(1 - x);
+  x -= 1;
+  let a = c[0];
+  const t = x + g + 0.5;
+  for (let i = 1; i < 9; i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+
+// Regularized lower incomplete gamma P(s, x) — Numerical Recipes style
+function gammaP(s, x) {
+  if (x <= 0) return 0;
+  if (x < s + 1) {
+    // Series representation
+    let term = 1 / s, sum = term;
+    for (let n = 1; n < 500; n++) {
+      term *= x / (s + n);
+      sum += term;
+      if (Math.abs(term) < 1e-15 * Math.abs(sum)) break;
+    }
+    return sum * Math.exp(-x + s * Math.log(x) - logGamma(s));
+  } else {
+    // Continued fraction for Q(s,x), then P = 1 − Q
+    const FPMIN = 1e-300, EPS = 1e-15;
+    let b = x + 1 - s, c = 1 / FPMIN, d = 1 / b, h = d;
+    for (let i = 1; i < 500; i++) {
+      const an = -i * (i - s);
+      b += 2;
+      d = an * d + b; if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = b + an / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1 / d;
+      const delta = d * c; h *= delta;
+      if (Math.abs(delta - 1) < EPS) break;
+    }
+    return 1 - Math.exp(-x + s * Math.log(x) - logGamma(s)) * h;
+  }
+}
+
+const chi2CDF = (x, df) => gammaP(df / 2, x / 2);
+
+function chiSquareTest(observed, expected) {
+  let stat = 0;
+  for (let i = 0; i < observed.length; i++) {
+    if (expected[i] > 0) stat += Math.pow(observed[i] - expected[i], 2) / expected[i];
+  }
+  const df = observed.length - 1;
+  return { statistic: stat, df, pValue: 1 - chi2CDF(stat, df) };
+}
+
+// Inverse CDF via bisection
+function chi2InvCDF(p, df) {
+  let lo = 0, hi = Math.max(df * 10, 100);
+  while (chi2CDF(hi, df) < p) hi *= 2;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    if (chi2CDF(mid, df) < p) lo = mid; else hi = mid;
+    if (hi - lo < 1e-8) break;
+  }
+  return (lo + hi) / 2;
+}
+
+// ============================================================
+// Parsing
+// ============================================================
+function parseData(text, mode) {
+  const lines = text.trim().split('\n').filter(l => l.trim() && !l.trim().startsWith('#'));
+  const draws = [];
+  for (const line of lines) {
+    const parts = line.split(/[,\s\t]+/).map(s => s.trim()).filter(Boolean);
+    if (mode === 'lotto') {
+      if (parts.length >= 7) {
+        const nums = parts.slice(1, 7).map(Number);
+        if (nums.every(n => Number.isInteger(n) && n >= 1 && n <= 45) && new Set(nums).size === 6) {
+          draws.push({ round: parts[0], nums });
+        }
+      }
+    } else {
+      if (parts.length >= 8) {
+        const group = Number(parts[1]);
+        const digits = parts.slice(2, 8).map(Number);
+        if (Number.isInteger(group) && group >= 1 && group <= 5 &&
+            digits.every(n => Number.isInteger(n) && n >= 0 && n <= 9)) {
+          draws.push({ round: parts[0], group, digits });
+        }
+      }
+    }
+  }
+  return draws;
+}
+
+// ============================================================
+// Analysis
+// ============================================================
+function analyzeLotto(draws) {
+  const N = draws.length;
+  const counts = new Array(46).fill(0);
+  for (const d of draws) for (const n of d.nums) counts[n]++;
+  const observed = counts.slice(1, 46);
+  const expected = new Array(45).fill(N * 6 / 45);
+  return {
+    mode: 'lotto', N, observed, expected,
+    labels: Array.from({length: 45}, (_, i) => String(i + 1)),
+    test: chiSquareTest(observed, expected)
+  };
+}
+
+function analyzePension(draws) {
+  const N = draws.length;
+  const positionCounts = Array.from({length: 6}, () => new Array(10).fill(0));
+  const groupCounts = new Array(6).fill(0);
+
+  for (const d of draws) {
+    groupCounts[d.group]++;
+    for (let i = 0; i < 6; i++) positionCounts[i][d.digits[i]]++;
+  }
+
+  const results = [];
+  const gObs = groupCounts.slice(1, 6);
+  const gExp = new Array(5).fill(N / 5);
+  results.push({
+    name: '조 (Group)',
+    observed: gObs, expected: gExp,
+    labels: ['1조','2조','3조','4조','5조'],
+    test: chiSquareTest(gObs, gExp)
+  });
+
+  const posNames = ['자리 1 (십만)','자리 2 (만)','자리 3 (천)','자리 4 (백)','자리 5 (십)','자리 6 (일)'];
+  for (let i = 0; i < 6; i++) {
+    const exp = new Array(10).fill(N / 10);
+    results.push({
+      name: posNames[i],
+      observed: positionCounts[i], expected: exp,
+      labels: ['0','1','2','3','4','5','6','7','8','9'],
+      test: chiSquareTest(positionCounts[i], exp)
+    });
+  }
+  return { mode: 'pension', N, results };
+}
+
+// ============================================================
+// Rendering
+// ============================================================
+function fmt(x, d = 4) {
+  if (!isFinite(x)) return '—';
+  if (Math.abs(x) < 0.0001 && x !== 0) return x.toExponential(2);
+  return x.toFixed(d);
+}
+
+function renderBarChart(observed, expected, labels, container) {
+  const W = Math.max(600, labels.length * 18);
+  const H = 220;
+  const pad = { top: 10, right: 14, bottom: 28, left: 38 };
+  const cw = W - pad.left - pad.right;
+  const ch = H - pad.top - pad.bottom;
+  const maxY = Math.max(...observed, ...expected) * 1.15 || 1;
+  const bw = cw / labels.length * 0.78;
+
+  let s = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+  s += `<line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${H-pad.bottom}" stroke="#374151"/>`;
+  s += `<line x1="${pad.left}" y1="${H-pad.bottom}" x2="${W-pad.right}" y2="${H-pad.bottom}" stroke="#374151"/>`;
+  for (let t = 0; t <= 4; t++) {
+    const v = maxY * t / 4;
+    const y = H - pad.bottom - (v / maxY) * ch;
+    s += `<line x1="${pad.left}" y1="${y}" x2="${W-pad.right}" y2="${y}" stroke="#1f2937"/>`;
+    s += `<text x="${pad.left-5}" y="${y+3}" text-anchor="end" font-size="9" fill="#6b7280" font-family="monospace">${v.toFixed(1)}</text>`;
+  }
+  const expY = H - pad.bottom - (expected[0] / maxY) * ch;
+  s += `<line x1="${pad.left}" y1="${expY}" x2="${W-pad.right}" y2="${expY}" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4 3"/>`;
+  s += `<text x="${W-pad.right-2}" y="${expY-4}" text-anchor="end" font-size="9" fill="#f59e0b" font-family="monospace">E = ${expected[0].toFixed(2)}</text>`;
+  for (let i = 0; i < labels.length; i++) {
+    const x = pad.left + (i + 0.11) * (cw / labels.length);
+    const h = (observed[i] / maxY) * ch;
+    const y = H - pad.bottom - h;
+    const ratio = observed[i] / expected[i];
+    const color = ratio > 1.5 ? '#10b981' : ratio < 0.5 ? '#ef4444' : '#6b7280';
+    s += `<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${color}" opacity="0.85"><title>${labels[i]}: 관측 ${observed[i]}, 기댓값 ${expected[i].toFixed(2)}, O/E = ${ratio.toFixed(2)}</title></rect>`;
+  }
+  const step = Math.max(1, Math.ceil(labels.length / 22));
+  for (let i = 0; i < labels.length; i += step) {
+    const x = pad.left + (i + 0.5) * (cw / labels.length);
+    s += `<text x="${x}" y="${H-pad.bottom+14}" text-anchor="middle" font-size="9" fill="#9ca3af" font-family="monospace">${labels[i]}</text>`;
+  }
+  s += `</svg>`;
+  container.innerHTML = s;
+}
+
+function renderLottoResults(a) {
+  const { test, observed, expected, labels, N } = a;
+  const c05 = chi2InvCDF(0.95, test.df);
+  const c01 = chi2InvCDF(0.99, test.df);
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat"><div class="stat-label">Draws n</div><div class="stat-value">${N}</div></div>
+    <div class="stat"><div class="stat-label">χ² 통계량</div><div class="stat-value">${fmt(test.statistic, 2)}</div></div>
+    <div class="stat"><div class="stat-label">자유도 df</div><div class="stat-value">${test.df}</div></div>
+    <div class="stat"><div class="stat-label">p-value</div><div class="stat-value">${fmt(test.pValue, 4)}</div></div>
+    <div class="stat"><div class="stat-label">임계값 α=.05</div><div class="stat-value">${fmt(c05, 2)}</div></div>
+    <div class="stat"><div class="stat-label">임계값 α=.01</div><div class="stat-value">${fmt(c01, 2)}</div></div>
+  `;
+
+  const v = document.getElementById('verdict');
+  const r05 = test.statistic > c05, r01 = test.statistic > c01;
+  const lowPower = N < 30;
+  if (lowPower) {
+    v.className = 'verdict warn';
+    v.innerHTML = `⚠ 표본이 작아 검정력 부족 (n=${N}). 기댓값 ${(N*6/45).toFixed(1)} &lt; 5 인 셀 존재 가능.<br>→ <strong>100회 이상</strong> 데이터로 재검정 권장.`;
+  } else if (!r05) {
+    v.className = 'verdict pass';
+    v.innerHTML = `✓ α=0.05 기준 <strong>H₀ 기각 불가</strong><br>→ 관측 빈도가 균등분포 1/45와 통계적으로 부합. 편향 증거 없음.`;
+  } else if (!r01) {
+    v.className = 'verdict warn';
+    v.innerHTML = `⚠ α=0.05에서 H₀ 기각 (α=0.01에선 기각 불가)<br>→ 약한 편향 시사. Type-I 오류 고려해 추가 검증 필요.`;
+  } else {
+    v.className = 'verdict fail';
+    v.innerHTML = `✗ α=0.01 기준 <strong>H₀ 기각</strong><br>→ 유의한 편향 존재. 단, 1회 검정으로 단정 금물 — 다른 구간에서 재현되는지 확인.`;
+  }
+
+  renderBarChart(observed, expected, labels, document.getElementById('chart'));
+
+  const sorted = observed.map((o, i) => ({
+    num: i + 1, count: o,
+    z: (o - expected[i]) / Math.sqrt(expected[i])
+  })).sort((a, b) => b.z - a.z);
+  const top = sorted.slice(0, 5), bot = sorted.slice(-5).reverse();
+  const f = x => `#${x.num} (${x.count}회, z=${x.z.toFixed(2)})`;
+  document.getElementById('detail').innerHTML = `
+    <div style="font-family: var(--mono); font-size: 12px; line-height: 1.8;">
+      <div style="color: var(--accent);">▲ 과대출현 상위 5개 (양의 잔차)</div>
+      <div style="color: var(--text-dim); margin-bottom: 10px;">${top.map(f).join(' · ')}</div>
+      <div style="color: var(--danger);">▼ 과소출현 상위 5개 (음의 잔차)</div>
+      <div style="color: var(--text-dim);">${bot.map(f).join(' · ')}</div>
+      <div style="color: #6b7280; margin-top: 12px; font-size: 11px;">z-score = (관측−기댓값) / √기댓값. |z| &gt; 2 는 통상 5% 유의수준에서 단일 셀 이상치 기준(단, 다중검정 보정 전)</div>
+    </div>
+  `;
+}
+
+function renderPensionResults(a) {
+  const { results, N } = a;
+  const bonf = 0.05 / results.length;
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat"><div class="stat-label">Draws n</div><div class="stat-value">${N}</div></div>
+    <div class="stat"><div class="stat-label">검정 개수</div><div class="stat-value">${results.length}</div></div>
+    <div class="stat"><div class="stat-label">Bonferroni α</div><div class="stat-value">${fmt(bonf, 4)}</div></div>
+    <div class="stat"><div class="stat-label">최소 p-value</div><div class="stat-value">${fmt(Math.min(...results.map(r => r.test.pValue)), 4)}</div></div>
+  `;
+
+  const v = document.getElementById('verdict');
+  const anyReject = results.some(r => r.test.pValue < bonf);
+  if (N < 50) {
+    v.className = 'verdict warn';
+    v.innerHTML = `⚠ 표본이 작아 자리별 검정력 부족 (n=${N}, 기댓값 ${(N/10).toFixed(1)} &lt; 5).<br>→ <strong>100회 이상</strong> 권장.`;
+  } else if (!anyReject) {
+    v.className = 'verdict pass';
+    v.innerHTML = `✓ 모든 검정에서 Bonferroni 보정 α=${fmt(bonf,4)} 기준 <strong>H₀ 기각 불가</strong><br>→ 각 조/자리 모두 균등분포와 부합.`;
+  } else {
+    v.className = 'verdict fail';
+    v.innerHTML = `✗ 일부 검정 H₀ 기각 (보정 α=${fmt(bonf,4)})<br>→ 아래 상세 결과에서 red 표시 확인.`;
+  }
+
+  document.getElementById('chart-panel').style.display = 'none';
+
+  let html = '';
+  for (const r of results) {
+    const c05 = chi2InvCDF(1 - bonf, r.test.df);
+    const reject = r.test.statistic > c05;
+    const color = reject ? 'var(--danger)' : 'var(--accent)';
+    const id = 'ch-' + r.name.replace(/[^a-z0-9]/gi, '');
+    html += `
+      <div class="sub-test">
+        <div class="sub-test-head">
+          <div class="sub-test-name">${r.name}</div>
+          <div class="sub-test-stat" style="color: ${color};">
+            χ²=${fmt(r.test.statistic, 2)} · df=${r.test.df} · p=${fmt(r.test.pValue, 4)} · 임계값(보정)=${fmt(c05, 2)}
+          </div>
+        </div>
+        <div class="chart" id="${id}"></div>
+      </div>`;
+  }
+  document.getElementById('detail').innerHTML = html;
+
+  for (const r of results) {
+    const id = 'ch-' + r.name.replace(/[^a-z0-9]/gi, '');
+    renderBarChart(r.observed, r.expected, r.labels, document.getElementById(id));
+  }
+}
+
+// ============================================================
+// UI
+// ============================================================
+let mode = 'lotto';
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+  const h0 = document.getElementById('h0');
+  const info = document.getElementById('data-info');
+  const ta = document.getElementById('data-input');
+  if (m === 'lotto') {
+    h0.innerHTML = 'H₀: 45개 번호가 각각 1/45 확률로 독립적으로 추첨됨<br>H₁: 일부 번호에 편향 존재';
+    info.innerHTML = '형식: <code>회차,n1,n2,n3,n4,n5,n6,보너스</code> (한 줄에 한 회차). 유의미한 검정을 위해 <strong>100회 이상</strong> 권장 (기댓값 E ≈ N×6/45).';
+    ta.placeholder = '예:\n1220,2,22,25,28,34,43,16\n1219,1,2,15,28,39,45,31\n...';
+  } else {
+    h0.innerHTML = 'H₀: 각 자리 숫자(0–9) 및 조(1–5)가 균등분포 (조 P=1/5, 자리 P=1/10)<br>H₁: 일부 자리/조에 편향 존재';
+    info.innerHTML = '형식: <code>회차,조,d1,d2,d3,d4,d5,d6</code>. 7개 독립 검정에 <strong>Bonferroni 보정</strong> 적용. n ≥ 100 권장.';
+    ta.placeholder = '예:\n311,4,3,8,2,2,6,8\n310,3,0,5,6,2,0,4\n...';
+  }
+  document.getElementById('results').classList.add('hidden');
+  document.getElementById('chart-panel').style.display = '';
+}
+
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
+document.getElementById('load-sample').addEventListener('click', () => {
+  document.getElementById('data-input').value = mode === 'lotto' ? SAMPLE_LOTTO : SAMPLE_PENSION;
+});
+document.getElementById('clear-btn').addEventListener('click', () => {
+  document.getElementById('data-input').value = '';
+  document.getElementById('results').classList.add('hidden');
+});
+document.getElementById('upload-btn').addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change', (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = (ev) => { document.getElementById('data-input').value = ev.target.result; };
+  r.readAsText(f);
+});
+document.getElementById('run-btn').addEventListener('click', () => {
+  const text = document.getElementById('data-input').value.trim();
+  if (!text) { alert('데이터를 입력하세요'); return; }
+  const draws = parseData(text, mode);
+  if (draws.length === 0) { alert('유효한 데이터가 없습니다. 형식을 확인하세요.'); return; }
+  const a = mode === 'lotto' ? analyzeLotto(draws) : analyzePension(draws);
+  document.getElementById('results').classList.remove('hidden');
+  if (mode === 'lotto') renderLottoResults(a); else renderPensionResults(a);
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+setMode('lotto');
+</script>
+
+</body>
+</html>
