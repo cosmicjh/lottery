@@ -4,91 +4,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>복권 카이제곱 적합도 검정 · Chi-Square GoF Tester</title>
+<title>복권 카이제곱 적합도 검정</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0a0e14;
-    --panel: #12181f;
-    --panel-2: #0d131a;
-    --border: #1f2937;
-    --text: #e5e7eb;
-    --text-dim: #9ca3af;
-    --accent: #10b981;
-    --danger: #ef4444;
-    --warning: #f59e0b;
+    --bg: #0a0e14; --panel: #12181f; --panel-2: #0d131a;
+    --border: #1f2937; --text: #e5e7eb; --text-dim: #9ca3af;
+    --accent: #10b981; --accent-2: #06b6d4;
+    --danger: #ef4444; --warning: #f59e0b;
     --mono: ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace;
   }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.55;
-    min-height: 100vh;
+    background: var(--bg); color: var(--text); line-height: 1.55; min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
-  .container { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
-  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px; }
-  h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
-  .subtitle { color: var(--text-dim); font-size: 12px; margin-top: 4px; font-family: var(--mono); }
-  .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .container { max-width: 960px; margin: 0 auto; padding: 20px 14px 48px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 16px; }
+  h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-dim); font-size: 11px; margin-top: 4px; font-family: var(--mono); }
+  .tabs { display: flex; gap: 2px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
   .tab {
-    padding: 10px 16px; background: none; border: none; color: var(--text-dim);
+    padding: 10px 14px; background: none; border: none; color: var(--text-dim);
     cursor: pointer; font-size: 14px; border-bottom: 2px solid transparent;
-    transition: all 0.15s; font-family: inherit;
+    transition: all 0.15s; font-family: inherit; flex: 1;
   }
   .tab.active { color: var(--text); border-bottom-color: var(--accent); }
-  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
   .panel-title {
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
     color: var(--text-dim); margin-bottom: 10px; font-family: var(--mono);
+    display: flex; justify-content: space-between; align-items: center;
   }
-  textarea {
-    width: 100%; min-height: 140px; background: var(--panel-2); color: var(--text);
-    border: 1px solid var(--border); border-radius: 6px; padding: 10px;
-    font-family: var(--mono); font-size: 12px; resize: vertical;
+  .panel-title .badge {
+    background: var(--panel-2); color: var(--accent); padding: 2px 7px;
+    border-radius: 10px; font-size: 10px; border: 1px solid var(--border);
+    text-transform: none; letter-spacing: 0;
   }
-  textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
-  .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .buttons { display: flex; gap: 6px; flex-wrap: wrap; }
   button {
-    padding: 8px 14px; background: var(--panel-2); border: 1px solid var(--border);
+    padding: 8px 12px; background: var(--panel-2); border: 1px solid var(--border);
     color: var(--text); border-radius: 6px; cursor: pointer; font-size: 13px;
     transition: all 0.15s; font-family: inherit;
   }
   button:hover { border-color: var(--accent); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
   button.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
   button.primary:hover { background: #0ea674; border-color: #0ea674; }
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 14px; }
-  .stat { padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
+  button.danger:hover { border-color: var(--danger); color: var(--danger); }
+  button.small { padding: 5px 9px; font-size: 12px; }
+  input[type="number"], input[type="text"], select {
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 5px; padding: 7px 9px; font-family: var(--mono); font-size: 13px;
+    width: 100%; appearance: none; -webkit-appearance: none;
+  }
+  input:focus, select:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; }
+  .status { padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; font-family: var(--mono); font-size: 12px; margin-bottom: 10px; line-height: 1.5; }
+  .status.empty { color: var(--text-dim); }
+  .status strong { color: var(--accent); }
+  .form-grid { display: grid; gap: 8px; }
+  .form-row { display: flex; gap: 6px; align-items: center; }
+  .form-row label { min-width: 50px; font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
+  .num-inputs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; margin-bottom: 12px; }
+  .stat { padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
   .stat-label { font-size: 10px; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); letter-spacing: 0.06em; }
-  .stat-value { font-family: var(--mono); font-size: 17px; font-weight: 600; margin-top: 2px; }
-  .verdict { padding: 12px; border-radius: 6px; font-family: var(--mono); font-size: 13px; line-height: 1.6; }
+  .stat-value { font-family: var(--mono); font-size: 15px; font-weight: 600; margin-top: 2px; word-break: break-all; }
+  .verdict { padding: 11px; border-radius: 6px; font-family: var(--mono); font-size: 12px; line-height: 1.6; }
   .verdict.pass { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.5); color: var(--accent); }
   .verdict.fail { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.5); color: var(--danger); }
   .verdict.warn { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.5); color: var(--warning); }
   .chart { width: 100%; overflow-x: auto; }
   svg { display: block; max-width: 100%; height: auto; }
-  footer { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-dim); font-family: var(--mono); line-height: 1.7; }
-  footer code { color: var(--accent); }
-  .hidden { display: none; }
-  .info {
-    background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.3);
-    color: var(--warning); padding: 8px 12px; border-radius: 6px;
-    font-size: 12px; margin-bottom: 12px; line-height: 1.5;
+  footer { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-dim); font-family: var(--mono); line-height: 1.7; }
+  footer code { color: var(--accent); background: var(--panel-2); padding: 1px 4px; border-radius: 3px; }
+  .hidden { display: none !important; }
+  .h0-text { font-family: var(--mono); font-size: 12px; color: var(--text-dim); line-height: 1.7; margin-bottom: 10px; }
+  .sub-test { padding: 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; }
+  .sub-test-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 6px; flex-wrap: wrap; }
+  .sub-test-name { font-weight: 600; font-size: 12px; }
+  .sub-test-stat { font-family: var(--mono); font-size: 10px; }
+  .results-table { max-height: 380px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+  th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { background: var(--panel-2); color: var(--text-dim); font-weight: 600; font-size: 10px; text-transform: uppercase; position: sticky; top: 0; z-index: 1; }
+  tr:hover td { background: var(--panel-2); }
+  td.bonus { color: var(--accent-2); }
+  td.group-badge { color: var(--warning); }
+  .msg { padding: 8px 10px; border-radius: 5px; font-size: 11px; margin-top: 8px; font-family: var(--mono); }
+  .msg.ok { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--accent); }
+  .msg.err { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); }
+  .hint { color: var(--text-dim); font-size: 11px; font-family: var(--mono); margin-top: 4px; }
+  @media (max-width: 480px) {
+    h1 { font-size: 17px; }
+    .tab { font-size: 13px; padding: 9px 8px; }
+    button { font-size: 12px; padding: 7px 10px; }
+    .num-inputs { grid-template-columns: repeat(3, 1fr); }
   }
-  code { font-family: var(--mono); background: var(--panel-2); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: var(--text); }
-  .h0-text { font-family: var(--mono); font-size: 13px; color: var(--text-dim); line-height: 1.7; }
-  .sub-test { padding: 12px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; }
-  .sub-test-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; }
-  .sub-test-name { font-weight: 600; font-size: 13px; }
-  .sub-test-stat { font-family: var(--mono); font-size: 11px; }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
     <h1>복권 카이제곱 적합도 검정</h1>
-    <div class="subtitle">Lottery Chi-Square Goodness-of-Fit Tester · H₀: uniform draw</div>
+    <div class="subtitle">Lottery Chi-Square GoF · H₀: uniform · localStorage persist</div>
   </header>
 
   <div class="tabs">
@@ -96,21 +117,48 @@
     <button class="tab" data-mode="pension">연금복권720+</button>
   </div>
 
-  <div class="panel">
-    <div class="panel-title">귀무가설 H₀</div>
-    <div class="h0-text" id="h0"></div>
-  </div>
+  <!-- Data management -->
 
   <div class="panel">
-    <div class="panel-title">데이터 입력</div>
-    <div class="info" id="data-info"></div>
-    <textarea id="data-input" spellcheck="false"></textarea>
+    <div class="panel-title">
+      <span>저장된 데이터</span>
+      <span class="badge" id="count-badge">0건</span>
+    </div>
+    <div class="status" id="status"></div>
     <div class="buttons">
-      <button class="primary" id="run-btn">검정 실행</button>
-      <button id="load-sample">샘플 불러오기</button>
-      <button id="upload-btn">CSV 업로드</button>
-      <button id="clear-btn">지우기</button>
-      <input type="file" id="file-input" accept=".csv,.txt" style="display:none;">
+      <button id="upload-btn">📂 엑셀 업로드</button>
+      <button id="toggle-view-btn">📋 결과 열람</button>
+      <button class="danger" id="clear-btn">🗑 전체 삭제</button>
+    </div>
+    <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none">
+    <div id="upload-msg"></div>
+  </div>
+
+  <!-- Results viewer (collapsible) -->
+
+  <div class="panel hidden" id="view-panel">
+    <div class="panel-title">
+      <span>저장된 당첨결과</span>
+      <span class="badge" id="view-count"></span>
+    </div>
+    <div class="results-table" id="results-table"></div>
+  </div>
+
+  <!-- Manual entry -->
+
+  <div class="panel">
+    <div class="panel-title">회차 수동 입력</div>
+    <div id="manual-form"></div>
+    <div id="manual-msg"></div>
+  </div>
+
+  <!-- Chi-square test -->
+
+  <div class="panel">
+    <div class="panel-title">카이제곱 적합도 검정</div>
+    <div class="h0-text" id="h0"></div>
+    <div class="buttons">
+      <button class="primary" id="run-btn">▶ 검정 실행</button>
     </div>
   </div>
 
@@ -131,106 +179,126 @@
   </div>
 
   <footer>
-    <div><strong>배포</strong>: 레포 루트에 <code>index.html</code> 저장 → Settings → Pages → Source: <code>main</code> 브랜치 → Save</div>
-    <div><strong>데이터 수집</strong>: dhlottery.co.kr → 당첨결과 → 전체보기 엑셀 다운로드 후 CSV로 정리</div>
-    <div style="margin-top: 6px; color: #6b7280;">⚠️ 각 추첨은 독립사건입니다. 본 도구는 기계 편향 탐지용이며 번호 예측에는 쓸 수 없습니다.</div>
+    <div><strong>저장</strong>: 브라우저 <code>localStorage</code>에 영구 저장 (도메인별·브라우저별)</div>
+    <div><strong>엑셀 양식</strong>: 동행복권 → 당첨결과 → 회차별 당첨번호 → 엑셀 다운로드</div>
+    <div><strong>배포</strong>: 레포 루트에 <code>index.html</code> 저장 → Settings → Pages → <code>main</code> / root</div>
+    <div style="margin-top: 6px; color: #6b7280;">⚠ 각 추첨은 독립사건. 본 도구는 기계 편향 탐지용이며 번호 예측 용도가 아닙니다.</div>
   </footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <script>
 // ============================================================
-// Sample data (demo용 소량 — 실제 검정엔 100회 이상 권장)
+// Storage
 // ============================================================
-const SAMPLE_LOTTO = `# 형식: 회차,n1,n2,n3,n4,n5,n6,보너스
-1220,2,22,25,28,34,43,16
-1219,1,2,15,28,39,45,31
-1218,3,28,31,32,42,45,25
-1217,8,10,15,20,29,31,41
-1216,3,10,14,15,23,24,25
-1215,13,15,19,21,44,45,39
-1214,10,15,19,27,30,33,14
-1213,5,11,25,27,36,38,2
-1212,5,8,25,31,41,44,45`;
+const STORAGE_KEY = { lotto: 'lotto645_draws_v1', pension: 'pension720_draws_v1' };
 
-const SAMPLE_PENSION = `# 형식: 회차,조,d1,d2,d3,d4,d5,d6
-311,4,3,8,2,2,6,8
-310,3,0,5,6,2,0,4
-309,4,8,6,7,5,4,9
-308,5,9,2,0,3,8,8
-307,1,9,8,7,6,4,5
-306,4,5,4,5,3,8,0
-305,2,3,3,1,3,1,6
-304,5,2,3,4,9,3,1
-303,4,6,3,9,5,6,6
-302,4,6,3,9,9,2,7
-301,4,7,4,8,5,5,9
-300,1,4,5,5,4,9,0
-299,2,2,8,2,9,4,5
-298,3,9,6,0,2,1,1
-297,5,4,4,4,1,6,3
-296,1,6,6,7,9,7,5`;
+function loadDraws(mode) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY[mode]);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { console.error(e); return []; }
+}
+function saveDraws(mode, draws) {
+  const sorted = [...draws].sort((a, b) => b.round - a.round);
+  try { localStorage.setItem(STORAGE_KEY[mode], JSON.stringify(sorted)); return true; }
+  catch (e) { alert('저장 실패 (용량 초과 가능): ' + e.message); return false; }
+}
+function mergeDraws(existing, newDraws) {
+  const map = new Map();
+  for (const d of existing) map.set(d.round, d);
+  for (const d of newDraws) map.set(d.round, d);
+  return Array.from(map.values()).sort((a, b) => b.round - a.round);
+}
 
 // ============================================================
-// Statistical functions
+// Excel parsing
 // ============================================================
+function parseLottoExcel(buffer) {
+  const wb = XLSX.read(buffer, { type: 'array' });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+  const draws = [];
+  for (const row of rows) {
+    if (!row || row.length < 9) continue;
+    const round = parseInt(row[1]);
+    if (!Number.isInteger(round)) continue;
+    const nums = [row[2], row[3], row[4], row[5], row[6], row[7]].map(v => parseInt(v));
+    const bonus = parseInt(row[8]);
+    if (nums.some(n => !Number.isInteger(n) || n < 1 || n > 45)) continue;
+    if (new Set(nums).size !== 6) continue;
+    if (!Number.isInteger(bonus) || bonus < 1 || bonus > 45) continue;
+    draws.push({ round, nums: nums.sort((a,b)=>a-b), bonus });
+  }
+  return draws;
+}
 
-// log Gamma (Lanczos approximation, g=7)
+function parsePensionExcel(buffer) {
+  const wb = XLSX.read(buffer, { type: 'array' });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+  const draws = [];
+  for (const row of rows) {
+    if (!row || row.length < 4) continue;
+    const round = parseInt(row[1]);
+    if (!Number.isInteger(round)) continue;
+    const group = parseInt(row[2]);
+    if (!Number.isInteger(group) || group < 1 || group > 5) continue;
+    const rawNum = row[3];
+    if (rawNum === null || rawNum === undefined) continue;
+    const numStr = String(rawNum).replace(/\D/g, '').padStart(6, '0');
+    if (!/^\d{6}$/.test(numStr) || numStr.length !== 6) continue;
+    const digits = numStr.split('').map(Number);
+    draws.push({ round, group, digits });
+  }
+  return draws;
+}
+
+// ============================================================
+// Statistics
+// ============================================================
 function logGamma(x) {
-  const g = 7;
-  const c = [
-    0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+  const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
     771.32342877765313, -176.61502916214059, 12.507343278686905,
-    -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7
-  ];
+    -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
   if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - logGamma(1 - x);
   x -= 1;
   let a = c[0];
-  const t = x + g + 0.5;
+  const t = x + 7.5;
   for (let i = 1; i < 9; i++) a += c[i] / (x + i);
   return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
 }
-
-// Regularized lower incomplete gamma P(s, x) — Numerical Recipes style
 function gammaP(s, x) {
   if (x <= 0) return 0;
   if (x < s + 1) {
-    // Series representation
     let term = 1 / s, sum = term;
     for (let n = 1; n < 500; n++) {
-      term *= x / (s + n);
-      sum += term;
+      term *= x / (s + n); sum += term;
       if (Math.abs(term) < 1e-15 * Math.abs(sum)) break;
     }
     return sum * Math.exp(-x + s * Math.log(x) - logGamma(s));
-  } else {
-    // Continued fraction for Q(s,x), then P = 1 − Q
-    const FPMIN = 1e-300, EPS = 1e-15;
-    let b = x + 1 - s, c = 1 / FPMIN, d = 1 / b, h = d;
-    for (let i = 1; i < 500; i++) {
-      const an = -i * (i - s);
-      b += 2;
-      d = an * d + b; if (Math.abs(d) < FPMIN) d = FPMIN;
-      c = b + an / c; if (Math.abs(c) < FPMIN) c = FPMIN;
-      d = 1 / d;
-      const delta = d * c; h *= delta;
-      if (Math.abs(delta - 1) < EPS) break;
-    }
-    return 1 - Math.exp(-x + s * Math.log(x) - logGamma(s)) * h;
   }
+  const FPMIN = 1e-300, EPS = 1e-15;
+  let b = x + 1 - s, c = 1 / FPMIN, d = 1 / b, h = d;
+  for (let i = 1; i < 500; i++) {
+    const an = -i * (i - s); b += 2;
+    d = an * d + b; if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = b + an / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    const delta = d * c; h *= delta;
+    if (Math.abs(delta - 1) < EPS) break;
+  }
+  return 1 - Math.exp(-x + s * Math.log(x) - logGamma(s)) * h;
 }
-
 const chi2CDF = (x, df) => gammaP(df / 2, x / 2);
-
 function chiSquareTest(observed, expected) {
   let stat = 0;
   for (let i = 0; i < observed.length; i++) {
     if (expected[i] > 0) stat += Math.pow(observed[i] - expected[i], 2) / expected[i];
   }
-  const df = observed.length - 1;
-  return { statistic: stat, df, pValue: 1 - chi2CDF(stat, df) };
+  return { statistic: stat, df: observed.length - 1, pValue: 1 - chi2CDF(stat, observed.length - 1) };
 }
-
-// Inverse CDF via bisection
 function chi2InvCDF(p, df) {
   let lo = 0, hi = Math.max(df * 10, 100);
   while (chi2CDF(hi, df) < p) hi *= 2;
@@ -240,35 +308,6 @@ function chi2InvCDF(p, df) {
     if (hi - lo < 1e-8) break;
   }
   return (lo + hi) / 2;
-}
-
-// ============================================================
-// Parsing
-// ============================================================
-function parseData(text, mode) {
-  const lines = text.trim().split('\n').filter(l => l.trim() && !l.trim().startsWith('#'));
-  const draws = [];
-  for (const line of lines) {
-    const parts = line.split(/[,\s\t]+/).map(s => s.trim()).filter(Boolean);
-    if (mode === 'lotto') {
-      if (parts.length >= 7) {
-        const nums = parts.slice(1, 7).map(Number);
-        if (nums.every(n => Number.isInteger(n) && n >= 1 && n <= 45) && new Set(nums).size === 6) {
-          draws.push({ round: parts[0], nums });
-        }
-      }
-    } else {
-      if (parts.length >= 8) {
-        const group = Number(parts[1]);
-        const digits = parts.slice(2, 8).map(Number);
-        if (Number.isInteger(group) && group >= 1 && group <= 5 &&
-            digits.every(n => Number.isInteger(n) && n >= 0 && n <= 9)) {
-          draws.push({ round: parts[0], group, digits });
-        }
-      }
-    }
-  }
-  return draws;
 }
 
 // ============================================================
@@ -286,33 +325,26 @@ function analyzeLotto(draws) {
     test: chiSquareTest(observed, expected)
   };
 }
-
 function analyzePension(draws) {
   const N = draws.length;
   const positionCounts = Array.from({length: 6}, () => new Array(10).fill(0));
   const groupCounts = new Array(6).fill(0);
-
   for (const d of draws) {
     groupCounts[d.group]++;
     for (let i = 0; i < 6; i++) positionCounts[i][d.digits[i]]++;
   }
-
   const results = [];
   const gObs = groupCounts.slice(1, 6);
   const gExp = new Array(5).fill(N / 5);
   results.push({
-    name: '조 (Group)',
-    observed: gObs, expected: gExp,
-    labels: ['1조','2조','3조','4조','5조'],
-    test: chiSquareTest(gObs, gExp)
+    name: '조 (Group)', observed: gObs, expected: gExp,
+    labels: ['1조','2조','3조','4조','5조'], test: chiSquareTest(gObs, gExp)
   });
-
-  const posNames = ['자리 1 (십만)','자리 2 (만)','자리 3 (천)','자리 4 (백)','자리 5 (십)','자리 6 (일)'];
+  const posNames = ['십만 자리','만 자리','천 자리','백 자리','십 자리','일 자리'];
   for (let i = 0; i < 6; i++) {
     const exp = new Array(10).fill(N / 10);
     results.push({
-      name: posNames[i],
-      observed: positionCounts[i], expected: exp,
+      name: posNames[i], observed: positionCounts[i], expected: exp,
       labels: ['0','1','2','3','4','5','6','7','8','9'],
       test: chiSquareTest(positionCounts[i], exp)
     });
@@ -321,20 +353,18 @@ function analyzePension(draws) {
 }
 
 // ============================================================
-// Rendering
+// Rendering: chart
 // ============================================================
 function fmt(x, d = 4) {
   if (!isFinite(x)) return '—';
   if (Math.abs(x) < 0.0001 && x !== 0) return x.toExponential(2);
   return x.toFixed(d);
 }
-
 function renderBarChart(observed, expected, labels, container) {
-  const W = Math.max(600, labels.length * 18);
+  const W = Math.max(640, labels.length * 18);
   const H = 220;
   const pad = { top: 10, right: 14, bottom: 28, left: 38 };
-  const cw = W - pad.left - pad.right;
-  const ch = H - pad.top - pad.bottom;
+  const cw = W - pad.left - pad.right, ch = H - pad.top - pad.bottom;
   const maxY = Math.max(...observed, ...expected) * 1.15 || 1;
   const bw = cw / labels.length * 0.78;
 
@@ -355,7 +385,7 @@ function renderBarChart(observed, expected, labels, container) {
     const h = (observed[i] / maxY) * ch;
     const y = H - pad.bottom - h;
     const ratio = observed[i] / expected[i];
-    const color = ratio > 1.5 ? '#10b981' : ratio < 0.5 ? '#ef4444' : '#6b7280';
+    const color = ratio > 1.25 ? '#10b981' : ratio < 0.75 ? '#ef4444' : '#6b7280';
     s += `<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${color}" opacity="0.85"><title>${labels[i]}: 관측 ${observed[i]}, 기댓값 ${expected[i].toFixed(2)}, O/E = ${ratio.toFixed(2)}</title></rect>`;
   }
   const step = Math.max(1, Math.ceil(labels.length / 22));
@@ -367,157 +397,307 @@ function renderBarChart(observed, expected, labels, container) {
   container.innerHTML = s;
 }
 
+// ============================================================
+// Rendering: results
+// ============================================================
 function renderLottoResults(a) {
   const { test, observed, expected, labels, N } = a;
   const c05 = chi2InvCDF(0.95, test.df);
   const c01 = chi2InvCDF(0.99, test.df);
-
   document.getElementById('stat-grid').innerHTML = `
     <div class="stat"><div class="stat-label">Draws n</div><div class="stat-value">${N}</div></div>
     <div class="stat"><div class="stat-label">χ² 통계량</div><div class="stat-value">${fmt(test.statistic, 2)}</div></div>
     <div class="stat"><div class="stat-label">자유도 df</div><div class="stat-value">${test.df}</div></div>
     <div class="stat"><div class="stat-label">p-value</div><div class="stat-value">${fmt(test.pValue, 4)}</div></div>
-    <div class="stat"><div class="stat-label">임계값 α=.05</div><div class="stat-value">${fmt(c05, 2)}</div></div>
-    <div class="stat"><div class="stat-label">임계값 α=.01</div><div class="stat-value">${fmt(c01, 2)}</div></div>
-  `;
-
+    <div class="stat"><div class="stat-label">임계 α=.05</div><div class="stat-value">${fmt(c05, 2)}</div></div>
+    <div class="stat"><div class="stat-label">임계 α=.01</div><div class="stat-value">${fmt(c01, 2)}</div></div>`;
   const v = document.getElementById('verdict');
   const r05 = test.statistic > c05, r01 = test.statistic > c01;
-  const lowPower = N < 30;
-  if (lowPower) {
+  if (N < 30) {
     v.className = 'verdict warn';
-    v.innerHTML = `⚠ 표본이 작아 검정력 부족 (n=${N}). 기댓값 ${(N*6/45).toFixed(1)} &lt; 5 인 셀 존재 가능.<br>→ <strong>100회 이상</strong> 데이터로 재검정 권장.`;
+    v.innerHTML = `⚠ 표본 부족 (n=${N}). 기댓값 ${(N*6/45).toFixed(1)} &lt; 5 가능.<br>→ <strong>100회 이상</strong> 데이터 권장.`;
   } else if (!r05) {
     v.className = 'verdict pass';
-    v.innerHTML = `✓ α=0.05 기준 <strong>H₀ 기각 불가</strong><br>→ 관측 빈도가 균등분포 1/45와 통계적으로 부합. 편향 증거 없음.`;
+    v.innerHTML = `✓ α=0.05 기준 <strong>H₀ 기각 불가</strong><br>→ 관측 빈도가 균등분포 1/45와 부합. 편향 증거 없음.`;
   } else if (!r01) {
     v.className = 'verdict warn';
-    v.innerHTML = `⚠ α=0.05에서 H₀ 기각 (α=0.01에선 기각 불가)<br>→ 약한 편향 시사. Type-I 오류 고려해 추가 검증 필요.`;
+    v.innerHTML = `⚠ α=0.05 기각 (α=0.01 기각 불가)<br>→ 약한 편향 시사. 추가 검증 필요.`;
   } else {
     v.className = 'verdict fail';
-    v.innerHTML = `✗ α=0.01 기준 <strong>H₀ 기각</strong><br>→ 유의한 편향 존재. 단, 1회 검정으로 단정 금물 — 다른 구간에서 재현되는지 확인.`;
+    v.innerHTML = `✗ α=0.01 <strong>H₀ 기각</strong><br>→ 유의한 편향. 단, 단일 검정으로 단정 금물.`;
   }
-
   renderBarChart(observed, expected, labels, document.getElementById('chart'));
-
   const sorted = observed.map((o, i) => ({
-    num: i + 1, count: o,
-    z: (o - expected[i]) / Math.sqrt(expected[i])
+    num: i + 1, count: o, z: (o - expected[i]) / Math.sqrt(expected[i])
   })).sort((a, b) => b.z - a.z);
   const top = sorted.slice(0, 5), bot = sorted.slice(-5).reverse();
   const f = x => `#${x.num} (${x.count}회, z=${x.z.toFixed(2)})`;
   document.getElementById('detail').innerHTML = `
     <div style="font-family: var(--mono); font-size: 12px; line-height: 1.8;">
-      <div style="color: var(--accent);">▲ 과대출현 상위 5개 (양의 잔차)</div>
+      <div style="color: var(--accent);">▲ 과대출현 상위 5개</div>
       <div style="color: var(--text-dim); margin-bottom: 10px;">${top.map(f).join(' · ')}</div>
-      <div style="color: var(--danger);">▼ 과소출현 상위 5개 (음의 잔차)</div>
+      <div style="color: var(--danger);">▼ 과소출현 상위 5개</div>
       <div style="color: var(--text-dim);">${bot.map(f).join(' · ')}</div>
-      <div style="color: #6b7280; margin-top: 12px; font-size: 11px;">z-score = (관측−기댓값) / √기댓값. |z| &gt; 2 는 통상 5% 유의수준에서 단일 셀 이상치 기준(단, 다중검정 보정 전)</div>
-    </div>
-  `;
+      <div style="color: #6b7280; margin-top: 10px; font-size: 11px;">z = (O−E)/√E. |z|&gt;2는 단일 셀 기준 유의 (다중검정 미보정)</div>
+    </div>`;
 }
-
 function renderPensionResults(a) {
   const { results, N } = a;
   const bonf = 0.05 / results.length;
-
   document.getElementById('stat-grid').innerHTML = `
     <div class="stat"><div class="stat-label">Draws n</div><div class="stat-value">${N}</div></div>
-    <div class="stat"><div class="stat-label">검정 개수</div><div class="stat-value">${results.length}</div></div>
+    <div class="stat"><div class="stat-label">검정 수</div><div class="stat-value">${results.length}</div></div>
     <div class="stat"><div class="stat-label">Bonferroni α</div><div class="stat-value">${fmt(bonf, 4)}</div></div>
-    <div class="stat"><div class="stat-label">최소 p-value</div><div class="stat-value">${fmt(Math.min(...results.map(r => r.test.pValue)), 4)}</div></div>
-  `;
-
+    <div class="stat"><div class="stat-label">최소 p</div><div class="stat-value">${fmt(Math.min(...results.map(r => r.test.pValue)), 4)}</div></div>`;
   const v = document.getElementById('verdict');
   const anyReject = results.some(r => r.test.pValue < bonf);
   if (N < 50) {
     v.className = 'verdict warn';
-    v.innerHTML = `⚠ 표본이 작아 자리별 검정력 부족 (n=${N}, 기댓값 ${(N/10).toFixed(1)} &lt; 5).<br>→ <strong>100회 이상</strong> 권장.`;
+    v.innerHTML = `⚠ 표본 부족 (n=${N}). 기댓값 ${(N/10).toFixed(1)} &lt; 5.<br>→ <strong>100회 이상</strong> 권장.`;
   } else if (!anyReject) {
     v.className = 'verdict pass';
-    v.innerHTML = `✓ 모든 검정에서 Bonferroni 보정 α=${fmt(bonf,4)} 기준 <strong>H₀ 기각 불가</strong><br>→ 각 조/자리 모두 균등분포와 부합.`;
+    v.innerHTML = `✓ 모든 검정 Bonferroni α=${fmt(bonf,4)} 기준 <strong>H₀ 기각 불가</strong><br>→ 조/자리 모두 균등분포와 부합.`;
   } else {
     v.className = 'verdict fail';
-    v.innerHTML = `✗ 일부 검정 H₀ 기각 (보정 α=${fmt(bonf,4)})<br>→ 아래 상세 결과에서 red 표시 확인.`;
+    v.innerHTML = `✗ 일부 검정 H₀ 기각 (보정 α=${fmt(bonf,4)})<br>→ 아래 red 표시 확인.`;
   }
-
-  document.getElementById('chart-panel').style.display = 'none';
-
+  document.getElementById('chart-panel').classList.add('hidden');
   let html = '';
   for (const r of results) {
     const c05 = chi2InvCDF(1 - bonf, r.test.df);
     const reject = r.test.statistic > c05;
     const color = reject ? 'var(--danger)' : 'var(--accent)';
-    const id = 'ch-' + r.name.replace(/[^a-z0-9]/gi, '');
+    const id = 'ch-' + r.name.replace(/[^a-z0-9가-힣]/gi, '');
     html += `
       <div class="sub-test">
         <div class="sub-test-head">
           <div class="sub-test-name">${r.name}</div>
           <div class="sub-test-stat" style="color: ${color};">
-            χ²=${fmt(r.test.statistic, 2)} · df=${r.test.df} · p=${fmt(r.test.pValue, 4)} · 임계값(보정)=${fmt(c05, 2)}
+            χ²=${fmt(r.test.statistic, 2)} · df=${r.test.df} · p=${fmt(r.test.pValue, 4)} · 임계=${fmt(c05, 2)}
           </div>
         </div>
         <div class="chart" id="${id}"></div>
       </div>`;
   }
   document.getElementById('detail').innerHTML = html;
-
   for (const r of results) {
-    const id = 'ch-' + r.name.replace(/[^a-z0-9]/gi, '');
+    const id = 'ch-' + r.name.replace(/[^a-z0-9가-힣]/gi, '');
     renderBarChart(r.observed, r.expected, r.labels, document.getElementById(id));
   }
 }
 
 // ============================================================
-// UI
+// Rendering: viewer table
+// ============================================================
+function renderTable(mode, draws) {
+  const container = document.getElementById('results-table');
+  document.getElementById('view-count').textContent = `${draws.length}건`;
+  if (!draws.length) { container.innerHTML = '<div class="status empty" style="border:none;">데이터 없음</div>'; return; }
+  let html = '<table><thead><tr>';
+  if (mode === 'lotto') {
+    html += '<th>회차</th><th>당첨번호</th><th>보너스</th><th></th></tr></thead><tbody>';
+    for (const d of draws) {
+      html += `<tr><td>${d.round}</td><td>${d.nums.join(', ')}</td><td class="bonus">+${d.bonus}</td><td><button class="small danger" onclick="deleteDraw(${d.round})">삭제</button></td></tr>`;
+    }
+  } else {
+    html += '<th>회차</th><th>조</th><th>당첨번호</th><th></th></tr></thead><tbody>';
+    for (const d of draws) {
+      html += `<tr><td>${d.round}</td><td class="group-badge">${d.group}조</td><td>${d.digits.join('')}</td><td><button class="small danger" onclick="deleteDraw(${d.round})">삭제</button></td></tr>`;
+    }
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+// ============================================================
+// Rendering: manual form
+// ============================================================
+function renderManualForm(mode) {
+  const f = document.getElementById('manual-form');
+  if (mode === 'lotto') {
+    f.innerHTML = `
+      <div class="form-grid">
+        <div class="form-row">
+          <label>회차</label>
+          <input type="number" id="m-round" placeholder="예: 1221" min="1" inputmode="numeric">
+        </div>
+        <div>
+          <label style="display:block; margin-bottom:4px; font-size:12px; color:var(--text-dim); font-family:var(--mono);">당첨번호 6개 (1–45)</label>
+          <div class="num-inputs">
+            ${[1,2,3,4,5,6].map(i => `<input type="number" id="m-n${i}" min="1" max="45" inputmode="numeric">`).join('')}
+          </div>
+        </div>
+        <div class="form-row">
+          <label>보너스</label>
+          <input type="number" id="m-bonus" min="1" max="45" inputmode="numeric">
+        </div>
+        <button class="primary" id="m-add">➕ 추가 저장</button>
+      </div>
+      <div class="hint">동일 회차 입력 시 덮어쓰기됩니다.</div>`;
+    document.getElementById('m-add').onclick = () => addLottoManual();
+  } else {
+    f.innerHTML = `
+      <div class="form-grid">
+        <div class="form-row">
+          <label>회차</label>
+          <input type="number" id="m-round" placeholder="예: 312" min="1" inputmode="numeric">
+        </div>
+        <div class="form-row">
+          <label>조</label>
+          <select id="m-group">
+            <option value="1">1조</option><option value="2">2조</option>
+            <option value="3">3조</option><option value="4">4조</option>
+            <option value="5">5조</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>번호</label>
+          <input type="text" id="m-digits" placeholder="6자리 (예: 382268)" maxlength="6" inputmode="numeric" pattern="[0-9]{6}">
+        </div>
+        <button class="primary" id="m-add">➕ 추가 저장</button>
+      </div>
+      <div class="hint">6자리 숫자 (앞 0 포함). 동일 회차는 덮어쓰기.</div>`;
+    document.getElementById('m-add').onclick = () => addPensionManual();
+  }
+}
+
+// ============================================================
+// Actions
 // ============================================================
 let mode = 'lotto';
+
+function showMsg(elId, text, ok) {
+  const el = document.getElementById(elId);
+  el.innerHTML = `<div class="msg ${ok ? 'ok' : 'err'}">${text}</div>`;
+  setTimeout(() => { el.innerHTML = ''; }, 4000);
+}
+
+function updateStatus() {
+  const draws = loadDraws(mode);
+  const status = document.getElementById('status');
+  const badge = document.getElementById('count-badge');
+  badge.textContent = `${draws.length}건`;
+  if (draws.length === 0) {
+    status.className = 'status empty';
+    status.innerHTML = '저장된 데이터 없음. 엑셀 업로드 또는 수동 입력으로 시작하세요.';
+  } else {
+    const rounds = draws.map(d => d.round);
+    const min = Math.min(...rounds), max = Math.max(...rounds);
+    status.className = 'status';
+    status.innerHTML = `저장 회차: <strong>${max}회 ~ ${min}회</strong> · 총 <strong>${draws.length}건</strong>`;
+  }
+  if (!document.getElementById('view-panel').classList.contains('hidden')) renderTable(mode, draws);
+}
 
 function setMode(m) {
   mode = m;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
   const h0 = document.getElementById('h0');
-  const info = document.getElementById('data-info');
-  const ta = document.getElementById('data-input');
   if (m === 'lotto') {
-    h0.innerHTML = 'H₀: 45개 번호가 각각 1/45 확률로 독립적으로 추첨됨<br>H₁: 일부 번호에 편향 존재';
-    info.innerHTML = '형식: <code>회차,n1,n2,n3,n4,n5,n6,보너스</code> (한 줄에 한 회차). 유의미한 검정을 위해 <strong>100회 이상</strong> 권장 (기댓값 E ≈ N×6/45).';
-    ta.placeholder = '예:\n1220,2,22,25,28,34,43,16\n1219,1,2,15,28,39,45,31\n...';
+    h0.innerHTML = 'H₀: 45개 번호 각각 1/45 독립 추첨 · H₁: 일부 번호 편향';
   } else {
-    h0.innerHTML = 'H₀: 각 자리 숫자(0–9) 및 조(1–5)가 균등분포 (조 P=1/5, 자리 P=1/10)<br>H₁: 일부 자리/조에 편향 존재';
-    info.innerHTML = '형식: <code>회차,조,d1,d2,d3,d4,d5,d6</code>. 7개 독립 검정에 <strong>Bonferroni 보정</strong> 적용. n ≥ 100 권장.';
-    ta.placeholder = '예:\n311,4,3,8,2,2,6,8\n310,3,0,5,6,2,0,4\n...';
+    h0.innerHTML = 'H₀: 조(1/5) 및 각 자리(0-9, 1/10) 균등 · 7개 독립검정 Bonferroni 보정';
   }
   document.getElementById('results').classList.add('hidden');
-  document.getElementById('chart-panel').style.display = '';
+  document.getElementById('view-panel').classList.add('hidden');
+  document.getElementById('chart-panel').classList.remove('hidden');
+  renderManualForm(m);
+  updateStatus();
 }
 
 document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
-document.getElementById('load-sample').addEventListener('click', () => {
-  document.getElementById('data-input').value = mode === 'lotto' ? SAMPLE_LOTTO : SAMPLE_PENSION;
-});
-document.getElementById('clear-btn').addEventListener('click', () => {
-  document.getElementById('data-input').value = '';
-  document.getElementById('results').classList.add('hidden');
-});
-document.getElementById('upload-btn').addEventListener('click', () => document.getElementById('file-input').click());
-document.getElementById('file-input').addEventListener('change', (e) => {
-  const f = e.target.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = (ev) => { document.getElementById('data-input').value = ev.target.result; };
-  r.readAsText(f);
-});
-document.getElementById('run-btn').addEventListener('click', () => {
-  const text = document.getElementById('data-input').value.trim();
-  if (!text) { alert('데이터를 입력하세요'); return; }
-  const draws = parseData(text, mode);
-  if (draws.length === 0) { alert('유효한 데이터가 없습니다. 형식을 확인하세요.'); return; }
+
+document.getElementById('upload-btn').onclick = () => document.getElementById('file-input').click();
+document.getElementById('file-input').onchange = async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  if (typeof XLSX === 'undefined') {
+    showMsg('upload-msg', 'SheetJS 로드 실패 (네트워크 확인)', false); return;
+  }
+  try {
+    const buf = await file.arrayBuffer();
+    const parsed = mode === 'lotto' ? parseLottoExcel(buf) : parsePensionExcel(buf);
+    if (!parsed.length) {
+      showMsg('upload-msg', '파싱된 유효 데이터가 없습니다. 양식을 확인하세요.', false);
+    } else {
+      const merged = mergeDraws(loadDraws(mode), parsed);
+      if (saveDraws(mode, merged)) {
+        showMsg('upload-msg', `✓ ${parsed.length}건 파싱, 병합 후 총 ${merged.length}건 저장`, true);
+        updateStatus();
+      }
+    }
+  } catch (err) {
+    showMsg('upload-msg', '읽기 오류: ' + err.message, false);
+  }
+  e.target.value = '';
+};
+
+document.getElementById('toggle-view-btn').onclick = () => {
+  const v = document.getElementById('view-panel');
+  v.classList.toggle('hidden');
+  if (!v.classList.contains('hidden')) {
+    renderTable(mode, loadDraws(mode));
+    v.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+document.getElementById('clear-btn').onclick = () => {
+  const draws = loadDraws(mode);
+  if (!draws.length) return;
+  if (confirm(`${mode === 'lotto' ? '로또' : '연금복권'} 저장 데이터 ${draws.length}건을 모두 삭제합니다. 계속?`)) {
+    localStorage.removeItem(STORAGE_KEY[mode]);
+    document.getElementById('results').classList.add('hidden');
+    updateStatus();
+  }
+};
+
+window.deleteDraw = function(round) {
+  const draws = loadDraws(mode).filter(d => d.round !== round);
+  saveDraws(mode, draws); updateStatus();
+};
+
+function addLottoManual() {
+  const round = parseInt(document.getElementById('m-round').value);
+  const nums = [1,2,3,4,5,6].map(i => parseInt(document.getElementById('m-n'+i).value));
+  const bonus = parseInt(document.getElementById('m-bonus').value);
+  if (!Number.isInteger(round) || round < 1) return showMsg('manual-msg', '회차 값이 올바르지 않습니다.', false);
+  if (nums.some(n => !Number.isInteger(n) || n < 1 || n > 45)) return showMsg('manual-msg', '번호는 1~45 정수 6개.', false);
+  if (new Set(nums).size !== 6) return showMsg('manual-msg', '중복 번호가 있습니다.', false);
+  if (!Number.isInteger(bonus) || bonus < 1 || bonus > 45) return showMsg('manual-msg', '보너스 번호(1~45) 확인.', false);
+  if (nums.includes(bonus)) return showMsg('manual-msg', '보너스는 본 번호와 달라야 합니다.', false);
+  const merged = mergeDraws(loadDraws('lotto'), [{ round, nums: nums.sort((a,b)=>a-b), bonus }]);
+  saveDraws('lotto', merged);
+  ['m-round','m-n1','m-n2','m-n3','m-n4','m-n5','m-n6','m-bonus'].forEach(id => document.getElementById(id).value = '');
+  showMsg('manual-msg', `✓ ${round}회 저장 (총 ${merged.length}건)`, true);
+  updateStatus();
+}
+
+function addPensionManual() {
+  const round = parseInt(document.getElementById('m-round').value);
+  const group = parseInt(document.getElementById('m-group').value);
+  const raw = document.getElementById('m-digits').value.trim();
+  if (!Number.isInteger(round) || round < 1) return showMsg('manual-msg', '회차 값이 올바르지 않습니다.', false);
+  if (!Number.isInteger(group) || group < 1 || group > 5) return showMsg('manual-msg', '조 선택.', false);
+  if (!/^\d{6}$/.test(raw)) return showMsg('manual-msg', '6자리 숫자를 정확히 입력하세요.', false);
+  const digits = raw.split('').map(Number);
+  const merged = mergeDraws(loadDraws('pension'), [{ round, group, digits }]);
+  saveDraws('pension', merged);
+  document.getElementById('m-round').value = '';
+  document.getElementById('m-digits').value = '';
+  showMsg('manual-msg', `✓ ${round}회 저장 (총 ${merged.length}건)`, true);
+  updateStatus();
+}
+
+document.getElementById('run-btn').onclick = () => {
+  const draws = loadDraws(mode);
+  if (!draws.length) return alert('저장된 데이터가 없습니다. 엑셀 업로드 또는 수동 입력 필요.');
   const a = mode === 'lotto' ? analyzeLotto(draws) : analyzePension(draws);
+  document.getElementById('chart-panel').classList.remove('hidden');
   document.getElementById('results').classList.remove('hidden');
   if (mode === 'lotto') renderLottoResults(a); else renderPensionResults(a);
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
+};
 
+// init
 setMode('lotto');
 </script>
 
