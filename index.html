@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>복권 카이제곱 적합도 검정</title>
+<title>복권 카이제곱 · 번호 생성기</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -25,8 +25,8 @@
   .subtitle { color: var(--text-dim); font-size: 11px; margin-top: 4px; font-family: var(--mono); }
   .tabs { display: flex; gap: 2px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
   .tab {
-    padding: 10px 14px; background: none; border: none; color: var(--text-dim);
-    cursor: pointer; font-size: 14px; border-bottom: 2px solid transparent;
+    padding: 10px 10px; background: none; border: none; color: var(--text-dim);
+    cursor: pointer; font-size: 13px; border-bottom: 2px solid transparent;
     transition: all 0.15s; font-family: inherit; flex: 1;
   }
   .tab.active { color: var(--text); border-bottom-color: var(--accent); }
@@ -61,12 +61,14 @@
   input:focus, select:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
   input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   input[type="number"] { -moz-appearance: textfield; }
+  input[type="checkbox"] { width: auto; accent-color: var(--accent); margin-right: 6px; }
   .status { padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; font-family: var(--mono); font-size: 12px; margin-bottom: 10px; line-height: 1.5; }
   .status.empty { color: var(--text-dim); }
   .status strong { color: var(--accent); }
   .form-grid { display: grid; gap: 8px; }
   .form-row { display: flex; gap: 6px; align-items: center; }
-  .form-row label { min-width: 50px; font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
+  .form-row label { min-width: 72px; font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
+  .form-row input[type="number"], .form-row input[type="text"] { flex: 1; }
   .num-inputs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
   .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; margin-bottom: 12px; }
   .stat { padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
@@ -96,32 +98,104 @@
   .msg { padding: 8px 10px; border-radius: 5px; font-size: 11px; margin-top: 8px; font-family: var(--mono); }
   .msg.ok { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--accent); }
   .msg.err { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); }
-  .hint { color: var(--text-dim); font-size: 11px; font-family: var(--mono); margin-top: 4px; }
-  @media (max-width: 480px) {
-    h1 { font-size: 17px; }
-    .tab { font-size: 13px; padding: 9px 8px; }
-    button { font-size: 12px; padding: 7px 10px; }
-    .num-inputs { grid-template-columns: repeat(3, 1fr); }
-  }
+  .hint { color: var(--text-dim); font-size: 11px; font-family: var(--mono); margin-top: 4px; line-height: 1.5; }
+
+/* Generator-specific */
+.info-banner {
+background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.3);
+color: var(–accent-2); padding: 10px 12px; border-radius: 6px;
+font-size: 11px; margin-bottom: 12px; line-height: 1.6; font-family: var(–mono);
+}
+details { background: var(–panel-2); border: 1px solid var(–border); border-radius: 6px; padding: 8px 10px; margin: 8px 0; }
+details > summary { cursor: pointer; font-size: 12px; color: var(–text-dim); font-family: var(–mono); padding: 2px 0; }
+details[open] > summary { color: var(–text); margin-bottom: 8px; }
+.combo-card {
+background: var(–panel-2); border: 1px solid var(–border); border-radius: 8px;
+padding: 12px; margin-bottom: 10px;
+}
+.combo-header {
+display: flex; justify-content: space-between; align-items: center;
+margin-bottom: 10px; font-family: var(–mono); gap: 8px; flex-wrap: wrap;
+}
+.combo-num { font-size: 13px; font-weight: 700; color: var(–accent); }
+.combo-score { font-size: 10px; color: var(–text-dim); }
+.combo-score strong { color: var(–text); }
+.combo-balls {
+display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
+padding: 8px; background: var(–bg); border-radius: 6px;
+justify-content: center;
+}
+.ball {
+display: inline-flex; align-items: center; justify-content: center;
+width: 38px; height: 38px; border-radius: 50%;
+font-family: var(–mono); font-weight: 700; font-size: 15px;
+flex-shrink: 0;
+}
+.ball-y { background: #fbbf24; color: #000; }
+.ball-b { background: #3b82f6; color: #fff; }
+.ball-r { background: #ef4444; color: #fff; }
+.ball-g { background: #4b5563; color: #fff; }
+.ball-gr { background: #10b981; color: #fff; }
+.combo-stats {
+display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
+font-family: var(–mono); font-size: 11px;
+}
+.combo-stats span {
+background: var(–bg); padding: 3px 8px; border-radius: 4px;
+border: 1px solid var(–border); color: var(–text-dim);
+}
+.combo-stats strong { color: var(–text); }
+.combo-reasons {
+font-family: var(–mono); font-size: 11px; line-height: 1.6;
+color: var(–text-dim); margin-top: 6px;
+}
+.reason-tag {
+display: inline-block; padding: 2px 7px; border-radius: 3px;
+background: rgba(239, 68, 68, 0.12); color: var(–danger);
+font-size: 10px; margin: 2px 3px 2px 0; border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.good-tag {
+display: inline-block; padding: 2px 7px; border-radius: 3px;
+background: rgba(16, 185, 129, 0.1); color: var(–accent);
+font-size: 10px; border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.factor-list {
+font-family: var(–mono); font-size: 11px; line-height: 1.7; color: var(–text-dim);
+}
+.factor-list .w { color: var(–warning); font-weight: 600; display: inline-block; min-width: 28px; }
+.factor-list .name { color: var(–text); }
+.copy-btn {
+font-size: 10px; padding: 3px 7px; margin-left: auto;
+}
+@media (max-width: 480px) {
+h1 { font-size: 17px; }
+.tab { font-size: 12px; padding: 9px 6px; }
+button { font-size: 12px; padding: 7px 10px; }
+.num-inputs { grid-template-columns: repeat(3, 1fr); }
+.ball { width: 34px; height: 34px; font-size: 14px; }
+.form-row label { min-width: 60px; font-size: 11px; }
+}
 </style>
+
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>복권 카이제곱 적합도 검정</h1>
-    <div class="subtitle">Lottery Chi-Square GoF · H₀: uniform · localStorage persist</div>
+    <h1>복권 카이제곱 · 번호 생성기</h1>
+    <div class="subtitle">GoF test + popularity-averse combinatorial generator</div>
   </header>
 
   <div class="tabs">
-    <button class="tab active" data-mode="lotto">로또 6/45</button>
-    <button class="tab" data-mode="pension">연금복권720+</button>
+    <button class="tab active" data-mode="lotto">로또 검정</button>
+    <button class="tab" data-mode="pension">연금 검정</button>
+    <button class="tab" data-mode="generate">🎲 번호 생성</button>
   </div>
 
   <!-- Data management -->
 
   <div class="panel">
     <div class="panel-title">
-      <span>저장된 데이터</span>
+      <span id="data-title">저장된 데이터</span>
       <span class="badge" id="count-badge">0건</span>
     </div>
     <div class="status" id="status"></div>
@@ -134,7 +208,7 @@
     <div id="upload-msg"></div>
   </div>
 
-  <!-- Results viewer (collapsible) -->
+  <!-- Viewer -->
 
   <div class="panel hidden" id="view-panel">
     <div class="panel-title">
@@ -144,45 +218,126 @@
     <div class="results-table" id="results-table"></div>
   </div>
 
-  <!-- Manual entry -->
+  <!-- Chi-square mode panels -->
 
-  <div class="panel">
-    <div class="panel-title">회차 수동 입력</div>
-    <div id="manual-form"></div>
-    <div id="manual-msg"></div>
-  </div>
-
-  <!-- Chi-square test -->
-
-  <div class="panel">
-    <div class="panel-title">카이제곱 적합도 검정</div>
-    <div class="h0-text" id="h0"></div>
-    <div class="buttons">
-      <button class="primary" id="run-btn">▶ 검정 실행</button>
-    </div>
-  </div>
-
-  <div id="results" class="hidden">
+  <div class="chi-only">
     <div class="panel">
-      <div class="panel-title">검정 통계량</div>
-      <div class="stat-grid" id="stat-grid"></div>
-      <div id="verdict" class="verdict"></div>
+      <div class="panel-title">회차 수동 입력</div>
+      <div id="manual-form"></div>
+      <div id="manual-msg"></div>
     </div>
-    <div class="panel" id="chart-panel">
-      <div class="panel-title">관측 빈도 vs 기댓값</div>
-      <div class="chart" id="chart"></div>
+    <div class="panel">
+      <div class="panel-title">카이제곱 적합도 검정</div>
+      <div class="h0-text" id="h0"></div>
+      <div class="buttons">
+        <button class="primary" id="run-btn">▶ 검정 실행</button>
+      </div>
     </div>
-    <div class="panel" id="detail-panel">
-      <div class="panel-title">상세 통계</div>
-      <div id="detail"></div>
+    <div id="results" class="hidden">
+      <div class="panel">
+        <div class="panel-title">검정 통계량</div>
+        <div class="stat-grid" id="stat-grid"></div>
+        <div id="verdict" class="verdict"></div>
+      </div>
+      <div class="panel" id="chart-panel">
+        <div class="panel-title">관측 빈도 vs 기댓값</div>
+        <div class="chart" id="chart"></div>
+      </div>
+      <div class="panel" id="detail-panel">
+        <div class="panel-title">상세 통계</div>
+        <div id="detail"></div>
+      </div>
     </div>
+  </div>
+
+  <!-- Generator mode panels -->
+
+  <div class="gen-only hidden">
+    <div class="panel">
+      <div class="panel-title">인기도 회피 번호 생성기</div>
+      <div class="info-banner">
+        카이제곱 결과가 H₀ 기각 불가 (p&gt;0.05)이면 추첨 편향은 없습니다.
+        이때 모든 조합의 당첨 확률은 동일하지만 <strong>남들이 덜 고르는 조합</strong>을 선택하면
+        당첨 시 분할 인원이 줄어 실수령액 기댓값이 증가합니다. (Cook &amp; Clotfelter, 1993)
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>생성 개수</label>
+          <input type="number" id="gen-n" value="5" min="1" max="10" inputmode="numeric">
+        </div>
+        <div class="form-row">
+          <label>포함 번호</label>
+          <input type="text" id="gen-include" placeholder="선택: 예) 7, 14 (최대 5개)">
+        </div>
+        <div class="form-row">
+          <label>제외 번호</label>
+          <input type="text" id="gen-exclude" placeholder="선택: 예) 1, 2, 3">
+        </div>
+        <div class="form-row">
+          <label>합계</label>
+          <input type="number" id="gen-min-sum" value="100" min="21" max="255" inputmode="numeric">
+          <span style="color:var(--text-dim); font-family:var(--mono);">~</span>
+          <input type="number" id="gen-max-sum" value="200" min="21" max="255" inputmode="numeric">
+        </div>
+        <label style="display:flex; align-items:center; font-size:12px; color:var(--text-dim); font-family:var(--mono);">
+          <input type="checkbox" id="gen-avoid-hist" checked>
+          과거 당첨조합 회피 (저장된 데이터 기반)
+        </label>
+        <details>
+          <summary>고급 설정</summary>
+          <div class="form-row" style="margin-top: 6px;">
+            <label>후보 수</label>
+            <input type="number" id="gen-candidates" value="20000" min="1000" max="100000" inputmode="numeric">
+          </div>
+          <div class="hint">많을수록 저인기 조합 탐색 범위가 넓어지지만 시간이 오래 걸립니다 (20k 기본 ≈ 100ms).</div>
+        </details>
+        <button class="primary" id="gen-btn">🎲 번호 생성</button>
+      </div>
+      <div id="gen-msg"></div>
+    </div>
+
+```
+<details class="panel" style="padding: 12px 14px;">
+  <summary style="font-size:12px; color:var(--text-dim); font-family:var(--mono);">📖 알고리즘 및 인기도 모델 설명</summary>
+  <div style="margin-top: 10px;">
+    <div class="factor-list">
+      <div style="color:var(--text); margin-bottom:6px;"><strong>알고리즘</strong>: Monte Carlo sampling + weighted scoring + greedy diversification</div>
+      <div>1. 제약조건 만족 조합 N개 무작위 생성 (기본 20,000)</div>
+      <div>2. 12가지 인기 편향 지표로 각 조합 점수화 (낮을수록 덜 인기)</div>
+      <div>3. 오름차순 정렬 후 상위 조합 선택</div>
+      <div>4. 중복도 5 이상인 조합은 제외 (다양성 확보)</div>
+    </div>
+    <div style="color:var(--text); margin-top:10px; margin-bottom:6px; font-family:var(--mono); font-size:12px;"><strong>인기 편향 지표 (가중치)</strong></div>
+    <div class="factor-list">
+      <div><span class="w">+15</span> <span class="name">등차수열</span> (e.g. 1·7·13·19·25·31)</div>
+      <div><span class="w">+15</span> <span class="name">전원 ≤31</span> (생일 편중)</div>
+      <div><span class="w">+20</span> <span class="name">과거 당첨조합 일치</span></div>
+      <div><span class="w">+10</span> <span class="name">5의 배수 5개 이상</span></div>
+      <div><span class="w">+8</span> <span class="name">끝자리 4개 이상 동일</span></div>
+      <div><span class="w">+8</span> <span class="name">연속 4개 이상</span></div>
+      <div><span class="w">+7</span> <span class="name">5/6 생일 편중</span></div>
+      <div><span class="w">+6</span> <span class="name">합계 95-125</span> (생일 평균)</div>
+      <div><span class="w">+6</span> <span class="name">같은 10단위 5개 이상</span></div>
+      <div><span class="w">+5</span> <span class="name">월 편중</span> (≤12 4개 이상)</div>
+      <div><span class="w">+3</span> <span class="name">홀짝/저고 극단</span> (0:6)</div>
+      <div><span class="w">+2</span> <span class="name">행운 7 선호</span> (7·17·27·37)</div>
+    </div>
+    <div style="color:#6b7280; margin-top:10px; font-size:11px; font-family:var(--mono); line-height:1.6;">
+      근거: Cook &amp; Clotfelter (1993), Simon (1999), Haigh (1997). 가중치는 문헌 추정치에 기반한 휴리스틱이며 정확한 당첨자 분포는 비공개입니다.
+    </div>
+  </div>
+</details>
+
+<div id="gen-results"></div>
+```
+
   </div>
 
   <footer>
     <div><strong>저장</strong>: 브라우저 <code>localStorage</code>에 영구 저장 (도메인별·브라우저별)</div>
     <div><strong>엑셀 양식</strong>: 동행복권 → 당첨결과 → 회차별 당첨번호 → 엑셀 다운로드</div>
     <div><strong>배포</strong>: 레포 루트에 <code>index.html</code> 저장 → Settings → Pages → <code>main</code> / root</div>
-    <div style="margin-top: 6px; color: #6b7280;">⚠ 각 추첨은 독립사건. 본 도구는 기계 편향 탐지용이며 번호 예측 용도가 아닙니다.</div>
+    <div style="margin-top: 6px; color: #6b7280;">⚠ 각 추첨은 독립사건. 당첨 확률은 바뀌지 않으며, 인기도 회피는 기대 실수령액만 개선합니다.</div>
   </footer>
 </div>
 
@@ -193,17 +348,14 @@
 // Storage
 // ============================================================
 const STORAGE_KEY = { lotto: 'lotto645_draws_v1', pension: 'pension720_draws_v1' };
-
-function loadDraws(mode) {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY[mode]);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) { console.error(e); return []; }
+function loadDraws(dm) {
+  try { const raw = localStorage.getItem(STORAGE_KEY[dm]); return raw ? JSON.parse(raw) : []; }
+  catch (e) { return []; }
 }
-function saveDraws(mode, draws) {
+function saveDraws(dm, draws) {
   const sorted = [...draws].sort((a, b) => b.round - a.round);
-  try { localStorage.setItem(STORAGE_KEY[mode], JSON.stringify(sorted)); return true; }
-  catch (e) { alert('저장 실패 (용량 초과 가능): ' + e.message); return false; }
+  try { localStorage.setItem(STORAGE_KEY[dm], JSON.stringify(sorted)); return true; }
+  catch (e) { alert('저장 실패: ' + e.message); return false; }
 }
 function mergeDraws(existing, newDraws) {
   const map = new Map();
@@ -222,8 +374,7 @@ function parseLottoExcel(buffer) {
   const draws = [];
   for (const row of rows) {
     if (!row || row.length < 9) continue;
-    const round = parseInt(row[1]);
-    if (!Number.isInteger(round)) continue;
+    const round = parseInt(row[1]); if (!Number.isInteger(round)) continue;
     const nums = [row[2], row[3], row[4], row[5], row[6], row[7]].map(v => parseInt(v));
     const bonus = parseInt(row[8]);
     if (nums.some(n => !Number.isInteger(n) || n < 1 || n > 45)) continue;
@@ -233,7 +384,6 @@ function parseLottoExcel(buffer) {
   }
   return draws;
 }
-
 function parsePensionExcel(buffer) {
   const wb = XLSX.read(buffer, { type: 'array' });
   const ws = wb.Sheets[wb.SheetNames[0]];
@@ -241,16 +391,13 @@ function parsePensionExcel(buffer) {
   const draws = [];
   for (const row of rows) {
     if (!row || row.length < 4) continue;
-    const round = parseInt(row[1]);
-    if (!Number.isInteger(round)) continue;
+    const round = parseInt(row[1]); if (!Number.isInteger(round)) continue;
     const group = parseInt(row[2]);
     if (!Number.isInteger(group) || group < 1 || group > 5) continue;
-    const rawNum = row[3];
-    if (rawNum === null || rawNum === undefined) continue;
+    const rawNum = row[3]; if (rawNum === null || rawNum === undefined) continue;
     const numStr = String(rawNum).replace(/\D/g, '').padStart(6, '0');
     if (!/^\d{6}$/.test(numStr) || numStr.length !== 6) continue;
-    const digits = numStr.split('').map(Number);
-    draws.push({ round, group, digits });
+    draws.push({ round, group, digits: numStr.split('').map(Number) });
   }
   return draws;
 }
@@ -264,8 +411,7 @@ function logGamma(x) {
     -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
   if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - logGamma(1 - x);
   x -= 1;
-  let a = c[0];
-  const t = x + 7.5;
+  let a = c[0]; const t = x + 7.5;
   for (let i = 1; i < 9; i++) a += c[i] / (x + i);
   return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
 }
@@ -292,12 +438,10 @@ function gammaP(s, x) {
   return 1 - Math.exp(-x + s * Math.log(x) - logGamma(s)) * h;
 }
 const chi2CDF = (x, df) => gammaP(df / 2, x / 2);
-function chiSquareTest(observed, expected) {
+function chiSquareTest(obs, exp) {
   let stat = 0;
-  for (let i = 0; i < observed.length; i++) {
-    if (expected[i] > 0) stat += Math.pow(observed[i] - expected[i], 2) / expected[i];
-  }
-  return { statistic: stat, df: observed.length - 1, pValue: 1 - chi2CDF(stat, observed.length - 1) };
+  for (let i = 0; i < obs.length; i++) if (exp[i] > 0) stat += Math.pow(obs[i] - exp[i], 2) / exp[i];
+  return { statistic: stat, df: obs.length - 1, pValue: 1 - chi2CDF(stat, obs.length - 1) };
 }
 function chi2InvCDF(p, df) {
   let lo = 0, hi = Math.max(df * 10, 100);
@@ -309,51 +453,176 @@ function chi2InvCDF(p, df) {
   }
   return (lo + hi) / 2;
 }
-
-// ============================================================
-// Analysis
-// ============================================================
 function analyzeLotto(draws) {
-  const N = draws.length;
-  const counts = new Array(46).fill(0);
+  const N = draws.length, counts = new Array(46).fill(0);
   for (const d of draws) for (const n of d.nums) counts[n]++;
   const observed = counts.slice(1, 46);
   const expected = new Array(45).fill(N * 6 / 45);
-  return {
-    mode: 'lotto', N, observed, expected,
+  return { mode: 'lotto', N, observed, expected,
     labels: Array.from({length: 45}, (_, i) => String(i + 1)),
-    test: chiSquareTest(observed, expected)
-  };
+    test: chiSquareTest(observed, expected) };
 }
 function analyzePension(draws) {
   const N = draws.length;
-  const positionCounts = Array.from({length: 6}, () => new Array(10).fill(0));
-  const groupCounts = new Array(6).fill(0);
+  const posCounts = Array.from({length: 6}, () => new Array(10).fill(0));
+  const grpCounts = new Array(6).fill(0);
   for (const d of draws) {
-    groupCounts[d.group]++;
-    for (let i = 0; i < 6; i++) positionCounts[i][d.digits[i]]++;
+    grpCounts[d.group]++;
+    for (let i = 0; i < 6; i++) posCounts[i][d.digits[i]]++;
   }
   const results = [];
-  const gObs = groupCounts.slice(1, 6);
-  const gExp = new Array(5).fill(N / 5);
-  results.push({
-    name: '조 (Group)', observed: gObs, expected: gExp,
-    labels: ['1조','2조','3조','4조','5조'], test: chiSquareTest(gObs, gExp)
-  });
+  results.push({ name: '조 (Group)', observed: grpCounts.slice(1, 6),
+    expected: new Array(5).fill(N / 5), labels: ['1조','2조','3조','4조','5조'],
+    test: chiSquareTest(grpCounts.slice(1, 6), new Array(5).fill(N / 5)) });
   const posNames = ['십만 자리','만 자리','천 자리','백 자리','십 자리','일 자리'];
   for (let i = 0; i < 6; i++) {
     const exp = new Array(10).fill(N / 10);
-    results.push({
-      name: posNames[i], observed: positionCounts[i], expected: exp,
+    results.push({ name: posNames[i], observed: posCounts[i], expected: exp,
       labels: ['0','1','2','3','4','5','6','7','8','9'],
-      test: chiSquareTest(positionCounts[i], exp)
-    });
+      test: chiSquareTest(posCounts[i], exp) });
   }
   return { mode: 'pension', N, results };
 }
 
 // ============================================================
-// Rendering: chart
+// Popularity scoring & combinatorial generator
+// ============================================================
+function popularityScore(combo, historySet) {
+  let score = 0;
+  const reasons = [];
+  const sum = combo.reduce((a, b) => a + b, 0);
+
+  // 1. Birthday bias
+  const u31 = combo.filter(n => n <= 31).length;
+  if (u31 === 6) { score += 15; reasons.push('전원 생일범위'); }
+  else if (u31 === 5) { score += 7; reasons.push('5개 생일범위'); }
+  else if (u31 === 4) { score += 2; }
+
+  // 2. Month bias
+  const u12 = combo.filter(n => n <= 12).length;
+  if (u12 >= 4) { score += 5; reasons.push('월 편중'); }
+  else if (u12 === 3) { score += 2; }
+
+  // 3. Sum near player-typical
+  if (sum >= 95 && sum <= 125) { score += 6; reasons.push('합계 생일대'); }
+  else if (sum >= 85 && sum <= 140) { score += 2; }
+
+  // 4. Arithmetic progression
+  const diffs = [];
+  for (let i = 1; i < 6; i++) diffs.push(combo[i] - combo[i - 1]);
+  const uDiff = new Set(diffs).size;
+  if (uDiff === 1) { score += 15; reasons.push('등차수열'); }
+  else if (uDiff === 2 && Math.max(...diffs) - Math.min(...diffs) <= 1) { score += 4; reasons.push('준등차'); }
+
+  // 5. Consecutive run
+  let maxRun = 1, curRun = 1;
+  for (let i = 1; i < 6; i++) {
+    if (combo[i] - combo[i - 1] === 1) { curRun++; maxRun = Math.max(maxRun, curRun); }
+    else curRun = 1;
+  }
+  if (maxRun >= 4) { score += 8; reasons.push(`연속 ${maxRun}개`); }
+  else if (maxRun === 3) { score += 3; reasons.push('연속 3개'); }
+
+  // 6. Multiples of 5
+  const m5 = combo.filter(n => n % 5 === 0).length;
+  if (m5 >= 5) { score += 10; reasons.push('5의 배수'); }
+  else if (m5 === 4) { score += 4; reasons.push('5의 배수 4개'); }
+
+  // 7. Same last digit
+  const lastD = combo.map(n => n % 10);
+  const digitC = {};
+  for (const d of lastD) digitC[d] = (digitC[d] || 0) + 1;
+  const maxD = Math.max(...Object.values(digitC));
+  if (maxD >= 4) { score += 8; reasons.push('끝자리 편중'); }
+  else if (maxD === 3) { score += 2; }
+
+  // 8. Same decade
+  const decC = {};
+  for (const n of combo) { const d = Math.floor((n - 1) / 10); decC[d] = (decC[d] || 0) + 1; }
+  const maxDec = Math.max(...Object.values(decC));
+  if (maxDec >= 5) { score += 6; reasons.push('10단위 편중'); }
+  else if (maxDec === 4) { score += 2; }
+
+  // 9. Extreme odd/even
+  const odds = combo.filter(n => n % 2 === 1).length;
+  if (odds === 0 || odds === 6) { score += 3; reasons.push('홀짝 극단'); }
+
+  // 10. Extreme low/high (split at 23)
+  const low = combo.filter(n => n <= 22).length;
+  if (low === 0 || low === 6) { score += 3; reasons.push('저고 극단'); }
+
+  // 11. Lucky 7 preference
+  const luckys = combo.filter(n => n === 7 || n === 17 || n === 27 || n === 37).length;
+  if (luckys >= 3) { score += 3; reasons.push('행운7 다수'); }
+  else if (luckys === 2) { score += 1; }
+
+  // 12. Historical match
+  const key = combo.join(',');
+  if (historySet.has(key)) { score += 20; reasons.push('과거 당첨조합'); }
+
+  return { score, reasons, sum, odds, low, maxRun, m5, u31 };
+}
+
+function parseNumList(text) {
+  if (!text) return [];
+  return text.split(/[,\s]+/).filter(s => s.trim()).map(s => parseInt(s)).filter(n => Number.isInteger(n) && n >= 1 && n <= 45);
+}
+
+function generateCombinations(opts) {
+  const { N, include, exclude, minSum, maxSum, avoidHistory, historyDraws, candidateCount } = opts;
+  if (include.length > 5) throw new Error('포함 번호는 최대 5개');
+  if (include.some(n => exclude.includes(n))) throw new Error('포함/제외 충돌');
+  if (new Set(include).size !== include.length) throw new Error('포함 번호 중복');
+  const pool = [];
+  for (let i = 1; i <= 45; i++) if (!exclude.includes(i) && !include.includes(i)) pool.push(i);
+  const slotCount = 6 - include.length;
+  if (pool.length < slotCount) throw new Error('선택 가능한 번호 부족');
+  const historySet = avoidHistory ? new Set(historyDraws.map(d => d.nums.join(','))) : new Set();
+
+  const candidates = [];
+  for (let k = 0; k < candidateCount; k++) {
+    const picked = [...include];
+    const avail = [...pool];
+    for (let i = 0; i < slotCount; i++) {
+      const idx = Math.floor(Math.random() * avail.length);
+      picked.push(avail[idx]);
+      avail.splice(idx, 1);
+    }
+    picked.sort((a, b) => a - b);
+    const sum = picked.reduce((a, b) => a + b, 0);
+    if (sum < minSum || sum > maxSum) continue;
+    const scored = popularityScore(picked, historySet);
+    candidates.push({ nums: picked, ...scored });
+  }
+  if (!candidates.length) throw new Error('조건에 맞는 조합 없음 (합계 범위 확인)');
+  candidates.sort((a, b) => a.score - b.score);
+
+  // Greedy diversification
+  const result = [];
+  const seen = new Set();
+  for (let i = 0; i < candidates.length; i++) {
+    if (result.length >= N) break;
+    const c = candidates[i];
+    const key = c.nums.join(',');
+    if (seen.has(key)) continue;
+    let tooSim = false;
+    for (const r of result) {
+      const overlap = c.nums.filter(n => r.nums.includes(n)).length;
+      if (overlap >= 5) { tooSim = true; break; }
+    }
+    if (tooSim) continue;
+    seen.add(key);
+    // Find original rank by score ties
+    const better = candidates.filter(x => x.score < c.score).length;
+    c.percentile = 1 - better / candidates.length;
+    result.push(c);
+  }
+  return { combinations: result, totalCandidates: candidates.length,
+    minScore: candidates[0].score, maxScore: candidates[candidates.length - 1].score };
+}
+
+// ============================================================
+// Chart & chi-square rendering (unchanged from previous)
 // ============================================================
 function fmt(x, d = 4) {
   if (!isFinite(x)) return '—';
@@ -361,19 +630,16 @@ function fmt(x, d = 4) {
   return x.toFixed(d);
 }
 function renderBarChart(observed, expected, labels, container) {
-  const W = Math.max(640, labels.length * 18);
-  const H = 220;
+  const W = Math.max(640, labels.length * 18), H = 220;
   const pad = { top: 10, right: 14, bottom: 28, left: 38 };
   const cw = W - pad.left - pad.right, ch = H - pad.top - pad.bottom;
   const maxY = Math.max(...observed, ...expected) * 1.15 || 1;
   const bw = cw / labels.length * 0.78;
-
   let s = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
   s += `<line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${H-pad.bottom}" stroke="#374151"/>`;
   s += `<line x1="${pad.left}" y1="${H-pad.bottom}" x2="${W-pad.right}" y2="${H-pad.bottom}" stroke="#374151"/>`;
   for (let t = 0; t <= 4; t++) {
-    const v = maxY * t / 4;
-    const y = H - pad.bottom - (v / maxY) * ch;
+    const v = maxY * t / 4, y = H - pad.bottom - (v / maxY) * ch;
     s += `<line x1="${pad.left}" y1="${y}" x2="${W-pad.right}" y2="${y}" stroke="#1f2937"/>`;
     s += `<text x="${pad.left-5}" y="${y+3}" text-anchor="end" font-size="9" fill="#6b7280" font-family="monospace">${v.toFixed(1)}</text>`;
   }
@@ -382,8 +648,7 @@ function renderBarChart(observed, expected, labels, container) {
   s += `<text x="${W-pad.right-2}" y="${expY-4}" text-anchor="end" font-size="9" fill="#f59e0b" font-family="monospace">E = ${expected[0].toFixed(2)}</text>`;
   for (let i = 0; i < labels.length; i++) {
     const x = pad.left + (i + 0.11) * (cw / labels.length);
-    const h = (observed[i] / maxY) * ch;
-    const y = H - pad.bottom - h;
+    const h = (observed[i] / maxY) * ch, y = H - pad.bottom - h;
     const ratio = observed[i] / expected[i];
     const color = ratio > 1.25 ? '#10b981' : ratio < 0.75 ? '#ef4444' : '#6b7280';
     s += `<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${color}" opacity="0.85"><title>${labels[i]}: 관측 ${observed[i]}, 기댓값 ${expected[i].toFixed(2)}, O/E = ${ratio.toFixed(2)}</title></rect>`;
@@ -393,17 +658,11 @@ function renderBarChart(observed, expected, labels, container) {
     const x = pad.left + (i + 0.5) * (cw / labels.length);
     s += `<text x="${x}" y="${H-pad.bottom+14}" text-anchor="middle" font-size="9" fill="#9ca3af" font-family="monospace">${labels[i]}</text>`;
   }
-  s += `</svg>`;
-  container.innerHTML = s;
+  container.innerHTML = s + `</svg>`;
 }
-
-// ============================================================
-// Rendering: results
-// ============================================================
 function renderLottoResults(a) {
   const { test, observed, expected, labels, N } = a;
-  const c05 = chi2InvCDF(0.95, test.df);
-  const c01 = chi2InvCDF(0.99, test.df);
+  const c05 = chi2InvCDF(0.95, test.df), c01 = chi2InvCDF(0.99, test.df);
   document.getElementById('stat-grid').innerHTML = `
     <div class="stat"><div class="stat-label">Draws n</div><div class="stat-value">${N}</div></div>
     <div class="stat"><div class="stat-label">χ² 통계량</div><div class="stat-value">${fmt(test.statistic, 2)}</div></div>
@@ -413,23 +672,13 @@ function renderLottoResults(a) {
     <div class="stat"><div class="stat-label">임계 α=.01</div><div class="stat-value">${fmt(c01, 2)}</div></div>`;
   const v = document.getElementById('verdict');
   const r05 = test.statistic > c05, r01 = test.statistic > c01;
-  if (N < 30) {
-    v.className = 'verdict warn';
-    v.innerHTML = `⚠ 표본 부족 (n=${N}). 기댓값 ${(N*6/45).toFixed(1)} &lt; 5 가능.<br>→ <strong>100회 이상</strong> 데이터 권장.`;
-  } else if (!r05) {
-    v.className = 'verdict pass';
-    v.innerHTML = `✓ α=0.05 기준 <strong>H₀ 기각 불가</strong><br>→ 관측 빈도가 균등분포 1/45와 부합. 편향 증거 없음.`;
-  } else if (!r01) {
-    v.className = 'verdict warn';
-    v.innerHTML = `⚠ α=0.05 기각 (α=0.01 기각 불가)<br>→ 약한 편향 시사. 추가 검증 필요.`;
-  } else {
-    v.className = 'verdict fail';
-    v.innerHTML = `✗ α=0.01 <strong>H₀ 기각</strong><br>→ 유의한 편향. 단, 단일 검정으로 단정 금물.`;
-  }
+  if (N < 30) { v.className = 'verdict warn'; v.innerHTML = `⚠ 표본 부족 (n=${N}).`; }
+  else if (!r05) { v.className = 'verdict pass'; v.innerHTML = `✓ α=0.05 <strong>H₀ 기각 불가</strong> — 균등분포 부합. 편향 증거 없음. → <strong>번호 생성 탭</strong>에서 인기도 회피 전략 사용 권장.`; }
+  else if (!r01) { v.className = 'verdict warn'; v.innerHTML = `⚠ α=0.05 기각 (α=0.01 기각 불가) — 약한 편향 시사.`; }
+  else { v.className = 'verdict fail'; v.innerHTML = `✗ α=0.01 <strong>H₀ 기각</strong> — 유의한 편향.`; }
   renderBarChart(observed, expected, labels, document.getElementById('chart'));
-  const sorted = observed.map((o, i) => ({
-    num: i + 1, count: o, z: (o - expected[i]) / Math.sqrt(expected[i])
-  })).sort((a, b) => b.z - a.z);
+  const sorted = observed.map((o, i) => ({ num: i + 1, count: o, z: (o - expected[i]) / Math.sqrt(expected[i]) }))
+    .sort((a, b) => b.z - a.z);
   const top = sorted.slice(0, 5), bot = sorted.slice(-5).reverse();
   const f = x => `#${x.num} (${x.count}회, z=${x.z.toFixed(2)})`;
   document.getElementById('detail').innerHTML = `
@@ -438,7 +687,6 @@ function renderLottoResults(a) {
       <div style="color: var(--text-dim); margin-bottom: 10px;">${top.map(f).join(' · ')}</div>
       <div style="color: var(--danger);">▼ 과소출현 상위 5개</div>
       <div style="color: var(--text-dim);">${bot.map(f).join(' · ')}</div>
-      <div style="color: #6b7280; margin-top: 10px; font-size: 11px;">z = (O−E)/√E. |z|&gt;2는 단일 셀 기준 유의 (다중검정 미보정)</div>
     </div>`;
 }
 function renderPensionResults(a) {
@@ -451,16 +699,9 @@ function renderPensionResults(a) {
     <div class="stat"><div class="stat-label">최소 p</div><div class="stat-value">${fmt(Math.min(...results.map(r => r.test.pValue)), 4)}</div></div>`;
   const v = document.getElementById('verdict');
   const anyReject = results.some(r => r.test.pValue < bonf);
-  if (N < 50) {
-    v.className = 'verdict warn';
-    v.innerHTML = `⚠ 표본 부족 (n=${N}). 기댓값 ${(N/10).toFixed(1)} &lt; 5.<br>→ <strong>100회 이상</strong> 권장.`;
-  } else if (!anyReject) {
-    v.className = 'verdict pass';
-    v.innerHTML = `✓ 모든 검정 Bonferroni α=${fmt(bonf,4)} 기준 <strong>H₀ 기각 불가</strong><br>→ 조/자리 모두 균등분포와 부합.`;
-  } else {
-    v.className = 'verdict fail';
-    v.innerHTML = `✗ 일부 검정 H₀ 기각 (보정 α=${fmt(bonf,4)})<br>→ 아래 red 표시 확인.`;
-  }
+  if (N < 50) { v.className = 'verdict warn'; v.innerHTML = `⚠ 표본 부족 (n=${N}).`; }
+  else if (!anyReject) { v.className = 'verdict pass'; v.innerHTML = `✓ 모든 검정 기각 불가 — 균등분포 부합.`; }
+  else { v.className = 'verdict fail'; v.innerHTML = `✗ 일부 검정 H₀ 기각.`; }
   document.getElementById('chart-panel').classList.add('hidden');
   let html = '';
   for (const r of results) {
@@ -468,16 +709,10 @@ function renderPensionResults(a) {
     const reject = r.test.statistic > c05;
     const color = reject ? 'var(--danger)' : 'var(--accent)';
     const id = 'ch-' + r.name.replace(/[^a-z0-9가-힣]/gi, '');
-    html += `
-      <div class="sub-test">
-        <div class="sub-test-head">
-          <div class="sub-test-name">${r.name}</div>
-          <div class="sub-test-stat" style="color: ${color};">
-            χ²=${fmt(r.test.statistic, 2)} · df=${r.test.df} · p=${fmt(r.test.pValue, 4)} · 임계=${fmt(c05, 2)}
-          </div>
-        </div>
-        <div class="chart" id="${id}"></div>
-      </div>`;
+    html += `<div class="sub-test">
+      <div class="sub-test-head"><div class="sub-test-name">${r.name}</div>
+      <div class="sub-test-stat" style="color: ${color};">χ²=${fmt(r.test.statistic, 2)} · df=${r.test.df} · p=${fmt(r.test.pValue, 4)}</div></div>
+      <div class="chart" id="${id}"></div></div>`;
   }
   document.getElementById('detail').innerHTML = html;
   for (const r of results) {
@@ -487,217 +722,263 @@ function renderPensionResults(a) {
 }
 
 // ============================================================
-// Rendering: viewer table
+// Viewer & manual form
 // ============================================================
-function renderTable(mode, draws) {
+function renderTable(dm, draws) {
   const container = document.getElementById('results-table');
   document.getElementById('view-count').textContent = `${draws.length}건`;
   if (!draws.length) { container.innerHTML = '<div class="status empty" style="border:none;">데이터 없음</div>'; return; }
   let html = '<table><thead><tr>';
-  if (mode === 'lotto') {
+  if (dm === 'lotto') {
     html += '<th>회차</th><th>당첨번호</th><th>보너스</th><th></th></tr></thead><tbody>';
-    for (const d of draws) {
-      html += `<tr><td>${d.round}</td><td>${d.nums.join(', ')}</td><td class="bonus">+${d.bonus}</td><td><button class="small danger" onclick="deleteDraw(${d.round})">삭제</button></td></tr>`;
-    }
+    for (const d of draws) html += `<tr><td>${d.round}</td><td>${d.nums.join(', ')}</td><td class="bonus">+${d.bonus}</td><td><button class="small danger" onclick="deleteDraw(${d.round})">삭제</button></td></tr>`;
   } else {
     html += '<th>회차</th><th>조</th><th>당첨번호</th><th></th></tr></thead><tbody>';
-    for (const d of draws) {
-      html += `<tr><td>${d.round}</td><td class="group-badge">${d.group}조</td><td>${d.digits.join('')}</td><td><button class="small danger" onclick="deleteDraw(${d.round})">삭제</button></td></tr>`;
-    }
+    for (const d of draws) html += `<tr><td>${d.round}</td><td class="group-badge">${d.group}조</td><td>${d.digits.join('')}</td><td><button class="small danger" onclick="deleteDraw(${d.round})">삭제</button></td></tr>`;
   }
-  html += '</tbody></table>';
+  container.innerHTML = html + '</tbody></table>';
+}
+function renderManualForm(dm) {
+  const f = document.getElementById('manual-form');
+  if (dm === 'lotto') {
+    f.innerHTML = `<div class="form-grid">
+      <div class="form-row"><label>회차</label><input type="number" id="m-round" placeholder="예: 1221" min="1" inputmode="numeric"></div>
+      <div><label style="display:block; margin-bottom:4px; font-size:12px; color:var(--text-dim); font-family:var(--mono);">당첨번호 6개 (1–45)</label>
+      <div class="num-inputs">${[1,2,3,4,5,6].map(i => `<input type="number" id="m-n${i}" min="1" max="45" inputmode="numeric">`).join('')}</div></div>
+      <div class="form-row"><label>보너스</label><input type="number" id="m-bonus" min="1" max="45" inputmode="numeric"></div>
+      <button class="primary" id="m-add">➕ 추가 저장</button></div>
+      <div class="hint">동일 회차 입력 시 덮어쓰기됩니다.</div>`;
+    document.getElementById('m-add').onclick = addLottoManual;
+  } else {
+    f.innerHTML = `<div class="form-grid">
+      <div class="form-row"><label>회차</label><input type="number" id="m-round" placeholder="예: 312" min="1" inputmode="numeric"></div>
+      <div class="form-row"><label>조</label><select id="m-group"><option value="1">1조</option><option value="2">2조</option><option value="3">3조</option><option value="4">4조</option><option value="5">5조</option></select></div>
+      <div class="form-row"><label>번호</label><input type="text" id="m-digits" placeholder="6자리 (예: 382268)" maxlength="6" inputmode="numeric" pattern="[0-9]{6}"></div>
+      <button class="primary" id="m-add">➕ 추가 저장</button></div>
+      <div class="hint">6자리 숫자 (앞 0 포함). 동일 회차는 덮어쓰기.</div>`;
+    document.getElementById('m-add').onclick = addPensionManual;
+  }
+}
+
+// ============================================================
+// Generator rendering
+// ============================================================
+function ballClass(n) {
+  if (n <= 10) return 'ball-y';
+  if (n <= 20) return 'ball-b';
+  if (n <= 30) return 'ball-r';
+  if (n <= 40) return 'ball-g';
+  return 'ball-gr';
+}
+function renderGenResults(data) {
+  const { combinations, totalCandidates, minScore, maxScore } = data;
+  const container = document.getElementById('gen-results');
+  if (!combinations.length) { container.innerHTML = '<div class="panel"><div class="msg err">생성 실패</div></div>'; return; }
+
+  let html = `<div class="panel">
+    <div class="panel-title">
+      <span>생성 결과</span>
+      <span class="badge">${combinations.length}조합 · ${totalCandidates.toLocaleString()}/${totalCandidates.toLocaleString()} 후보</span>
+    </div>`;
+
+  combinations.forEach((c, idx) => {
+    const pctBetter = ((1 - c.percentile) * 100).toFixed(1);
+    const ballsHtml = c.nums.map(n => `<span class="ball ${ballClass(n)}">${n}</span>`).join('');
+    const reasonsHtml = c.reasons.length
+      ? c.reasons.map(r => `<span class="reason-tag">${r}</span>`).join('')
+      : '<span class="good-tag">주요 편향 없음</span>';
+    const evenOdd = `${c.odds}:${6 - c.odds}`;
+    const lowHigh = `${c.low}:${6 - c.low}`;
+    html += `<div class="combo-card">
+      <div class="combo-header">
+        <span class="combo-num">조합 #${idx + 1}</span>
+        <span class="combo-score">점수 <strong>${c.score}</strong> · 무작위 대비 상위 <strong>${(c.percentile * 100).toFixed(1)}%</strong></span>
+        <button class="copy-btn small" onclick="copyCombo('${c.nums.join(', ')}', this)">복사</button>
+      </div>
+      <div class="combo-balls">${ballsHtml}</div>
+      <div class="combo-stats">
+        <span>합 <strong>${c.sum}</strong></span>
+        <span>홀짝 <strong>${evenOdd}</strong></span>
+        <span>저고 <strong>${lowHigh}</strong></span>
+        <span>연속 <strong>${c.maxRun}</strong></span>
+        <span>5의배수 <strong>${c.m5}</strong></span>
+        <span>≤31 <strong>${c.u31}</strong></span>
+      </div>
+      <div class="combo-reasons">${reasonsHtml}</div>
+    </div>`;
+  });
+  html += `<div class="hint" style="margin-top:10px;">
+    "상위 X%"는 샘플링된 ${totalCandidates.toLocaleString()}개 후보 중 인기도가 낮은 쪽 기준.
+    점수 범위: ${minScore} ~ ${maxScore}. 0에 가까울수록 남들이 덜 고를 가능성.
+  </div></div>`;
   container.innerHTML = html;
 }
+window.copyCombo = (text, btn) => {
+  const orig = btn.textContent;
+  const done = () => { btn.textContent = '✓'; setTimeout(() => btn.textContent = orig, 1500); };
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done();
+  });
+  else { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }
+};
 
 // ============================================================
-// Rendering: manual form
-// ============================================================
-function renderManualForm(mode) {
-  const f = document.getElementById('manual-form');
-  if (mode === 'lotto') {
-    f.innerHTML = `
-      <div class="form-grid">
-        <div class="form-row">
-          <label>회차</label>
-          <input type="number" id="m-round" placeholder="예: 1221" min="1" inputmode="numeric">
-        </div>
-        <div>
-          <label style="display:block; margin-bottom:4px; font-size:12px; color:var(--text-dim); font-family:var(--mono);">당첨번호 6개 (1–45)</label>
-          <div class="num-inputs">
-            ${[1,2,3,4,5,6].map(i => `<input type="number" id="m-n${i}" min="1" max="45" inputmode="numeric">`).join('')}
-          </div>
-        </div>
-        <div class="form-row">
-          <label>보너스</label>
-          <input type="number" id="m-bonus" min="1" max="45" inputmode="numeric">
-        </div>
-        <button class="primary" id="m-add">➕ 추가 저장</button>
-      </div>
-      <div class="hint">동일 회차 입력 시 덮어쓰기됩니다.</div>`;
-    document.getElementById('m-add').onclick = () => addLottoManual();
-  } else {
-    f.innerHTML = `
-      <div class="form-grid">
-        <div class="form-row">
-          <label>회차</label>
-          <input type="number" id="m-round" placeholder="예: 312" min="1" inputmode="numeric">
-        </div>
-        <div class="form-row">
-          <label>조</label>
-          <select id="m-group">
-            <option value="1">1조</option><option value="2">2조</option>
-            <option value="3">3조</option><option value="4">4조</option>
-            <option value="5">5조</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>번호</label>
-          <input type="text" id="m-digits" placeholder="6자리 (예: 382268)" maxlength="6" inputmode="numeric" pattern="[0-9]{6}">
-        </div>
-        <button class="primary" id="m-add">➕ 추가 저장</button>
-      </div>
-      <div class="hint">6자리 숫자 (앞 0 포함). 동일 회차는 덮어쓰기.</div>`;
-    document.getElementById('m-add').onclick = () => addPensionManual();
-  }
-}
-
-// ============================================================
-// Actions
+// UI state
 // ============================================================
 let mode = 'lotto';
+const activeDataMode = () => mode === 'pension' ? 'pension' : 'lotto';
 
 function showMsg(elId, text, ok) {
   const el = document.getElementById(elId);
   el.innerHTML = `<div class="msg ${ok ? 'ok' : 'err'}">${text}</div>`;
   setTimeout(() => { el.innerHTML = ''; }, 4000);
 }
-
 function updateStatus() {
-  const draws = loadDraws(mode);
+  const dm = activeDataMode();
+  const draws = loadDraws(dm);
   const status = document.getElementById('status');
-  const badge = document.getElementById('count-badge');
-  badge.textContent = `${draws.length}건`;
-  if (draws.length === 0) {
+  document.getElementById('count-badge').textContent = `${draws.length}건`;
+  const title = dm === 'lotto' ? '로또 저장 데이터' : '연금 저장 데이터';
+  document.getElementById('data-title').textContent = title;
+  if (!draws.length) {
     status.className = 'status empty';
-    status.innerHTML = '저장된 데이터 없음. 엑셀 업로드 또는 수동 입력으로 시작하세요.';
+    status.innerHTML = '저장된 데이터 없음. 엑셀 업로드 또는 수동 입력으로 시작.';
   } else {
     const rounds = draws.map(d => d.round);
-    const min = Math.min(...rounds), max = Math.max(...rounds);
     status.className = 'status';
-    status.innerHTML = `저장 회차: <strong>${max}회 ~ ${min}회</strong> · 총 <strong>${draws.length}건</strong>`;
+    status.innerHTML = `저장 회차: <strong>${Math.max(...rounds)}회 ~ ${Math.min(...rounds)}회</strong> · 총 <strong>${draws.length}건</strong>`;
   }
-  if (!document.getElementById('view-panel').classList.contains('hidden')) renderTable(mode, draws);
+  if (!document.getElementById('view-panel').classList.contains('hidden')) renderTable(dm, draws);
 }
-
 function setMode(m) {
   mode = m;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
-  const h0 = document.getElementById('h0');
-  if (m === 'lotto') {
-    h0.innerHTML = 'H₀: 45개 번호 각각 1/45 독립 추첨 · H₁: 일부 번호 편향';
-  } else {
-    h0.innerHTML = 'H₀: 조(1/5) 및 각 자리(0-9, 1/10) 균등 · 7개 독립검정 Bonferroni 보정';
-  }
+  const isChi = m === 'lotto' || m === 'pension';
+  const isGen = m === 'generate';
+  document.querySelectorAll('.chi-only').forEach(el => el.classList.toggle('hidden', !isChi));
+  document.querySelectorAll('.gen-only').forEach(el => el.classList.toggle('hidden', !isGen));
   document.getElementById('results').classList.add('hidden');
   document.getElementById('view-panel').classList.add('hidden');
   document.getElementById('chart-panel').classList.remove('hidden');
-  renderManualForm(m);
+  document.getElementById('gen-results').innerHTML = '';
+  if (isChi) {
+    const h0 = document.getElementById('h0');
+    if (m === 'lotto') h0.innerHTML = 'H₀: 45개 번호 각각 1/45 독립 추첨 · H₁: 일부 편향';
+    else h0.innerHTML = 'H₀: 조(1/5) 및 각 자리(1/10) 균등 · 7개 검정 Bonferroni 보정';
+    renderManualForm(m);
+  }
   updateStatus();
 }
-
 document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
 
+// ============================================================
+// Event handlers
+// ============================================================
 document.getElementById('upload-btn').onclick = () => document.getElementById('file-input').click();
 document.getElementById('file-input').onchange = async (e) => {
   const file = e.target.files[0]; if (!file) return;
-  if (typeof XLSX === 'undefined') {
-    showMsg('upload-msg', 'SheetJS 로드 실패 (네트워크 확인)', false); return;
-  }
+  if (typeof XLSX === 'undefined') { showMsg('upload-msg', 'SheetJS 로드 실패', false); return; }
   try {
     const buf = await file.arrayBuffer();
-    const parsed = mode === 'lotto' ? parseLottoExcel(buf) : parsePensionExcel(buf);
-    if (!parsed.length) {
-      showMsg('upload-msg', '파싱된 유효 데이터가 없습니다. 양식을 확인하세요.', false);
-    } else {
-      const merged = mergeDraws(loadDraws(mode), parsed);
-      if (saveDraws(mode, merged)) {
+    const dm = activeDataMode();
+    const parsed = dm === 'lotto' ? parseLottoExcel(buf) : parsePensionExcel(buf);
+    if (!parsed.length) { showMsg('upload-msg', '유효 데이터 없음', false); }
+    else {
+      const merged = mergeDraws(loadDraws(dm), parsed);
+      if (saveDraws(dm, merged)) {
         showMsg('upload-msg', `✓ ${parsed.length}건 파싱, 병합 후 총 ${merged.length}건 저장`, true);
         updateStatus();
       }
     }
-  } catch (err) {
-    showMsg('upload-msg', '읽기 오류: ' + err.message, false);
-  }
+  } catch (err) { showMsg('upload-msg', '읽기 오류: ' + err.message, false); }
   e.target.value = '';
 };
-
 document.getElementById('toggle-view-btn').onclick = () => {
   const v = document.getElementById('view-panel');
   v.classList.toggle('hidden');
   if (!v.classList.contains('hidden')) {
-    renderTable(mode, loadDraws(mode));
+    renderTable(activeDataMode(), loadDraws(activeDataMode()));
     v.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 };
-
 document.getElementById('clear-btn').onclick = () => {
-  const draws = loadDraws(mode);
+  const dm = activeDataMode();
+  const draws = loadDraws(dm);
   if (!draws.length) return;
-  if (confirm(`${mode === 'lotto' ? '로또' : '연금복권'} 저장 데이터 ${draws.length}건을 모두 삭제합니다. 계속?`)) {
-    localStorage.removeItem(STORAGE_KEY[mode]);
+  if (confirm(`${dm === 'lotto' ? '로또' : '연금복권'} 저장 데이터 ${draws.length}건 삭제?`)) {
+    localStorage.removeItem(STORAGE_KEY[dm]);
     document.getElementById('results').classList.add('hidden');
     updateStatus();
   }
 };
-
-window.deleteDraw = function(round) {
-  const draws = loadDraws(mode).filter(d => d.round !== round);
-  saveDraws(mode, draws); updateStatus();
+window.deleteDraw = (round) => {
+  const dm = activeDataMode();
+  const draws = loadDraws(dm).filter(d => d.round !== round);
+  saveDraws(dm, draws); updateStatus();
 };
-
 function addLottoManual() {
   const round = parseInt(document.getElementById('m-round').value);
   const nums = [1,2,3,4,5,6].map(i => parseInt(document.getElementById('m-n'+i).value));
   const bonus = parseInt(document.getElementById('m-bonus').value);
-  if (!Number.isInteger(round) || round < 1) return showMsg('manual-msg', '회차 값이 올바르지 않습니다.', false);
-  if (nums.some(n => !Number.isInteger(n) || n < 1 || n > 45)) return showMsg('manual-msg', '번호는 1~45 정수 6개.', false);
-  if (new Set(nums).size !== 6) return showMsg('manual-msg', '중복 번호가 있습니다.', false);
-  if (!Number.isInteger(bonus) || bonus < 1 || bonus > 45) return showMsg('manual-msg', '보너스 번호(1~45) 확인.', false);
-  if (nums.includes(bonus)) return showMsg('manual-msg', '보너스는 본 번호와 달라야 합니다.', false);
+  if (!Number.isInteger(round) || round < 1) return showMsg('manual-msg', '회차 확인', false);
+  if (nums.some(n => !Number.isInteger(n) || n < 1 || n > 45)) return showMsg('manual-msg', '번호 1~45', false);
+  if (new Set(nums).size !== 6) return showMsg('manual-msg', '중복 번호', false);
+  if (!Number.isInteger(bonus) || bonus < 1 || bonus > 45) return showMsg('manual-msg', '보너스 확인', false);
+  if (nums.includes(bonus)) return showMsg('manual-msg', '보너스 중복', false);
   const merged = mergeDraws(loadDraws('lotto'), [{ round, nums: nums.sort((a,b)=>a-b), bonus }]);
   saveDraws('lotto', merged);
   ['m-round','m-n1','m-n2','m-n3','m-n4','m-n5','m-n6','m-bonus'].forEach(id => document.getElementById(id).value = '');
-  showMsg('manual-msg', `✓ ${round}회 저장 (총 ${merged.length}건)`, true);
+  showMsg('manual-msg', `✓ ${round}회 저장`, true);
   updateStatus();
 }
-
 function addPensionManual() {
   const round = parseInt(document.getElementById('m-round').value);
   const group = parseInt(document.getElementById('m-group').value);
   const raw = document.getElementById('m-digits').value.trim();
-  if (!Number.isInteger(round) || round < 1) return showMsg('manual-msg', '회차 값이 올바르지 않습니다.', false);
-  if (!Number.isInteger(group) || group < 1 || group > 5) return showMsg('manual-msg', '조 선택.', false);
-  if (!/^\d{6}$/.test(raw)) return showMsg('manual-msg', '6자리 숫자를 정확히 입력하세요.', false);
-  const digits = raw.split('').map(Number);
-  const merged = mergeDraws(loadDraws('pension'), [{ round, group, digits }]);
+  if (!Number.isInteger(round) || round < 1) return showMsg('manual-msg', '회차 확인', false);
+  if (!Number.isInteger(group) || group < 1 || group > 5) return showMsg('manual-msg', '조 선택', false);
+  if (!/^\d{6}$/.test(raw)) return showMsg('manual-msg', '6자리 숫자', false);
+  const merged = mergeDraws(loadDraws('pension'), [{ round, group, digits: raw.split('').map(Number) }]);
   saveDraws('pension', merged);
   document.getElementById('m-round').value = '';
   document.getElementById('m-digits').value = '';
-  showMsg('manual-msg', `✓ ${round}회 저장 (총 ${merged.length}건)`, true);
+  showMsg('manual-msg', `✓ ${round}회 저장`, true);
   updateStatus();
 }
-
 document.getElementById('run-btn').onclick = () => {
-  const draws = loadDraws(mode);
-  if (!draws.length) return alert('저장된 데이터가 없습니다. 엑셀 업로드 또는 수동 입력 필요.');
-  const a = mode === 'lotto' ? analyzeLotto(draws) : analyzePension(draws);
+  const dm = activeDataMode();
+  const draws = loadDraws(dm);
+  if (!draws.length) return alert('저장된 데이터 없음');
+  const a = dm === 'lotto' ? analyzeLotto(draws) : analyzePension(draws);
   document.getElementById('chart-panel').classList.remove('hidden');
   document.getElementById('results').classList.remove('hidden');
-  if (mode === 'lotto') renderLottoResults(a); else renderPensionResults(a);
+  if (dm === 'lotto') renderLottoResults(a); else renderPensionResults(a);
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
+document.getElementById('gen-btn').onclick = () => {
+  try {
+    const N = Math.max(1, Math.min(10, parseInt(document.getElementById('gen-n').value) || 5));
+    const include = parseNumList(document.getElementById('gen-include').value);
+    const exclude = parseNumList(document.getElementById('gen-exclude').value);
+    const minSum = Math.max(21, Math.min(255, parseInt(document.getElementById('gen-min-sum').value) || 21));
+    const maxSum = Math.max(21, Math.min(255, parseInt(document.getElementById('gen-max-sum').value) || 255));
+    if (minSum > maxSum) throw new Error('최소 합계 > 최대 합계');
+    const avoidHistory = document.getElementById('gen-avoid-hist').checked;
+    const candidateCount = Math.max(1000, Math.min(100000, parseInt(document.getElementById('gen-candidates').value) || 20000));
+    const historyDraws = avoidHistory ? loadDraws('lotto') : [];
+    const t0 = performance.now();
+    const data = generateCombinations({ N, include, exclude, minSum, maxSum, avoidHistory, historyDraws, candidateCount });
+    const dt = (performance.now() - t0).toFixed(0);
+    renderGenResults(data);
+    showMsg('gen-msg', `✓ ${data.combinations.length}조합 생성 · ${dt}ms · 필터 통과 ${data.totalCandidates.toLocaleString()}/${candidateCount.toLocaleString()}`, true);
+    document.getElementById('gen-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (err) {
+    showMsg('gen-msg', '오류: ' + err.message, false);
+  }
+};
 
-// init
 setMode('lotto');
 </script>
 
