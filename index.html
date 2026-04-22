@@ -30,6 +30,17 @@
     transition: all 0.15s; font-family: inherit; flex: 1;
   }
   .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .sub-tabs {
+    display: flex; gap: 4px; margin-bottom: 12px;
+    background: var(--bg); padding: 3px; border-radius: 7px;
+    border: 1px solid var(--border);
+  }
+  .sub-tab {
+    flex: 1; padding: 6px 10px; background: none; border: none;
+    color: var(--text-dim); cursor: pointer; font-size: 12px;
+    border-radius: 5px; transition: all 0.15s; font-family: inherit;
+  }
+  .sub-tab.active { background: var(--panel); color: var(--accent); border: 1px solid var(--border); }
   .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
   .panel-title {
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
@@ -68,7 +79,7 @@
   .form-grid { display: grid; gap: 8px; }
   .form-row { display: flex; gap: 6px; align-items: center; }
   .form-row label { min-width: 72px; font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
-  .form-row input[type="number"], .form-row input[type="text"] { flex: 1; }
+  .form-row input[type="number"], .form-row input[type="text"], .form-row select { flex: 1; }
   .num-inputs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
   .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; margin-bottom: 12px; }
   .stat { padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; }
@@ -100,10 +111,15 @@
   .msg.err { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); }
   .hint { color: var(--text-dim); font-size: 11px; font-family: var(--mono); margin-top: 4px; line-height: 1.5; }
 
-/* Generator-specific */
+/* Generator */
 .info-banner {
 background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.3);
 color: var(–accent-2); padding: 10px 12px; border-radius: 6px;
+font-size: 11px; margin-bottom: 12px; line-height: 1.6; font-family: var(–mono);
+}
+.warn-banner {
+background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.4);
+color: var(–warning); padding: 10px 12px; border-radius: 6px;
 font-size: 11px; margin-bottom: 12px; line-height: 1.6; font-family: var(–mono);
 }
 details { background: var(–panel-2); border: 1px solid var(–border); border-radius: 6px; padding: 8px 10px; margin: 8px 0; }
@@ -123,7 +139,7 @@ margin-bottom: 10px; font-family: var(–mono); gap: 8px; flex-wrap: wrap;
 .combo-balls {
 display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
 padding: 8px; background: var(–bg); border-radius: 6px;
-justify-content: center;
+justify-content: center; align-items: center;
 }
 .ball {
 display: inline-flex; align-items: center; justify-content: center;
@@ -136,6 +152,19 @@ flex-shrink: 0;
 .ball-r { background: #ef4444; color: #fff; }
 .ball-g { background: #4b5563; color: #fff; }
 .ball-gr { background: #10b981; color: #fff; }
+.group-tag {
+display: inline-flex; align-items: center; justify-content: center;
+background: #f59e0b; color: #000; padding: 0 12px; height: 42px;
+border-radius: 6px; font-weight: 700; font-family: var(–mono); font-size: 14px;
+margin-right: 4px; flex-shrink: 0;
+}
+.digit-box {
+display: inline-flex; align-items: center; justify-content: center;
+width: 36px; height: 42px; background: var(–panel);
+border: 2px solid var(–border); color: var(–text);
+border-radius: 4px; font-family: var(–mono); font-weight: 700; font-size: 17px;
+flex-shrink: 0;
+}
 .combo-stats {
 display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
 font-family: var(–mono); font-size: 11px;
@@ -145,10 +174,7 @@ background: var(–bg); padding: 3px 8px; border-radius: 4px;
 border: 1px solid var(–border); color: var(–text-dim);
 }
 .combo-stats strong { color: var(–text); }
-.combo-reasons {
-font-family: var(–mono); font-size: 11px; line-height: 1.6;
-color: var(–text-dim); margin-top: 6px;
-}
+.combo-reasons { font-family: var(–mono); font-size: 11px; line-height: 1.6; color: var(–text-dim); margin-top: 6px; }
 .reason-tag {
 display: inline-block; padding: 2px 7px; border-radius: 3px;
 background: rgba(239, 68, 68, 0.12); color: var(–danger);
@@ -159,20 +185,18 @@ display: inline-block; padding: 2px 7px; border-radius: 3px;
 background: rgba(16, 185, 129, 0.1); color: var(–accent);
 font-size: 10px; border: 1px solid rgba(16, 185, 129, 0.3);
 }
-.factor-list {
-font-family: var(–mono); font-size: 11px; line-height: 1.7; color: var(–text-dim);
-}
+.factor-list { font-family: var(–mono); font-size: 11px; line-height: 1.7; color: var(–text-dim); }
 .factor-list .w { color: var(–warning); font-weight: 600; display: inline-block; min-width: 28px; }
 .factor-list .name { color: var(–text); }
-.copy-btn {
-font-size: 10px; padding: 3px 7px; margin-left: auto;
-}
+.copy-btn { font-size: 10px; padding: 3px 7px; margin-left: auto; }
 @media (max-width: 480px) {
 h1 { font-size: 17px; }
 .tab { font-size: 12px; padding: 9px 6px; }
 button { font-size: 12px; padding: 7px 10px; }
 .num-inputs { grid-template-columns: repeat(3, 1fr); }
 .ball { width: 34px; height: 34px; font-size: 14px; }
+.digit-box { width: 32px; height: 38px; font-size: 15px; }
+.group-tag { padding: 0 10px; height: 38px; font-size: 13px; }
 .form-row label { min-width: 60px; font-size: 11px; }
 }
 </style>
@@ -250,80 +274,127 @@ button { font-size: 12px; padding: 7px 10px; }
     </div>
   </div>
 
-  <!-- Generator mode panels -->
+  <!-- Generator mode -->
 
   <div class="gen-only hidden">
     <div class="panel">
       <div class="panel-title">인기도 회피 번호 생성기</div>
-      <div class="info-banner">
-        카이제곱 결과가 H₀ 기각 불가 (p&gt;0.05)이면 추첨 편향은 없습니다.
-        이때 모든 조합의 당첨 확률은 동일하지만 <strong>남들이 덜 고르는 조합</strong>을 선택하면
-        당첨 시 분할 인원이 줄어 실수령액 기댓값이 증가합니다. (Cook &amp; Clotfelter, 1993)
+      <div class="sub-tabs">
+        <button class="sub-tab active" data-gen="lotto">로또 6/45</button>
+        <button class="sub-tab" data-gen="pension">연금복권720+</button>
       </div>
-      <div class="form-grid">
-        <div class="form-row">
-          <label>생성 개수</label>
-          <input type="number" id="gen-n" value="5" min="1" max="10" inputmode="numeric">
-        </div>
-        <div class="form-row">
-          <label>포함 번호</label>
-          <input type="text" id="gen-include" placeholder="선택: 예) 7, 14 (최대 5개)">
-        </div>
-        <div class="form-row">
-          <label>제외 번호</label>
-          <input type="text" id="gen-exclude" placeholder="선택: 예) 1, 2, 3">
-        </div>
-        <div class="form-row">
-          <label>합계</label>
-          <input type="number" id="gen-min-sum" value="100" min="21" max="255" inputmode="numeric">
-          <span style="color:var(--text-dim); font-family:var(--mono);">~</span>
-          <input type="number" id="gen-max-sum" value="200" min="21" max="255" inputmode="numeric">
-        </div>
-        <label style="display:flex; align-items:center; font-size:12px; color:var(--text-dim); font-family:var(--mono);">
-          <input type="checkbox" id="gen-avoid-hist" checked>
-          과거 당첨조합 회피 (저장된 데이터 기반)
-        </label>
-        <details>
-          <summary>고급 설정</summary>
-          <div class="form-row" style="margin-top: 6px;">
-            <label>후보 수</label>
-            <input type="number" id="gen-candidates" value="20000" min="1000" max="100000" inputmode="numeric">
-          </div>
-          <div class="hint">많을수록 저인기 조합 탐색 범위가 넓어지지만 시간이 오래 걸립니다 (20k 기본 ≈ 100ms).</div>
-        </details>
-        <button class="primary" id="gen-btn">🎲 번호 생성</button>
-      </div>
-      <div id="gen-msg"></div>
-    </div>
 
 ```
-<details class="panel" style="padding: 12px 14px;">
-  <summary style="font-size:12px; color:var(--text-dim); font-family:var(--mono);">📖 알고리즘 및 인기도 모델 설명</summary>
+  <!-- Lotto generator UI -->
+  <div id="lotto-gen">
+    <div class="info-banner">
+      카이제곱 결과가 H₀ 기각 불가 (p&gt;0.05)이면 추첨 편향은 없습니다.
+      이때 모든 조합의 당첨 확률은 동일하지만 <strong>남들이 덜 고르는 조합</strong>을 선택하면
+      당첨 시 분할 인원이 줄어 실수령액 기댓값이 증가합니다. (Cook &amp; Clotfelter, 1993)
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label>생성 개수</label>
+        <input type="number" id="l-gen-n" value="5" min="1" max="10" inputmode="numeric"></div>
+      <div class="form-row"><label>포함 번호</label>
+        <input type="text" id="l-gen-include" placeholder="선택: 예) 7, 14 (최대 5개)"></div>
+      <div class="form-row"><label>제외 번호</label>
+        <input type="text" id="l-gen-exclude" placeholder="선택: 예) 1, 2, 3"></div>
+      <div class="form-row"><label>합계</label>
+        <input type="number" id="l-gen-min-sum" value="100" min="21" max="255" inputmode="numeric">
+        <span style="color:var(--text-dim); font-family:var(--mono);">~</span>
+        <input type="number" id="l-gen-max-sum" value="200" min="21" max="255" inputmode="numeric"></div>
+      <label style="display:flex; align-items:center; font-size:12px; color:var(--text-dim); font-family:var(--mono);">
+        <input type="checkbox" id="l-gen-avoid-hist" checked>과거 당첨조합 회피 (저장 데이터)
+      </label>
+      <details>
+        <summary>고급 설정</summary>
+        <div class="form-row" style="margin-top: 6px;"><label>후보 수</label>
+          <input type="number" id="l-gen-candidates" value="20000" min="1000" max="100000" inputmode="numeric"></div>
+      </details>
+      <button class="primary" id="l-gen-btn">🎲 번호 생성</button>
+    </div>
+  </div>
+
+  <!-- Pension generator UI -->
+  <div id="pension-gen" class="hidden">
+    <div class="warn-banner">
+      ⚠ <strong>연금복권은 당첨금이 고정액</strong>입니다 (1등 월 700만원×20년). 여러 명 당첨돼도 <strong>각자 전액 수령</strong>하므로 인기도 회피는 <strong>기대수익을 개선하지 못합니다</strong>. 이 기능은 남들과 겹치지 않는 번호를 선호하는 분을 위한 것이며, 수학적으로는 무작위 자동과 동일합니다.
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label>생성 개수</label>
+        <input type="number" id="p-gen-n" value="5" min="1" max="10" inputmode="numeric"></div>
+      <div class="form-row"><label>조</label>
+        <select id="p-gen-group">
+          <option value="">자동 (분산)</option>
+          <option value="1">1조 고정</option>
+          <option value="2">2조 고정</option>
+          <option value="3">3조 고정</option>
+          <option value="4">4조 고정</option>
+          <option value="5">5조 고정</option>
+        </select></div>
+      <div class="form-row"><label>제외 숫자</label>
+        <input type="text" id="p-gen-exclude" placeholder="선택: 0–9 중, 예) 4 (한국 선호 반영)"></div>
+      <label style="display:flex; align-items:center; font-size:12px; color:var(--text-dim); font-family:var(--mono);">
+        <input type="checkbox" id="p-gen-avoid-hist" checked>과거 당첨번호 회피 (저장 데이터)
+      </label>
+      <details>
+        <summary>고급 설정</summary>
+        <div class="form-row" style="margin-top: 6px;"><label>후보 수</label>
+          <input type="number" id="p-gen-candidates" value="20000" min="1000" max="100000" inputmode="numeric"></div>
+      </details>
+      <button class="primary" id="p-gen-btn">🎲 번호 생성</button>
+    </div>
+  </div>
+  <div id="gen-msg"></div>
+</div>
+
+<!-- Algorithm explanation -->
+<details class="panel" id="lotto-algo" style="padding: 12px 14px;">
+  <summary style="font-size:12px; color:var(--text-dim); font-family:var(--mono);">📖 로또 알고리즘 및 인기도 모델</summary>
   <div style="margin-top: 10px;">
     <div class="factor-list">
-      <div style="color:var(--text); margin-bottom:6px;"><strong>알고리즘</strong>: Monte Carlo sampling + weighted scoring + greedy diversification</div>
-      <div>1. 제약조건 만족 조합 N개 무작위 생성 (기본 20,000)</div>
-      <div>2. 12가지 인기 편향 지표로 각 조합 점수화 (낮을수록 덜 인기)</div>
-      <div>3. 오름차순 정렬 후 상위 조합 선택</div>
-      <div>4. 중복도 5 이상인 조합은 제외 (다양성 확보)</div>
+      <div style="color:var(--text); margin-bottom:6px;"><strong>알고리즘</strong>: Monte Carlo + weighted scoring + greedy diversification</div>
+      <div>1. 조건 만족 조합 N개 무작위 샘플링 (기본 20,000)</div>
+      <div>2. 12가지 편향 지표로 점수화 (낮을수록 unpopular)</div>
+      <div>3. 정렬 후 상위부터 선택, 중복 5+ 이상은 제외</div>
     </div>
-    <div style="color:var(--text); margin-top:10px; margin-bottom:6px; font-family:var(--mono); font-size:12px;"><strong>인기 편향 지표 (가중치)</strong></div>
+    <div style="color:var(--text); margin-top:10px; margin-bottom:6px; font-family:var(--mono); font-size:12px;"><strong>편향 지표 (가중치)</strong></div>
     <div class="factor-list">
-      <div><span class="w">+15</span> <span class="name">등차수열</span> (e.g. 1·7·13·19·25·31)</div>
-      <div><span class="w">+15</span> <span class="name">전원 ≤31</span> (생일 편중)</div>
-      <div><span class="w">+20</span> <span class="name">과거 당첨조합 일치</span></div>
+      <div><span class="w">+20</span> <span class="name">과거 당첨조합</span></div>
+      <div><span class="w">+15</span> <span class="name">등차수열 / 전원 ≤31 (생일)</span></div>
       <div><span class="w">+10</span> <span class="name">5의 배수 5개 이상</span></div>
-      <div><span class="w">+8</span> <span class="name">끝자리 4개 이상 동일</span></div>
-      <div><span class="w">+8</span> <span class="name">연속 4개 이상</span></div>
-      <div><span class="w">+7</span> <span class="name">5/6 생일 편중</span></div>
-      <div><span class="w">+6</span> <span class="name">합계 95-125</span> (생일 평균)</div>
-      <div><span class="w">+6</span> <span class="name">같은 10단위 5개 이상</span></div>
-      <div><span class="w">+5</span> <span class="name">월 편중</span> (≤12 4개 이상)</div>
-      <div><span class="w">+3</span> <span class="name">홀짝/저고 극단</span> (0:6)</div>
-      <div><span class="w">+2</span> <span class="name">행운 7 선호</span> (7·17·27·37)</div>
+      <div><span class="w">+8</span> <span class="name">끝자리 동일 4개+ / 연속 4개+</span></div>
+      <div><span class="w">+6</span> <span class="name">합계 95-125 / 같은 10단위 5개+</span></div>
+      <div><span class="w">+5</span> <span class="name">월 편중 (≤12 4개+)</span></div>
+      <div><span class="w">+3</span> <span class="name">홀짝/저고 극단</span></div>
+      <div><span class="w">+2</span> <span class="name">행운 7 선호</span></div>
     </div>
-    <div style="color:#6b7280; margin-top:10px; font-size:11px; font-family:var(--mono); line-height:1.6;">
-      근거: Cook &amp; Clotfelter (1993), Simon (1999), Haigh (1997). 가중치는 문헌 추정치에 기반한 휴리스틱이며 정확한 당첨자 분포는 비공개입니다.
+  </div>
+</details>
+
+<details class="panel hidden" id="pension-algo" style="padding: 12px 14px;">
+  <summary style="font-size:12px; color:var(--text-dim); font-family:var(--mono);">📖 연금복권 알고리즘 및 패턴 모델</summary>
+  <div style="margin-top: 10px;">
+    <div class="factor-list">
+      <div style="color:var(--text); margin-bottom:6px;"><strong>알고리즘</strong>: 조(1–5) × 6자리 숫자(0–9) Monte Carlo 샘플링 + 패턴 점수화</div>
+      <div>1. 5,000,000 공간에서 N개 조합 무작위 샘플링</div>
+      <div>2. 13가지 선호 패턴 지표로 점수화</div>
+      <div>3. 조 분산 + 위치별 4+ 일치 회피로 다양성 확보</div>
+    </div>
+    <div style="color:var(--text); margin-top:10px; margin-bottom:6px; font-family:var(--mono); font-size:12px;"><strong>패턴 지표 (가중치)</strong></div>
+    <div class="factor-list">
+      <div><span class="w">+20</span> <span class="name">전자리 동일</span> (111111)</div>
+      <div><span class="w">+15</span> <span class="name">과거 당첨번호 / 오름·내림 연속</span> (123456)</div>
+      <div><span class="w">+12</span> <span class="name">ABABAB 반복</span> (121212)</div>
+      <div><span class="w">+10</span> <span class="name">ABCABC 반복</span> (123123)</div>
+      <div><span class="w">+8</span> <span class="name">팰린드롬 / 2가지 숫자만</span> (123321)</div>
+      <div><span class="w">+6</span> <span class="name">행운 7/8 과다 / 3가지 숫자만</span></div>
+      <div><span class="w">+5</span> <span class="name">YYMMDD 유효 날짜 / 휴대폰 앞자리</span></div>
+      <div><span class="w">+4</span> <span class="name">MMDDYY 유효 날짜</span></div>
+      <div><span class="w">+3</span> <span class="name">9·3자리 이상 반복</span></div>
+    </div>
+    <div style="color:#6b7280; margin-top:10px; font-size:11px; line-height:1.6;">
+      근거: 번호 선택 가능한 "수동 구매" 이용자의 생일·전화번호·패턴 선호 경향 휴리스틱. 엄밀한 학술 근거 부족.
     </div>
   </div>
 </details>
@@ -334,10 +405,10 @@ button { font-size: 12px; padding: 7px 10px; }
   </div>
 
   <footer>
-    <div><strong>저장</strong>: 브라우저 <code>localStorage</code>에 영구 저장 (도메인별·브라우저별)</div>
-    <div><strong>엑셀 양식</strong>: 동행복권 → 당첨결과 → 회차별 당첨번호 → 엑셀 다운로드</div>
-    <div><strong>배포</strong>: 레포 루트에 <code>index.html</code> 저장 → Settings → Pages → <code>main</code> / root</div>
-    <div style="margin-top: 6px; color: #6b7280;">⚠ 각 추첨은 독립사건. 당첨 확률은 바뀌지 않으며, 인기도 회피는 기대 실수령액만 개선합니다.</div>
+    <div><strong>저장</strong>: 브라우저 <code>localStorage</code> (도메인·브라우저별)</div>
+    <div><strong>엑셀 양식</strong>: 동행복권 → 당첨결과 → 회차별 당첨번호</div>
+    <div><strong>배포</strong>: 레포 루트에 <code>index.html</code> → Settings → Pages</div>
+    <div style="margin-top: 6px; color: #6b7280;">⚠ 로또: 인기도 회피 = 실수령액 개선 (파리뮤추얼). 연금: 효과 없음 (고정액).</div>
   </footer>
 </div>
 
@@ -485,36 +556,25 @@ function analyzePension(draws) {
 }
 
 // ============================================================
-// Popularity scoring & combinatorial generator
+// Lotto popularity scoring
 // ============================================================
-function popularityScore(combo, historySet) {
-  let score = 0;
-  const reasons = [];
+function lottoPopScore(combo, historySet) {
+  let score = 0; const reasons = [];
   const sum = combo.reduce((a, b) => a + b, 0);
-
-  // 1. Birthday bias
   const u31 = combo.filter(n => n <= 31).length;
   if (u31 === 6) { score += 15; reasons.push('전원 생일범위'); }
   else if (u31 === 5) { score += 7; reasons.push('5개 생일범위'); }
   else if (u31 === 4) { score += 2; }
-
-  // 2. Month bias
   const u12 = combo.filter(n => n <= 12).length;
   if (u12 >= 4) { score += 5; reasons.push('월 편중'); }
   else if (u12 === 3) { score += 2; }
-
-  // 3. Sum near player-typical
   if (sum >= 95 && sum <= 125) { score += 6; reasons.push('합계 생일대'); }
   else if (sum >= 85 && sum <= 140) { score += 2; }
-
-  // 4. Arithmetic progression
   const diffs = [];
   for (let i = 1; i < 6; i++) diffs.push(combo[i] - combo[i - 1]);
   const uDiff = new Set(diffs).size;
   if (uDiff === 1) { score += 15; reasons.push('등차수열'); }
   else if (uDiff === 2 && Math.max(...diffs) - Math.min(...diffs) <= 1) { score += 4; reasons.push('준등차'); }
-
-  // 5. Consecutive run
   let maxRun = 1, curRun = 1;
   for (let i = 1; i < 6; i++) {
     if (combo[i] - combo[i - 1] === 1) { curRun++; maxRun = Math.max(maxRun, curRun); }
@@ -522,53 +582,38 @@ function popularityScore(combo, historySet) {
   }
   if (maxRun >= 4) { score += 8; reasons.push(`연속 ${maxRun}개`); }
   else if (maxRun === 3) { score += 3; reasons.push('연속 3개'); }
-
-  // 6. Multiples of 5
   const m5 = combo.filter(n => n % 5 === 0).length;
   if (m5 >= 5) { score += 10; reasons.push('5의 배수'); }
   else if (m5 === 4) { score += 4; reasons.push('5의 배수 4개'); }
-
-  // 7. Same last digit
-  const lastD = combo.map(n => n % 10);
   const digitC = {};
-  for (const d of lastD) digitC[d] = (digitC[d] || 0) + 1;
+  for (const d of combo.map(n => n % 10)) digitC[d] = (digitC[d] || 0) + 1;
   const maxD = Math.max(...Object.values(digitC));
   if (maxD >= 4) { score += 8; reasons.push('끝자리 편중'); }
   else if (maxD === 3) { score += 2; }
-
-  // 8. Same decade
   const decC = {};
   for (const n of combo) { const d = Math.floor((n - 1) / 10); decC[d] = (decC[d] || 0) + 1; }
   const maxDec = Math.max(...Object.values(decC));
   if (maxDec >= 5) { score += 6; reasons.push('10단위 편중'); }
   else if (maxDec === 4) { score += 2; }
-
-  // 9. Extreme odd/even
   const odds = combo.filter(n => n % 2 === 1).length;
   if (odds === 0 || odds === 6) { score += 3; reasons.push('홀짝 극단'); }
-
-  // 10. Extreme low/high (split at 23)
   const low = combo.filter(n => n <= 22).length;
   if (low === 0 || low === 6) { score += 3; reasons.push('저고 극단'); }
-
-  // 11. Lucky 7 preference
   const luckys = combo.filter(n => n === 7 || n === 17 || n === 27 || n === 37).length;
   if (luckys >= 3) { score += 3; reasons.push('행운7 다수'); }
   else if (luckys === 2) { score += 1; }
-
-  // 12. Historical match
-  const key = combo.join(',');
-  if (historySet.has(key)) { score += 20; reasons.push('과거 당첨조합'); }
-
+  if (historySet.has(combo.join(','))) { score += 20; reasons.push('과거 당첨조합'); }
   return { score, reasons, sum, odds, low, maxRun, m5, u31 };
 }
 
-function parseNumList(text) {
+function parseNumList(text, max) {
   if (!text) return [];
-  return text.split(/[,\s]+/).filter(s => s.trim()).map(s => parseInt(s)).filter(n => Number.isInteger(n) && n >= 1 && n <= 45);
+  const lim = max || 45;
+  return text.split(/[,\s]+/).filter(s => s.trim()).map(s => parseInt(s))
+    .filter(n => Number.isInteger(n) && n >= 0 && n <= lim);
 }
 
-function generateCombinations(opts) {
+function generateLotto(opts) {
   const { N, include, exclude, minSum, maxSum, avoidHistory, historyDraws, candidateCount } = opts;
   if (include.length > 5) throw new Error('포함 번호는 최대 5개');
   if (include.some(n => exclude.includes(n))) throw new Error('포함/제외 충돌');
@@ -576,7 +621,7 @@ function generateCombinations(opts) {
   const pool = [];
   for (let i = 1; i <= 45; i++) if (!exclude.includes(i) && !include.includes(i)) pool.push(i);
   const slotCount = 6 - include.length;
-  if (pool.length < slotCount) throw new Error('선택 가능한 번호 부족');
+  if (pool.length < slotCount) throw new Error('선택 가능 번호 부족');
   const historySet = avoidHistory ? new Set(historyDraws.map(d => d.nums.join(','))) : new Set();
 
   const candidates = [];
@@ -585,24 +630,19 @@ function generateCombinations(opts) {
     const avail = [...pool];
     for (let i = 0; i < slotCount; i++) {
       const idx = Math.floor(Math.random() * avail.length);
-      picked.push(avail[idx]);
-      avail.splice(idx, 1);
+      picked.push(avail[idx]); avail.splice(idx, 1);
     }
     picked.sort((a, b) => a - b);
     const sum = picked.reduce((a, b) => a + b, 0);
     if (sum < minSum || sum > maxSum) continue;
-    const scored = popularityScore(picked, historySet);
-    candidates.push({ nums: picked, ...scored });
+    candidates.push({ nums: picked, ...lottoPopScore(picked, historySet) });
   }
   if (!candidates.length) throw new Error('조건에 맞는 조합 없음 (합계 범위 확인)');
   candidates.sort((a, b) => a.score - b.score);
 
-  // Greedy diversification
-  const result = [];
-  const seen = new Set();
-  for (let i = 0; i < candidates.length; i++) {
+  const result = [], seen = new Set();
+  for (const c of candidates) {
     if (result.length >= N) break;
-    const c = candidates[i];
     const key = c.nums.join(',');
     if (seen.has(key)) continue;
     let tooSim = false;
@@ -612,17 +652,156 @@ function generateCombinations(opts) {
     }
     if (tooSim) continue;
     seen.add(key);
-    // Find original rank by score ties
     const better = candidates.filter(x => x.score < c.score).length;
     c.percentile = 1 - better / candidates.length;
     result.push(c);
   }
-  return { combinations: result, totalCandidates: candidates.length,
+  return { type: 'lotto', combinations: result, totalCandidates: candidates.length,
     minScore: candidates[0].score, maxScore: candidates[candidates.length - 1].score };
 }
 
 // ============================================================
-// Chart & chi-square rendering (unchanged from previous)
+// Pension popularity scoring
+// ============================================================
+function pensionPopScore(group, digits, historySet) {
+  let score = 0; const reasons = [];
+  const uniq = new Set(digits);
+
+  // All same
+  if (uniq.size === 1) { score += 20; reasons.push('전자리 동일'); }
+
+  // Strictly ascending / descending
+  let incr = true, decr = true;
+  for (let i = 1; i < 6; i++) {
+    if (digits[i] !== digits[i-1] + 1) incr = false;
+    if (digits[i] !== digits[i-1] - 1) decr = false;
+  }
+  if (incr) { score += 15; reasons.push('오름차 연속'); }
+  if (decr) { score += 15; reasons.push('내림차 연속'); }
+
+  // ABABAB pattern
+  if (digits[0]===digits[2] && digits[2]===digits[4] &&
+      digits[1]===digits[3] && digits[3]===digits[5] && digits[0]!==digits[1]) {
+    score += 12; reasons.push('ABABAB 반복');
+  }
+  // ABCABC pattern
+  if (digits[0]===digits[3] && digits[1]===digits[4] && digits[2]===digits[5] &&
+      (digits[0]!==digits[1] || digits[1]!==digits[2])) {
+    score += 10; reasons.push('ABCABC 반복');
+  }
+  // Palindrome
+  if (digits[0]===digits[5] && digits[1]===digits[4] && digits[2]===digits[3] && uniq.size > 1) {
+    score += 8; reasons.push('팰린드롬');
+  }
+
+  // Few unique digits
+  if (uniq.size === 2) { score += 8; reasons.push('2가지 숫자만'); }
+  else if (uniq.size === 3) { score += 4; reasons.push('3가지 숫자만'); }
+
+  // Date-like: YYMMDD (first 2 year, middle 2 month 01-12, last 2 day 01-31)
+  const mm = digits[2] * 10 + digits[3];
+  const dd = digits[4] * 10 + digits[5];
+  if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
+    score += 5; reasons.push('YYMMDD 형식');
+  }
+  // MMDDYY
+  const mm2 = digits[0] * 10 + digits[1];
+  const dd2 = digits[2] * 10 + digits[3];
+  if (mm2 >= 1 && mm2 <= 12 && dd2 >= 1 && dd2 <= 31 && !(mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31)) {
+    score += 4; reasons.push('MMDDYY 형식');
+  }
+
+  // Lucky 7/8 concentration (Korean/Chinese preference)
+  const sevens = digits.filter(d => d === 7).length;
+  const eights = digits.filter(d => d === 8).length;
+  if (sevens >= 4) { score += 6; reasons.push('행운7 과다'); }
+  else if (sevens === 3) { score += 3; reasons.push('7 집중'); }
+  if (eights >= 4) { score += 6; reasons.push('행운8 과다'); }
+  else if (eights === 3) { score += 3; reasons.push('8 집중'); }
+
+  // Phone prefix (mobile: 010/011/016-019; landline: 02, 031-064 range not clean)
+  const numStr = digits.join('');
+  const mobilePrefix = ['010','011','016','017','018','019'];
+  if (mobilePrefix.some(p => numStr.startsWith(p))) {
+    score += 5; reasons.push('휴대폰 앞자리');
+  }
+
+  // Triples same digit (e.g., 333XXX or XXX888)
+  let hasTriple = false;
+  for (let i = 0; i <= 3; i++) {
+    if (digits[i] === digits[i+1] && digits[i+1] === digits[i+2]) { hasTriple = true; break; }
+  }
+  if (hasTriple && uniq.size > 1) { score += 3; reasons.push('3자리 연속 동일'); }
+
+  // Historical match
+  if (historySet.has(`${group},${numStr}`)) { score += 15; reasons.push('과거 당첨번호'); }
+
+  return { score, reasons, numStr, uniqCount: uniq.size };
+}
+
+function generatePension(opts) {
+  const { N, fixedGroup, excludeDigits, avoidHistory, historyDraws, candidateCount } = opts;
+  const allowed = [0,1,2,3,4,5,6,7,8,9].filter(d => !excludeDigits.includes(d));
+  if (allowed.length < 2) throw new Error('허용 숫자 부족 (최소 2개)');
+  const historySet = avoidHistory
+    ? new Set(historyDraws.map(d => `${d.group},${d.digits.join('')}`))
+    : new Set();
+
+  const candidates = [];
+  for (let k = 0; k < candidateCount; k++) {
+    const group = fixedGroup || (Math.floor(Math.random() * 5) + 1);
+    const digits = [];
+    for (let i = 0; i < 6; i++) {
+      digits.push(allowed[Math.floor(Math.random() * allowed.length)]);
+    }
+    candidates.push({ group, digits, ...pensionPopScore(group, digits, historySet) });
+  }
+  candidates.sort((a, b) => a.score - b.score);
+
+  const result = [], seen = new Set();
+  const groupUsed = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+  for (const c of candidates) {
+    if (result.length >= N) break;
+    const key = `${c.group},${c.digits.join('')}`;
+    if (seen.has(key)) continue;
+    // Similarity: same group + 4+ positions match
+    let tooSim = false;
+    for (const r of result) {
+      if (r.group !== c.group) continue;
+      let m = 0;
+      for (let i = 0; i < 6; i++) if (r.digits[i] === c.digits[i]) m++;
+      if (m >= 4) { tooSim = true; break; }
+    }
+    if (tooSim) continue;
+    // Group diversity: if not fixed and this group already used >= ceil(N/5), skip unless late
+    if (!fixedGroup && result.length < N - 1) {
+      const cap = Math.ceil(N / 5) + 1;
+      if (groupUsed[c.group] >= cap) continue;
+    }
+    seen.add(key);
+    const better = candidates.filter(x => x.score < c.score).length;
+    c.percentile = 1 - better / candidates.length;
+    groupUsed[c.group]++;
+    result.push(c);
+  }
+  // Fill remaining if diversity constraint blocked too many
+  if (result.length < N) {
+    for (const c of candidates) {
+      if (result.length >= N) break;
+      const key = `${c.group},${c.digits.join('')}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const better = candidates.filter(x => x.score < c.score).length;
+      c.percentile = 1 - better / candidates.length;
+      result.push(c);
+    }
+  }
+  return { type: 'pension', combinations: result, totalCandidates: candidates.length,
+    minScore: candidates[0].score, maxScore: candidates[candidates.length - 1].score };
+}
+
+// ============================================================
+// Chart rendering
 // ============================================================
 function fmt(x, d = 4) {
   if (!isFinite(x)) return '—';
@@ -673,9 +852,9 @@ function renderLottoResults(a) {
   const v = document.getElementById('verdict');
   const r05 = test.statistic > c05, r01 = test.statistic > c01;
   if (N < 30) { v.className = 'verdict warn'; v.innerHTML = `⚠ 표본 부족 (n=${N}).`; }
-  else if (!r05) { v.className = 'verdict pass'; v.innerHTML = `✓ α=0.05 <strong>H₀ 기각 불가</strong> — 균등분포 부합. 편향 증거 없음. → <strong>번호 생성 탭</strong>에서 인기도 회피 전략 사용 권장.`; }
-  else if (!r01) { v.className = 'verdict warn'; v.innerHTML = `⚠ α=0.05 기각 (α=0.01 기각 불가) — 약한 편향 시사.`; }
-  else { v.className = 'verdict fail'; v.innerHTML = `✗ α=0.01 <strong>H₀ 기각</strong> — 유의한 편향.`; }
+  else if (!r05) { v.className = 'verdict pass'; v.innerHTML = `✓ α=0.05 <strong>H₀ 기각 불가</strong> — 편향 증거 없음. <strong>번호 생성 탭</strong>에서 인기도 회피 사용 권장.`; }
+  else if (!r01) { v.className = 'verdict warn'; v.innerHTML = `⚠ α=0.05 기각 (α=0.01 기각 불가) — 약한 편향.`; }
+  else { v.className = 'verdict fail'; v.innerHTML = `✗ α=0.01 <strong>H₀ 기각</strong>.`; }
   renderBarChart(observed, expected, labels, document.getElementById('chart'));
   const sorted = observed.map((o, i) => ({ num: i + 1, count: o, z: (o - expected[i]) / Math.sqrt(expected[i]) }))
     .sort((a, b) => b.z - a.z);
@@ -701,7 +880,7 @@ function renderPensionResults(a) {
   const anyReject = results.some(r => r.test.pValue < bonf);
   if (N < 50) { v.className = 'verdict warn'; v.innerHTML = `⚠ 표본 부족 (n=${N}).`; }
   else if (!anyReject) { v.className = 'verdict pass'; v.innerHTML = `✓ 모든 검정 기각 불가 — 균등분포 부합.`; }
-  else { v.className = 'verdict fail'; v.innerHTML = `✗ 일부 검정 H₀ 기각.`; }
+  else { v.className = 'verdict fail'; v.innerHTML = `✗ 일부 검정 기각.`; }
   document.getElementById('chart-panel').classList.add('hidden');
   let html = '';
   for (const r of results) {
@@ -747,7 +926,7 @@ function renderManualForm(dm) {
       <div class="num-inputs">${[1,2,3,4,5,6].map(i => `<input type="number" id="m-n${i}" min="1" max="45" inputmode="numeric">`).join('')}</div></div>
       <div class="form-row"><label>보너스</label><input type="number" id="m-bonus" min="1" max="45" inputmode="numeric"></div>
       <button class="primary" id="m-add">➕ 추가 저장</button></div>
-      <div class="hint">동일 회차 입력 시 덮어쓰기됩니다.</div>`;
+      <div class="hint">동일 회차는 덮어쓰기.</div>`;
     document.getElementById('m-add').onclick = addLottoManual;
   } else {
     f.innerHTML = `<div class="form-grid">
@@ -755,7 +934,7 @@ function renderManualForm(dm) {
       <div class="form-row"><label>조</label><select id="m-group"><option value="1">1조</option><option value="2">2조</option><option value="3">3조</option><option value="4">4조</option><option value="5">5조</option></select></div>
       <div class="form-row"><label>번호</label><input type="text" id="m-digits" placeholder="6자리 (예: 382268)" maxlength="6" inputmode="numeric" pattern="[0-9]{6}"></div>
       <button class="primary" id="m-add">➕ 추가 저장</button></div>
-      <div class="hint">6자리 숫자 (앞 0 포함). 동일 회차는 덮어쓰기.</div>`;
+      <div class="hint">6자리 숫자 (앞 0 포함).</div>`;
     document.getElementById('m-add').onclick = addPensionManual;
   }
 }
@@ -771,63 +950,86 @@ function ballClass(n) {
   return 'ball-gr';
 }
 function renderGenResults(data) {
-  const { combinations, totalCandidates, minScore, maxScore } = data;
+  const { type, combinations, totalCandidates, minScore, maxScore } = data;
   const container = document.getElementById('gen-results');
   if (!combinations.length) { container.innerHTML = '<div class="panel"><div class="msg err">생성 실패</div></div>'; return; }
 
   let html = `<div class="panel">
     <div class="panel-title">
-      <span>생성 결과</span>
-      <span class="badge">${combinations.length}조합 · ${totalCandidates.toLocaleString()}/${totalCandidates.toLocaleString()} 후보</span>
+      <span>생성 결과 (${type === 'lotto' ? '로또' : '연금복권'})</span>
+      <span class="badge">${combinations.length}조합 · ${totalCandidates.toLocaleString()} 후보</span>
     </div>`;
 
   combinations.forEach((c, idx) => {
-    const pctBetter = ((1 - c.percentile) * 100).toFixed(1);
-    const ballsHtml = c.nums.map(n => `<span class="ball ${ballClass(n)}">${n}</span>`).join('');
-    const reasonsHtml = c.reasons.length
-      ? c.reasons.map(r => `<span class="reason-tag">${r}</span>`).join('')
-      : '<span class="good-tag">주요 편향 없음</span>';
-    const evenOdd = `${c.odds}:${6 - c.odds}`;
-    const lowHigh = `${c.low}:${6 - c.low}`;
-    html += `<div class="combo-card">
-      <div class="combo-header">
-        <span class="combo-num">조합 #${idx + 1}</span>
-        <span class="combo-score">점수 <strong>${c.score}</strong> · 무작위 대비 상위 <strong>${(c.percentile * 100).toFixed(1)}%</strong></span>
-        <button class="copy-btn small" onclick="copyCombo('${c.nums.join(', ')}', this)">복사</button>
-      </div>
-      <div class="combo-balls">${ballsHtml}</div>
-      <div class="combo-stats">
-        <span>합 <strong>${c.sum}</strong></span>
-        <span>홀짝 <strong>${evenOdd}</strong></span>
-        <span>저고 <strong>${lowHigh}</strong></span>
-        <span>연속 <strong>${c.maxRun}</strong></span>
-        <span>5의배수 <strong>${c.m5}</strong></span>
-        <span>≤31 <strong>${c.u31}</strong></span>
-      </div>
-      <div class="combo-reasons">${reasonsHtml}</div>
-    </div>`;
+    if (type === 'lotto') {
+      const ballsHtml = c.nums.map(n => `<span class="ball ${ballClass(n)}">${n}</span>`).join('');
+      const reasonsHtml = c.reasons.length
+        ? c.reasons.map(r => `<span class="reason-tag">${r}</span>`).join('')
+        : '<span class="good-tag">주요 편향 없음</span>';
+      html += `<div class="combo-card">
+        <div class="combo-header">
+          <span class="combo-num">조합 #${idx + 1}</span>
+          <span class="combo-score">점수 <strong>${c.score}</strong> · 상위 <strong>${(c.percentile * 100).toFixed(1)}%</strong></span>
+          <button class="copy-btn small" onclick="copyText('${c.nums.join(', ')}', this)">복사</button>
+        </div>
+        <div class="combo-balls">${ballsHtml}</div>
+        <div class="combo-stats">
+          <span>합 <strong>${c.sum}</strong></span>
+          <span>홀짝 <strong>${c.odds}:${6 - c.odds}</strong></span>
+          <span>저고 <strong>${c.low}:${6 - c.low}</strong></span>
+          <span>연속 <strong>${c.maxRun}</strong></span>
+          <span>5의배수 <strong>${c.m5}</strong></span>
+          <span>≤31 <strong>${c.u31}</strong></span>
+        </div>
+        <div class="combo-reasons">${reasonsHtml}</div>
+      </div>`;
+    } else {
+      // Pension
+      const digitsHtml = c.digits.map(d => `<span class="digit-box">${d}</span>`).join('');
+      const reasonsHtml = c.reasons.length
+        ? c.reasons.map(r => `<span class="reason-tag">${r}</span>`).join('')
+        : '<span class="good-tag">특별한 패턴 없음</span>';
+      const copyText = `${c.group}조 ${c.numStr}`;
+      html += `<div class="combo-card">
+        <div class="combo-header">
+          <span class="combo-num">조합 #${idx + 1}</span>
+          <span class="combo-score">점수 <strong>${c.score}</strong> · 상위 <strong>${(c.percentile * 100).toFixed(1)}%</strong></span>
+          <button class="copy-btn small" onclick="copyText('${copyText}', this)">복사</button>
+        </div>
+        <div class="combo-balls">
+          <span class="group-tag">${c.group}조</span>${digitsHtml}
+        </div>
+        <div class="combo-stats">
+          <span>번호 <strong>${c.numStr}</strong></span>
+          <span>고유숫자 <strong>${c.uniqCount}</strong>개</span>
+          <span>조 <strong>${c.group}</strong></span>
+        </div>
+        <div class="combo-reasons">${reasonsHtml}</div>
+      </div>`;
+    }
   });
   html += `<div class="hint" style="margin-top:10px;">
-    "상위 X%"는 샘플링된 ${totalCandidates.toLocaleString()}개 후보 중 인기도가 낮은 쪽 기준.
-    점수 범위: ${minScore} ~ ${maxScore}. 0에 가까울수록 남들이 덜 고를 가능성.
+    점수 0에 가까울수록 남들이 덜 고를 패턴. 범위 ${minScore} ~ ${maxScore}.
+    ${type === 'pension' ? '⚠ 연금복권은 고정액이라 실수령액 개선 효과 없음.' : ''}
   </div></div>`;
   container.innerHTML = html;
 }
-window.copyCombo = (text, btn) => {
+window.copyText = (text, btn) => {
   const orig = btn.textContent;
   const done = () => { btn.textContent = '✓'; setTimeout(() => btn.textContent = orig, 1500); };
-  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(() => {
+  const fallback = () => {
     const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
     ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done();
-  });
-  else { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }
+  };
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(fallback);
+  else fallback();
 };
 
 // ============================================================
 // UI state
 // ============================================================
 let mode = 'lotto';
+let genSubMode = 'lotto';
 const activeDataMode = () => mode === 'pension' ? 'pension' : 'lotto';
 
 function showMsg(elId, text, ok) {
@@ -840,7 +1042,12 @@ function updateStatus() {
   const draws = loadDraws(dm);
   const status = document.getElementById('status');
   document.getElementById('count-badge').textContent = `${draws.length}건`;
-  const title = dm === 'lotto' ? '로또 저장 데이터' : '연금 저장 데이터';
+  let title;
+  if (mode === 'generate') {
+    title = genSubMode === 'lotto' ? '로또 저장 데이터 (회피용)' : '연금 저장 데이터 (회피용)';
+  } else {
+    title = dm === 'lotto' ? '로또 저장 데이터' : '연금 저장 데이터';
+  }
   document.getElementById('data-title').textContent = title;
   if (!draws.length) {
     status.className = 'status empty';
@@ -852,6 +1059,41 @@ function updateStatus() {
   }
   if (!document.getElementById('view-panel').classList.contains('hidden')) renderTable(dm, draws);
 }
+
+// When in generate mode, switch the data source based on sub-tab
+function effectiveDataMode() {
+  return mode === 'generate' ? genSubMode : activeDataMode();
+}
+
+function setGenSub(sub) {
+  genSubMode = sub;
+  document.querySelectorAll('.sub-tab').forEach(t => t.classList.toggle('active', t.dataset.gen === sub));
+  document.getElementById('lotto-gen').classList.toggle('hidden', sub !== 'lotto');
+  document.getElementById('pension-gen').classList.toggle('hidden', sub !== 'pension');
+  document.getElementById('lotto-algo').classList.toggle('hidden', sub !== 'lotto');
+  document.getElementById('pension-algo').classList.toggle('hidden', sub !== 'pension');
+  document.getElementById('gen-results').innerHTML = '';
+  updateStatusForGen();
+}
+function updateStatusForGen() {
+  // Data panel shows data for the sub-mode being generated for
+  const dm = genSubMode;
+  const draws = loadDraws(dm);
+  const status = document.getElementById('status');
+  document.getElementById('count-badge').textContent = `${draws.length}건`;
+  document.getElementById('data-title').textContent =
+    (dm === 'lotto' ? '로또 저장 데이터' : '연금 저장 데이터') + ' (회피용)';
+  if (!draws.length) {
+    status.className = 'status empty';
+    status.innerHTML = '저장된 데이터 없음. 과거 당첨조합 회피 기능이 비활성화됩니다.';
+  } else {
+    const rounds = draws.map(d => d.round);
+    status.className = 'status';
+    status.innerHTML = `저장 회차: <strong>${Math.max(...rounds)}회 ~ ${Math.min(...rounds)}회</strong> · 총 <strong>${draws.length}건</strong>`;
+  }
+  if (!document.getElementById('view-panel').classList.contains('hidden')) renderTable(dm, draws);
+}
+
 function setMode(m) {
   mode = m;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
@@ -865,31 +1107,38 @@ function setMode(m) {
   document.getElementById('gen-results').innerHTML = '';
   if (isChi) {
     const h0 = document.getElementById('h0');
-    if (m === 'lotto') h0.innerHTML = 'H₀: 45개 번호 각각 1/45 독립 추첨 · H₁: 일부 편향';
-    else h0.innerHTML = 'H₀: 조(1/5) 및 각 자리(1/10) 균등 · 7개 검정 Bonferroni 보정';
+    if (m === 'lotto') h0.innerHTML = 'H₀: 45개 번호 각각 1/45 독립 · H₁: 편향';
+    else h0.innerHTML = 'H₀: 조(1/5) 및 자리(1/10) 균등 · Bonferroni 보정';
     renderManualForm(m);
+    updateStatus();
+  } else {
+    updateStatusForGen();
   }
-  updateStatus();
 }
 document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
+document.querySelectorAll('.sub-tab').forEach(t => t.addEventListener('click', () => setGenSub(t.dataset.gen)));
 
 // ============================================================
-// Event handlers
+// Data mgmt handlers (use effective data mode)
 // ============================================================
+function currentDataMode() {
+  return mode === 'generate' ? genSubMode : activeDataMode();
+}
+
 document.getElementById('upload-btn').onclick = () => document.getElementById('file-input').click();
 document.getElementById('file-input').onchange = async (e) => {
   const file = e.target.files[0]; if (!file) return;
   if (typeof XLSX === 'undefined') { showMsg('upload-msg', 'SheetJS 로드 실패', false); return; }
   try {
     const buf = await file.arrayBuffer();
-    const dm = activeDataMode();
+    const dm = currentDataMode();
     const parsed = dm === 'lotto' ? parseLottoExcel(buf) : parsePensionExcel(buf);
     if (!parsed.length) { showMsg('upload-msg', '유효 데이터 없음', false); }
     else {
       const merged = mergeDraws(loadDraws(dm), parsed);
       if (saveDraws(dm, merged)) {
-        showMsg('upload-msg', `✓ ${parsed.length}건 파싱, 병합 후 총 ${merged.length}건 저장`, true);
-        updateStatus();
+        showMsg('upload-msg', `✓ ${parsed.length}건 파싱, 총 ${merged.length}건 저장`, true);
+        if (mode === 'generate') updateStatusForGen(); else updateStatus();
       }
     }
   } catch (err) { showMsg('upload-msg', '읽기 오류: ' + err.message, false); }
@@ -899,25 +1148,28 @@ document.getElementById('toggle-view-btn').onclick = () => {
   const v = document.getElementById('view-panel');
   v.classList.toggle('hidden');
   if (!v.classList.contains('hidden')) {
-    renderTable(activeDataMode(), loadDraws(activeDataMode()));
+    renderTable(currentDataMode(), loadDraws(currentDataMode()));
     v.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 };
 document.getElementById('clear-btn').onclick = () => {
-  const dm = activeDataMode();
+  const dm = currentDataMode();
   const draws = loadDraws(dm);
   if (!draws.length) return;
   if (confirm(`${dm === 'lotto' ? '로또' : '연금복권'} 저장 데이터 ${draws.length}건 삭제?`)) {
     localStorage.removeItem(STORAGE_KEY[dm]);
     document.getElementById('results').classList.add('hidden');
-    updateStatus();
+    if (mode === 'generate') updateStatusForGen(); else updateStatus();
   }
 };
 window.deleteDraw = (round) => {
-  const dm = activeDataMode();
+  const dm = currentDataMode();
   const draws = loadDraws(dm).filter(d => d.round !== round);
-  saveDraws(dm, draws); updateStatus();
+  saveDraws(dm, draws);
+  if (mode === 'generate') updateStatusForGen(); else updateStatus();
 };
+
+// Manual add
 function addLottoManual() {
   const round = parseInt(document.getElementById('m-round').value);
   const nums = [1,2,3,4,5,6].map(i => parseInt(document.getElementById('m-n'+i).value));
@@ -947,6 +1199,8 @@ function addPensionManual() {
   showMsg('manual-msg', `✓ ${round}회 저장`, true);
   updateStatus();
 }
+
+// Chi-square run
 document.getElementById('run-btn').onclick = () => {
   const dm = activeDataMode();
   const draws = loadDraws(dm);
@@ -957,26 +1211,45 @@ document.getElementById('run-btn').onclick = () => {
   if (dm === 'lotto') renderLottoResults(a); else renderPensionResults(a);
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
-document.getElementById('gen-btn').onclick = () => {
+
+// Lotto generate
+document.getElementById('l-gen-btn').onclick = () => {
   try {
-    const N = Math.max(1, Math.min(10, parseInt(document.getElementById('gen-n').value) || 5));
-    const include = parseNumList(document.getElementById('gen-include').value);
-    const exclude = parseNumList(document.getElementById('gen-exclude').value);
-    const minSum = Math.max(21, Math.min(255, parseInt(document.getElementById('gen-min-sum').value) || 21));
-    const maxSum = Math.max(21, Math.min(255, parseInt(document.getElementById('gen-max-sum').value) || 255));
-    if (minSum > maxSum) throw new Error('최소 합계 > 최대 합계');
-    const avoidHistory = document.getElementById('gen-avoid-hist').checked;
-    const candidateCount = Math.max(1000, Math.min(100000, parseInt(document.getElementById('gen-candidates').value) || 20000));
+    const N = Math.max(1, Math.min(10, parseInt(document.getElementById('l-gen-n').value) || 5));
+    const include = parseNumList(document.getElementById('l-gen-include').value);
+    const exclude = parseNumList(document.getElementById('l-gen-exclude').value);
+    const minSum = Math.max(21, Math.min(255, parseInt(document.getElementById('l-gen-min-sum').value) || 21));
+    const maxSum = Math.max(21, Math.min(255, parseInt(document.getElementById('l-gen-max-sum').value) || 255));
+    if (minSum > maxSum) throw new Error('최소 > 최대');
+    const avoidHistory = document.getElementById('l-gen-avoid-hist').checked;
+    const candidateCount = Math.max(1000, Math.min(100000, parseInt(document.getElementById('l-gen-candidates').value) || 20000));
     const historyDraws = avoidHistory ? loadDraws('lotto') : [];
     const t0 = performance.now();
-    const data = generateCombinations({ N, include, exclude, minSum, maxSum, avoidHistory, historyDraws, candidateCount });
+    const data = generateLotto({ N, include, exclude, minSum, maxSum, avoidHistory, historyDraws, candidateCount });
     const dt = (performance.now() - t0).toFixed(0);
     renderGenResults(data);
-    showMsg('gen-msg', `✓ ${data.combinations.length}조합 생성 · ${dt}ms · 필터 통과 ${data.totalCandidates.toLocaleString()}/${candidateCount.toLocaleString()}`, true);
+    showMsg('gen-msg', `✓ ${data.combinations.length}조합 · ${dt}ms · 필터 통과 ${data.totalCandidates.toLocaleString()}/${candidateCount.toLocaleString()}`, true);
     document.getElementById('gen-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } catch (err) {
-    showMsg('gen-msg', '오류: ' + err.message, false);
-  }
+  } catch (err) { showMsg('gen-msg', '오류: ' + err.message, false); }
+};
+
+// Pension generate
+document.getElementById('p-gen-btn').onclick = () => {
+  try {
+    const N = Math.max(1, Math.min(10, parseInt(document.getElementById('p-gen-n').value) || 5));
+    const groupVal = document.getElementById('p-gen-group').value;
+    const fixedGroup = groupVal ? parseInt(groupVal) : null;
+    const excludeDigits = parseNumList(document.getElementById('p-gen-exclude').value, 9);
+    const avoidHistory = document.getElementById('p-gen-avoid-hist').checked;
+    const candidateCount = Math.max(1000, Math.min(100000, parseInt(document.getElementById('p-gen-candidates').value) || 20000));
+    const historyDraws = avoidHistory ? loadDraws('pension') : [];
+    const t0 = performance.now();
+    const data = generatePension({ N, fixedGroup, excludeDigits, avoidHistory, historyDraws, candidateCount });
+    const dt = (performance.now() - t0).toFixed(0);
+    renderGenResults(data);
+    showMsg('gen-msg', `✓ ${data.combinations.length}조합 · ${dt}ms`, true);
+    document.getElementById('gen-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (err) { showMsg('gen-msg', '오류: ' + err.message, false); }
 };
 
 setMode('lotto');
