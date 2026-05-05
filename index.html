@@ -321,8 +321,6 @@ button { font-size: 12px; padding: 7px 10px; }
       ⚠ <strong>연금복권은 당첨금이 고정액</strong>입니다 (1등 월 700만원×20년). 여러 명 당첨돼도 <strong>각자 전액 수령</strong>하므로 인기도 회피는 <strong>기대수익을 개선하지 못합니다</strong>. 이 기능은 남들과 겹치지 않는 번호를 선호하는 분을 위한 것이며, 수학적으로는 무작위 자동과 동일합니다.
     </div>
     <div class="form-grid">
-      <div class="form-row"><label>생성 개수</label>
-        <input type="number" id="p-gen-n" value="5" min="1" max="10" inputmode="numeric"></div>
       <div class="form-row"><label>조</label>
         <select id="p-gen-group">
           <option value="">자동 (분산)</option>
@@ -340,7 +338,7 @@ button { font-size: 12px; padding: 7px 10px; }
       <details>
         <summary>고급 설정</summary>
         <div class="form-row" style="margin-top: 6px;"><label>후보 수</label>
-          <input type="number" id="p-gen-candidates" value="20000" min="1000" max="100000" inputmode="numeric"></div>
+          <input type="number" id="p-gen-candidates" value="50000" min="1000" max="100000" inputmode="numeric"></div>
       </details>
       <button class="primary" id="p-gen-btn">🎲 번호 생성</button>
     </div>
@@ -618,10 +616,12 @@ function generateLotto(opts) {
   if (include.length > 5) throw new Error('포함 번호는 최대 5개');
   if (include.some(n => exclude.includes(n))) throw new Error('포함/제외 충돌');
   if (new Set(include).size !== include.length) throw new Error('포함 번호 중복');
+  if (N > 1 && include.length > 0) throw new Error('조합 간 번호 중복 금지 조건에서는 포함 번호를 N=1일 때만 사용 가능');
   const pool = [];
   for (let i = 1; i <= 45; i++) if (!exclude.includes(i) && !include.includes(i)) pool.push(i);
   const slotCount = 6 - include.length;
   if (pool.length < slotCount) throw new Error('선택 가능 번호 부족');
+  if (N * 6 > 45 - exclude.length) throw new Error(`${N}개 조합에 필요한 번호 ${N*6}개 부족 (가능: ${45 - exclude.length}개, 제외 번호 줄이기)`);
   const historySet = avoidHistory ? new Set(historyDraws.map(d => d.nums.join(','))) : new Set();
 
   const candidates = [];
@@ -648,7 +648,7 @@ function generateLotto(opts) {
     let tooSim = false;
     for (const r of result) {
       const overlap = c.nums.filter(n => r.nums.includes(n)).length;
-      if (overlap >= 5) { tooSim = true; break; }
+      if (overlap > 0) { tooSim = true; break; }
     }
     if (tooSim) continue;
     seen.add(key);
@@ -1236,7 +1236,7 @@ document.getElementById('l-gen-btn').onclick = () => {
 // Pension generate
 document.getElementById('p-gen-btn').onclick = () => {
   try {
-    const N = Math.max(1, Math.min(10, parseInt(document.getElementById('p-gen-n').value) || 5));
+    const N = 1;
     const groupVal = document.getElementById('p-gen-group').value;
     const fixedGroup = groupVal ? parseInt(groupVal) : null;
     const excludeDigits = parseNumList(document.getElementById('p-gen-exclude').value, 9);
