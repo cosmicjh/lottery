@@ -1,0 +1,31 @@
+name: 연금복권 회차 입력
+description: 연금복권720+ 당첨번호 추가 (저장소 데이터에 자동 반영됩니다)
+title: "[연금] "
+labels: ["pension-entry"]
+body:
+  - type: input
+    id: round
+    attributes:
+      label: 회차
+      placeholder: "312"
+    validations:
+      required: true
+  - type: dropdown
+    id: group
+    attributes:
+      label: 조
+      options:
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+    validations:
+      required: true
+  - type: input
+    id: numbers
+    attributes:
+      label: 당첨번호 6자리
+      placeholder: "382268"
+    validations:
+      required: true
