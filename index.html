@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -111,96 +110,95 @@
   .msg.err { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); }
   .hint { color: var(--text-dim); font-size: 11px; font-family: var(--mono); margin-top: 4px; line-height: 1.5; }
 
-/* Generator */
-.info-banner {
-background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.3);
-color: var(–accent-2); padding: 10px 12px; border-radius: 6px;
-font-size: 11px; margin-bottom: 12px; line-height: 1.6; font-family: var(–mono);
-}
-.warn-banner {
-background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.4);
-color: var(–warning); padding: 10px 12px; border-radius: 6px;
-font-size: 11px; margin-bottom: 12px; line-height: 1.6; font-family: var(–mono);
-}
-details { background: var(–panel-2); border: 1px solid var(–border); border-radius: 6px; padding: 8px 10px; margin: 8px 0; }
-details > summary { cursor: pointer; font-size: 12px; color: var(–text-dim); font-family: var(–mono); padding: 2px 0; }
-details[open] > summary { color: var(–text); margin-bottom: 8px; }
-.combo-card {
-background: var(–panel-2); border: 1px solid var(–border); border-radius: 8px;
-padding: 12px; margin-bottom: 10px;
-}
-.combo-header {
-display: flex; justify-content: space-between; align-items: center;
-margin-bottom: 10px; font-family: var(–mono); gap: 8px; flex-wrap: wrap;
-}
-.combo-num { font-size: 13px; font-weight: 700; color: var(–accent); }
-.combo-score { font-size: 10px; color: var(–text-dim); }
-.combo-score strong { color: var(–text); }
-.combo-balls {
-display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
-padding: 8px; background: var(–bg); border-radius: 6px;
-justify-content: center; align-items: center;
-}
-.ball {
-display: inline-flex; align-items: center; justify-content: center;
-width: 38px; height: 38px; border-radius: 50%;
-font-family: var(–mono); font-weight: 700; font-size: 15px;
-flex-shrink: 0;
-}
-.ball-y { background: #fbbf24; color: #000; }
-.ball-b { background: #3b82f6; color: #fff; }
-.ball-r { background: #ef4444; color: #fff; }
-.ball-g { background: #4b5563; color: #fff; }
-.ball-gr { background: #10b981; color: #fff; }
-.group-tag {
-display: inline-flex; align-items: center; justify-content: center;
-background: #f59e0b; color: #000; padding: 0 12px; height: 42px;
-border-radius: 6px; font-weight: 700; font-family: var(–mono); font-size: 14px;
-margin-right: 4px; flex-shrink: 0;
-}
-.digit-box {
-display: inline-flex; align-items: center; justify-content: center;
-width: 36px; height: 42px; background: var(–panel);
-border: 2px solid var(–border); color: var(–text);
-border-radius: 4px; font-family: var(–mono); font-weight: 700; font-size: 17px;
-flex-shrink: 0;
-}
-.combo-stats {
-display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
-font-family: var(–mono); font-size: 11px;
-}
-.combo-stats span {
-background: var(–bg); padding: 3px 8px; border-radius: 4px;
-border: 1px solid var(–border); color: var(–text-dim);
-}
-.combo-stats strong { color: var(–text); }
-.combo-reasons { font-family: var(–mono); font-size: 11px; line-height: 1.6; color: var(–text-dim); margin-top: 6px; }
-.reason-tag {
-display: inline-block; padding: 2px 7px; border-radius: 3px;
-background: rgba(239, 68, 68, 0.12); color: var(–danger);
-font-size: 10px; margin: 2px 3px 2px 0; border: 1px solid rgba(239, 68, 68, 0.3);
-}
-.good-tag {
-display: inline-block; padding: 2px 7px; border-radius: 3px;
-background: rgba(16, 185, 129, 0.1); color: var(–accent);
-font-size: 10px; border: 1px solid rgba(16, 185, 129, 0.3);
-}
-.factor-list { font-family: var(–mono); font-size: 11px; line-height: 1.7; color: var(–text-dim); }
-.factor-list .w { color: var(–warning); font-weight: 600; display: inline-block; min-width: 28px; }
-.factor-list .name { color: var(–text); }
-.copy-btn { font-size: 10px; padding: 3px 7px; margin-left: auto; }
-@media (max-width: 480px) {
-h1 { font-size: 17px; }
-.tab { font-size: 12px; padding: 9px 6px; }
-button { font-size: 12px; padding: 7px 10px; }
-.num-inputs { grid-template-columns: repeat(3, 1fr); }
-.ball { width: 34px; height: 34px; font-size: 14px; }
-.digit-box { width: 32px; height: 38px; font-size: 15px; }
-.group-tag { padding: 0 10px; height: 38px; font-size: 13px; }
-.form-row label { min-width: 60px; font-size: 11px; }
-}
+  /* Generator */
+  .info-banner {
+    background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.3);
+    color: var(--accent-2); padding: 10px 12px; border-radius: 6px;
+    font-size: 11px; margin-bottom: 12px; line-height: 1.6; font-family: var(--mono);
+  }
+  .warn-banner {
+    background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.4);
+    color: var(--warning); padding: 10px 12px; border-radius: 6px;
+    font-size: 11px; margin-bottom: 12px; line-height: 1.6; font-family: var(--mono);
+  }
+  details { background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; margin: 8px 0; }
+  details > summary { cursor: pointer; font-size: 12px; color: var(--text-dim); font-family: var(--mono); padding: 2px 0; }
+  details[open] > summary { color: var(--text); margin-bottom: 8px; }
+  .combo-card {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; margin-bottom: 10px;
+  }
+  .combo-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px; font-family: var(--mono); gap: 8px; flex-wrap: wrap;
+  }
+  .combo-num { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .combo-score { font-size: 10px; color: var(--text-dim); }
+  .combo-score strong { color: var(--text); }
+  .combo-balls {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
+    padding: 8px; background: var(--bg); border-radius: 6px;
+    justify-content: center; align-items: center;
+  }
+  .ball {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 50%;
+    font-family: var(--mono); font-weight: 700; font-size: 15px;
+    flex-shrink: 0;
+  }
+  .ball-y { background: #fbbf24; color: #000; }
+  .ball-b { background: #3b82f6; color: #fff; }
+  .ball-r { background: #ef4444; color: #fff; }
+  .ball-g { background: #4b5563; color: #fff; }
+  .ball-gr { background: #10b981; color: #fff; }
+  .group-tag {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #f59e0b; color: #000; padding: 0 12px; height: 42px;
+    border-radius: 6px; font-weight: 700; font-family: var(--mono); font-size: 14px;
+    margin-right: 4px; flex-shrink: 0;
+  }
+  .digit-box {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 42px; background: var(--panel);
+    border: 2px solid var(--border); color: var(--text);
+    border-radius: 4px; font-family: var(--mono); font-weight: 700; font-size: 17px;
+    flex-shrink: 0;
+  }
+  .combo-stats {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
+    font-family: var(--mono); font-size: 11px;
+  }
+  .combo-stats span {
+    background: var(--bg); padding: 3px 8px; border-radius: 4px;
+    border: 1px solid var(--border); color: var(--text-dim);
+  }
+  .combo-stats strong { color: var(--text); }
+  .combo-reasons { font-family: var(--mono); font-size: 11px; line-height: 1.6; color: var(--text-dim); margin-top: 6px; }
+  .reason-tag {
+    display: inline-block; padding: 2px 7px; border-radius: 3px;
+    background: rgba(239, 68, 68, 0.12); color: var(--danger);
+    font-size: 10px; margin: 2px 3px 2px 0; border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  .good-tag {
+    display: inline-block; padding: 2px 7px; border-radius: 3px;
+    background: rgba(16, 185, 129, 0.1); color: var(--accent);
+    font-size: 10px; border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  .factor-list { font-family: var(--mono); font-size: 11px; line-height: 1.7; color: var(--text-dim); }
+  .factor-list .w { color: var(--warning); font-weight: 600; display: inline-block; min-width: 28px; }
+  .factor-list .name { color: var(--text); }
+  .copy-btn { font-size: 10px; padding: 3px 7px; margin-left: auto; }
+  @media (max-width: 480px) {
+    h1 { font-size: 17px; }
+    .tab { font-size: 12px; padding: 9px 6px; }
+    button { font-size: 12px; padding: 7px 10px; }
+    .num-inputs { grid-template-columns: repeat(3, 1fr); }
+    .ball { width: 34px; height: 34px; font-size: 14px; }
+    .digit-box { width: 32px; height: 38px; font-size: 15px; }
+    .group-tag { padding: 0 10px; height: 38px; font-size: 13px; }
+    .form-row label { min-width: 60px; font-size: 11px; }
+  }
 </style>
-
 </head>
 <body>
 <div class="container">
@@ -216,7 +214,6 @@ button { font-size: 12px; padding: 7px 10px; }
   </div>
 
   <!-- Data management -->
-
   <div class="panel">
     <div class="panel-title">
       <span id="data-title">저장된 데이터</span>
@@ -233,7 +230,6 @@ button { font-size: 12px; padding: 7px 10px; }
   </div>
 
   <!-- Viewer -->
-
   <div class="panel hidden" id="view-panel">
     <div class="panel-title">
       <span>저장된 당첨결과</span>
@@ -243,7 +239,6 @@ button { font-size: 12px; padding: 7px 10px; }
   </div>
 
   <!-- Chi-square mode panels -->
-
   <div class="chi-only">
     <div class="panel">
       <div class="panel-title">회차 수동 입력</div>
@@ -275,7 +270,6 @@ button { font-size: 12px; padding: 7px 10px; }
   </div>
 
   <!-- Generator mode -->
-
   <div class="gen-only hidden">
     <div class="panel">
       <div class="panel-title">인기도 회피 번호 생성기</div>
@@ -284,122 +278,119 @@ button { font-size: 12px; padding: 7px 10px; }
         <button class="sub-tab" data-gen="pension">연금복권720+</button>
       </div>
 
-```
-  <!-- Lotto generator UI -->
-  <div id="lotto-gen">
-    <div class="info-banner">
-      카이제곱 결과가 H₀ 기각 불가 (p&gt;0.05)이면 추첨 편향은 없습니다.
-      이때 모든 조합의 당첨 확률은 동일하지만 <strong>남들이 덜 고르는 조합</strong>을 선택하면
-      당첨 시 분할 인원이 줄어 실수령액 기댓값이 증가합니다. (Cook &amp; Clotfelter, 1993)
-    </div>
-    <div class="form-grid">
-      <div class="form-row"><label>생성 개수</label>
-        <input type="number" id="l-gen-n" value="5" min="1" max="10" inputmode="numeric"></div>
-      <div class="form-row"><label>포함 번호</label>
-        <input type="text" id="l-gen-include" placeholder="선택: 예) 7, 14 (최대 5개)"></div>
-      <div class="form-row"><label>제외 번호</label>
-        <input type="text" id="l-gen-exclude" placeholder="선택: 예) 1, 2, 3"></div>
-      <div class="form-row"><label>합계</label>
-        <input type="number" id="l-gen-min-sum" value="100" min="21" max="255" inputmode="numeric">
-        <span style="color:var(--text-dim); font-family:var(--mono);">~</span>
-        <input type="number" id="l-gen-max-sum" value="200" min="21" max="255" inputmode="numeric"></div>
-      <label style="display:flex; align-items:center; font-size:12px; color:var(--text-dim); font-family:var(--mono);">
-        <input type="checkbox" id="l-gen-avoid-hist" checked>과거 당첨조합 회피 (저장 데이터)
-      </label>
-      <details>
-        <summary>고급 설정</summary>
-        <div class="form-row" style="margin-top: 6px;"><label>후보 수</label>
-          <input type="number" id="l-gen-candidates" value="20000" min="1000" max="100000" inputmode="numeric"></div>
-      </details>
-      <button class="primary" id="l-gen-btn">🎲 번호 생성</button>
-    </div>
-  </div>
+      <!-- Lotto generator UI -->
+      <div id="lotto-gen">
+        <div class="info-banner">
+          카이제곱 결과가 H₀ 기각 불가 (p&gt;0.05)이면 추첨 편향은 없습니다.
+          이때 모든 조합의 당첨 확률은 동일하지만 <strong>남들이 덜 고르는 조합</strong>을 선택하면
+          당첨 시 분할 인원이 줄어 실수령액 기댓값이 증가합니다. (Cook &amp; Clotfelter, 1993)
+        </div>
+        <div class="form-grid">
+          <div class="form-row"><label>생성 개수</label>
+            <input type="number" id="l-gen-n" value="5" min="1" max="10" inputmode="numeric"></div>
+          <div class="form-row"><label>포함 번호</label>
+            <input type="text" id="l-gen-include" placeholder="선택: 예) 7, 14 (최대 5개)"></div>
+          <div class="form-row"><label>제외 번호</label>
+            <input type="text" id="l-gen-exclude" placeholder="선택: 예) 1, 2, 3"></div>
+          <div class="form-row"><label>합계</label>
+            <input type="number" id="l-gen-min-sum" value="100" min="21" max="255" inputmode="numeric">
+            <span style="color:var(--text-dim); font-family:var(--mono);">~</span>
+            <input type="number" id="l-gen-max-sum" value="200" min="21" max="255" inputmode="numeric"></div>
+          <label style="display:flex; align-items:center; font-size:12px; color:var(--text-dim); font-family:var(--mono);">
+            <input type="checkbox" id="l-gen-avoid-hist" checked>과거 당첨조합 회피 (저장 데이터)
+          </label>
+          <details>
+            <summary>고급 설정</summary>
+            <div class="form-row" style="margin-top: 6px;"><label>후보 수</label>
+              <input type="number" id="l-gen-candidates" value="20000" min="1000" max="100000" inputmode="numeric"></div>
+          </details>
+          <button class="primary" id="l-gen-btn">🎲 번호 생성</button>
+        </div>
+      </div>
 
-  <!-- Pension generator UI -->
-  <div id="pension-gen" class="hidden">
-    <div class="warn-banner">
-      ⚠ <strong>연금복권은 당첨금이 고정액</strong>입니다 (1등 월 700만원×20년). 여러 명 당첨돼도 <strong>각자 전액 수령</strong>하므로 인기도 회피는 <strong>기대수익을 개선하지 못합니다</strong>. 이 기능은 남들과 겹치지 않는 번호를 선호하는 분을 위한 것이며, 수학적으로는 무작위 자동과 동일합니다.
+      <!-- Pension generator UI -->
+      <div id="pension-gen" class="hidden">
+        <div class="warn-banner">
+          ⚠ <strong>연금복권은 당첨금이 고정액</strong>입니다 (1등 월 700만원×20년). 여러 명 당첨돼도 <strong>각자 전액 수령</strong>하므로 인기도 회피는 <strong>기대수익을 개선하지 못합니다</strong>. 이 기능은 남들과 겹치지 않는 번호를 선호하는 분을 위한 것이며, 수학적으로는 무작위 자동과 동일합니다.
+        </div>
+        <div class="form-grid">
+          <div class="form-row"><label>조</label>
+            <select id="p-gen-group">
+              <option value="">자동 (분산)</option>
+              <option value="1">1조 고정</option>
+              <option value="2">2조 고정</option>
+              <option value="3">3조 고정</option>
+              <option value="4">4조 고정</option>
+              <option value="5">5조 고정</option>
+            </select></div>
+          <div class="form-row"><label>제외 숫자</label>
+            <input type="text" id="p-gen-exclude" placeholder="선택: 0–9 중, 예) 4 (한국 선호 반영)"></div>
+          <label style="display:flex; align-items:center; font-size:12px; color:var(--text-dim); font-family:var(--mono);">
+            <input type="checkbox" id="p-gen-avoid-hist" checked>과거 당첨번호 회피 (저장 데이터)
+          </label>
+          <details>
+            <summary>고급 설정</summary>
+            <div class="form-row" style="margin-top: 6px;"><label>후보 수</label>
+              <input type="number" id="p-gen-candidates" value="50000" min="1000" max="100000" inputmode="numeric"></div>
+          </details>
+          <button class="primary" id="p-gen-btn">🎲 번호 생성</button>
+        </div>
+      </div>
+      <div id="gen-msg"></div>
     </div>
-    <div class="form-grid">
-      <div class="form-row"><label>조</label>
-        <select id="p-gen-group">
-          <option value="">자동 (분산)</option>
-          <option value="1">1조 고정</option>
-          <option value="2">2조 고정</option>
-          <option value="3">3조 고정</option>
-          <option value="4">4조 고정</option>
-          <option value="5">5조 고정</option>
-        </select></div>
-      <div class="form-row"><label>제외 숫자</label>
-        <input type="text" id="p-gen-exclude" placeholder="선택: 0–9 중, 예) 4 (한국 선호 반영)"></div>
-      <label style="display:flex; align-items:center; font-size:12px; color:var(--text-dim); font-family:var(--mono);">
-        <input type="checkbox" id="p-gen-avoid-hist" checked>과거 당첨번호 회피 (저장 데이터)
-      </label>
-      <details>
-        <summary>고급 설정</summary>
-        <div class="form-row" style="margin-top: 6px;"><label>후보 수</label>
-          <input type="number" id="p-gen-candidates" value="50000" min="1000" max="100000" inputmode="numeric"></div>
-      </details>
-      <button class="primary" id="p-gen-btn">🎲 번호 생성</button>
-    </div>
-  </div>
-  <div id="gen-msg"></div>
-</div>
 
-<!-- Algorithm explanation -->
-<details class="panel" id="lotto-algo" style="padding: 12px 14px;">
-  <summary style="font-size:12px; color:var(--text-dim); font-family:var(--mono);">📖 로또 알고리즘 및 인기도 모델</summary>
-  <div style="margin-top: 10px;">
-    <div class="factor-list">
-      <div style="color:var(--text); margin-bottom:6px;"><strong>알고리즘</strong>: Monte Carlo + weighted scoring + greedy diversification</div>
-      <div>1. 조건 만족 조합 N개 무작위 샘플링 (기본 20,000)</div>
-      <div>2. 12가지 편향 지표로 점수화 (낮을수록 unpopular)</div>
-      <div>3. 정렬 후 상위부터 선택, 중복 5+ 이상은 제외</div>
-    </div>
-    <div style="color:var(--text); margin-top:10px; margin-bottom:6px; font-family:var(--mono); font-size:12px;"><strong>편향 지표 (가중치)</strong></div>
-    <div class="factor-list">
-      <div><span class="w">+20</span> <span class="name">과거 당첨조합</span></div>
-      <div><span class="w">+15</span> <span class="name">등차수열 / 전원 ≤31 (생일)</span></div>
-      <div><span class="w">+10</span> <span class="name">5의 배수 5개 이상</span></div>
-      <div><span class="w">+8</span> <span class="name">끝자리 동일 4개+ / 연속 4개+</span></div>
-      <div><span class="w">+6</span> <span class="name">합계 95-125 / 같은 10단위 5개+</span></div>
-      <div><span class="w">+5</span> <span class="name">월 편중 (≤12 4개+)</span></div>
-      <div><span class="w">+3</span> <span class="name">홀짝/저고 극단</span></div>
-      <div><span class="w">+2</span> <span class="name">행운 7 선호</span></div>
-    </div>
-  </div>
-</details>
+    <!-- Algorithm explanation -->
+    <details class="panel" id="lotto-algo" style="padding: 12px 14px;">
+      <summary style="font-size:12px; color:var(--text-dim); font-family:var(--mono);">📖 로또 알고리즘 및 인기도 모델</summary>
+      <div style="margin-top: 10px;">
+        <div class="factor-list">
+          <div style="color:var(--text); margin-bottom:6px;"><strong>알고리즘</strong>: Monte Carlo + weighted scoring + greedy diversification</div>
+          <div>1. 조건 만족 조합 N개 무작위 샘플링 (기본 20,000)</div>
+          <div>2. 12가지 편향 지표로 점수화 (낮을수록 unpopular)</div>
+          <div>3. 정렬 후 상위부터 선택, 중복 5+ 이상은 제외</div>
+        </div>
+        <div style="color:var(--text); margin-top:10px; margin-bottom:6px; font-family:var(--mono); font-size:12px;"><strong>편향 지표 (가중치)</strong></div>
+        <div class="factor-list">
+          <div><span class="w">+20</span> <span class="name">과거 당첨조합</span></div>
+          <div><span class="w">+15</span> <span class="name">등차수열 / 전원 ≤31 (생일)</span></div>
+          <div><span class="w">+10</span> <span class="name">5의 배수 5개 이상</span></div>
+          <div><span class="w">+8</span> <span class="name">끝자리 동일 4개+ / 연속 4개+</span></div>
+          <div><span class="w">+6</span> <span class="name">합계 95-125 / 같은 10단위 5개+</span></div>
+          <div><span class="w">+5</span> <span class="name">월 편중 (≤12 4개+)</span></div>
+          <div><span class="w">+3</span> <span class="name">홀짝/저고 극단</span></div>
+          <div><span class="w">+2</span> <span class="name">행운 7 선호</span></div>
+        </div>
+      </div>
+    </details>
 
-<details class="panel hidden" id="pension-algo" style="padding: 12px 14px;">
-  <summary style="font-size:12px; color:var(--text-dim); font-family:var(--mono);">📖 연금복권 알고리즘 및 패턴 모델</summary>
-  <div style="margin-top: 10px;">
-    <div class="factor-list">
-      <div style="color:var(--text); margin-bottom:6px;"><strong>알고리즘</strong>: 조(1–5) × 6자리 숫자(0–9) Monte Carlo 샘플링 + 패턴 점수화</div>
-      <div>1. 5,000,000 공간에서 N개 조합 무작위 샘플링</div>
-      <div>2. 13가지 선호 패턴 지표로 점수화</div>
-      <div>3. 조 분산 + 위치별 4+ 일치 회피로 다양성 확보</div>
-    </div>
-    <div style="color:var(--text); margin-top:10px; margin-bottom:6px; font-family:var(--mono); font-size:12px;"><strong>패턴 지표 (가중치)</strong></div>
-    <div class="factor-list">
-      <div><span class="w">+20</span> <span class="name">전자리 동일</span> (111111)</div>
-      <div><span class="w">+15</span> <span class="name">과거 당첨번호 / 오름·내림 연속</span> (123456)</div>
-      <div><span class="w">+12</span> <span class="name">ABABAB 반복</span> (121212)</div>
-      <div><span class="w">+10</span> <span class="name">ABCABC 반복</span> (123123)</div>
-      <div><span class="w">+8</span> <span class="name">팰린드롬 / 2가지 숫자만</span> (123321)</div>
-      <div><span class="w">+6</span> <span class="name">행운 7/8 과다 / 3가지 숫자만</span></div>
-      <div><span class="w">+5</span> <span class="name">YYMMDD 유효 날짜 / 휴대폰 앞자리</span></div>
-      <div><span class="w">+4</span> <span class="name">MMDDYY 유효 날짜</span></div>
-      <div><span class="w">+3</span> <span class="name">9·3자리 이상 반복</span></div>
-    </div>
-    <div style="color:#6b7280; margin-top:10px; font-size:11px; line-height:1.6;">
-      근거: 번호 선택 가능한 "수동 구매" 이용자의 생일·전화번호·패턴 선호 경향 휴리스틱. 엄밀한 학술 근거 부족.
-    </div>
-  </div>
-</details>
+    <details class="panel hidden" id="pension-algo" style="padding: 12px 14px;">
+      <summary style="font-size:12px; color:var(--text-dim); font-family:var(--mono);">📖 연금복권 알고리즘 및 패턴 모델</summary>
+      <div style="margin-top: 10px;">
+        <div class="factor-list">
+          <div style="color:var(--text); margin-bottom:6px;"><strong>알고리즘</strong>: 조(1–5) × 6자리 숫자(0–9) Monte Carlo 샘플링 + 패턴 점수화</div>
+          <div>1. 5,000,000 공간에서 N개 조합 무작위 샘플링</div>
+          <div>2. 13가지 선호 패턴 지표로 점수화</div>
+          <div>3. 조 분산 + 위치별 4+ 일치 회피로 다양성 확보</div>
+        </div>
+        <div style="color:var(--text); margin-top:10px; margin-bottom:6px; font-family:var(--mono); font-size:12px;"><strong>패턴 지표 (가중치)</strong></div>
+        <div class="factor-list">
+          <div><span class="w">+20</span> <span class="name">전자리 동일</span> (111111)</div>
+          <div><span class="w">+15</span> <span class="name">과거 당첨번호 / 오름·내림 연속</span> (123456)</div>
+          <div><span class="w">+12</span> <span class="name">ABABAB 반복</span> (121212)</div>
+          <div><span class="w">+10</span> <span class="name">ABCABC 반복</span> (123123)</div>
+          <div><span class="w">+8</span> <span class="name">팰린드롬 / 2가지 숫자만</span> (123321)</div>
+          <div><span class="w">+6</span> <span class="name">행운 7/8 과다 / 3가지 숫자만</span></div>
+          <div><span class="w">+5</span> <span class="name">YYMMDD 유효 날짜 / 휴대폰 앞자리</span></div>
+          <div><span class="w">+4</span> <span class="name">MMDDYY 유효 날짜</span></div>
+          <div><span class="w">+3</span> <span class="name">9·3자리 이상 반복</span></div>
+        </div>
+        <div style="color:#6b7280; margin-top:10px; font-size:11px; line-height:1.6;">
+          근거: 번호 선택 가능한 "수동 구매" 이용자의 생일·전화번호·패턴 선호 경향 휴리스틱. 엄밀한 학술 근거 부족.
+        </div>
+      </div>
+    </details>
 
-<div id="gen-results"></div>
-```
-
+    <div id="gen-results"></div>
   </div>
 
   <footer>
@@ -411,7 +402,6 @@ button { font-size: 12px; padding: 7px 10px; }
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
 <script>
 // ============================================================
 // Storage
@@ -1028,6 +1018,17 @@ window.copyText = (text, btn) => {
 // ============================================================
 // UI state
 // ============================================================
+const GITHUB_REPO = 'cosmicjh/lottery'; // 배포 전 본인 저장소로 수정 (예: 'junhong/lotto-chi2')
+
+async function syncFromRepo(dm) {
+  try {
+    const res = await fetch(`./data/${dm}.json`, { cache: 'no-store' });
+    if (!res.ok) return;
+    const remote = await res.json();
+    saveDraws(dm, mergeDraws(loadDraws(dm), remote));
+  } catch (e) { console.error('repo sync failed:', dm, e); }
+}
+
 let mode = 'lotto';
 let genSubMode = 'lotto';
 const activeDataMode = () => mode === 'pension' ? 'pension' : 'lotto';
@@ -1170,6 +1171,11 @@ window.deleteDraw = (round) => {
 };
 
 // Manual add
+function openGithubIssue(template, params) {
+  if (GITHUB_REPO === 'OWNER/REPO') return; // 미설정 시 스킵
+  const qs = new URLSearchParams({ template, ...params });
+  window.open(`https://github.com/${GITHUB_REPO}/issues/new?${qs}`, '_blank');
+}
 function addLottoManual() {
   const round = parseInt(document.getElementById('m-round').value);
   const nums = [1,2,3,4,5,6].map(i => parseInt(document.getElementById('m-n'+i).value));
@@ -1179,10 +1185,12 @@ function addLottoManual() {
   if (new Set(nums).size !== 6) return showMsg('manual-msg', '중복 번호', false);
   if (!Number.isInteger(bonus) || bonus < 1 || bonus > 45) return showMsg('manual-msg', '보너스 확인', false);
   if (nums.includes(bonus)) return showMsg('manual-msg', '보너스 중복', false);
-  const merged = mergeDraws(loadDraws('lotto'), [{ round, nums: nums.sort((a,b)=>a-b), bonus }]);
+  const sortedNums = nums.sort((a,b)=>a-b);
+  const merged = mergeDraws(loadDraws('lotto'), [{ round, nums: sortedNums, bonus }]);
   saveDraws('lotto', merged);
+  openGithubIssue('lotto-entry.yml', { title: `[로또] ${round}회`, round, numbers: sortedNums.join(', '), bonus });
   ['m-round','m-n1','m-n2','m-n3','m-n4','m-n5','m-n6','m-bonus'].forEach(id => document.getElementById(id).value = '');
-  showMsg('manual-msg', `✓ ${round}회 저장`, true);
+  showMsg('manual-msg', `✓ ${round}회 저장 (GitHub Issue 탭에서 제출하면 모든 기기에 동기화됩니다)`, true);
   updateStatus();
 }
 function addPensionManual() {
@@ -1194,9 +1202,10 @@ function addPensionManual() {
   if (!/^\d{6}$/.test(raw)) return showMsg('manual-msg', '6자리 숫자', false);
   const merged = mergeDraws(loadDraws('pension'), [{ round, group, digits: raw.split('').map(Number) }]);
   saveDraws('pension', merged);
+  openGithubIssue('pension-entry.yml', { title: `[연금] ${round}회`, round, group, numbers: raw });
   document.getElementById('m-round').value = '';
   document.getElementById('m-digits').value = '';
-  showMsg('manual-msg', `✓ ${round}회 저장`, true);
+  showMsg('manual-msg', `✓ ${round}회 저장 (GitHub Issue 탭에서 제출하면 모든 기기에 동기화됩니다)`, true);
   updateStatus();
 }
 
@@ -1253,7 +1262,9 @@ document.getElementById('p-gen-btn').onclick = () => {
 };
 
 setMode('lotto');
+Promise.all([syncFromRepo('lotto'), syncFromRepo('pension')]).then(() => {
+  if (mode === 'generate') updateStatusForGen(); else updateStatus();
+});
 </script>
-
 </body>
 </html>
