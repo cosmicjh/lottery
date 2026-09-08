@@ -1,0 +1,57 @@
+name: Lotto Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # UTC Sun/Mon 00:17 = Asia/Seoul Sun/Mon 09:17
+    - cron: '17 0 * * 0,1'
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: lotto-pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test
+        run: node --test tests/*.test.mjs
+      - name: Collect official results
+        id: collect
+        continue-on-error: true
+        run: node scripts/collect-lotto.mjs
+      - name: Save collection state
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/lotto.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update Lotto result data and collection status'
+            git push
+          fi
+      - name: Prepare public files
+        run: |
+          mkdir -p public/data
+          cp index.html .nojekyll public/
+          cp data/lotto.json public/data/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Report collection failure after publishing preserved data
+        if: steps.collect.outcome == 'failure'
+        run: |
+          echo 'Official collection failed. Existing data was preserved and the status was published.'
+          exit 1
