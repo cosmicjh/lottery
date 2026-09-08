@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
+import {generateLotto,gammaQ} from '../scripts/algorithm.mjs';
+import {validateRows,mergeVisible} from '../scripts/model.mjs';
+import {collectLotto,parseLottoResponse} from '../scripts/collector.mjs';
+const draw={round:1000,nums:[1,8,15,22,29,36],bonus:40};
+const row={ltEpsd:'1000',tm1WnNo:1,tm2WnNo:8,tm3WnNo:15,tm4WnNo:22,tm5WnNo:29,tm6WnNo:36,bnsWnNo:40,ltRflYmd:'20220129'};
+test('generator preserves include/exclude, sum, unique sets',()=>{const r=generateLotto({N:10,include:[7,14],exclude:[45],minSum:90,maxSum:190,candidateCount:5000});assert.equal(r.combinations.length,10);assert.equal(new Set(r.combinations.map(c=>c.nums.join(','))).size,10);for(const c of r.combinations){assert.ok(c.nums.includes(7)&&c.nums.includes(14)&&!c.nums.includes(45));assert.ok(c.sum>=90&&c.sum<=190);}});
+test('disjoint sets and impossible requests',()=>{const r=generateLotto({N:5,maxOverlap:0,candidateCount:5000});assert.equal(new Set(r.combinations.flatMap(c=>c.nums)).size,30);assert.throws(()=>generateLotto({N:8,maxOverlap:0}));assert.throws(()=>generateLotto({N:5,include:[1],exclude:[1]}));});
+test('upper-tail probability',()=>{assert.ok(Math.abs(gammaQ(2,2.21)-0.3521390817347915)<1e-12);assert.ok(gammaQ(22,150)>0);});
+test('bad data and duplicate rounds rejected',()=>{assert.throws(()=>validateRows([{...draw,bonus:1}]));assert.throws(()=>validateRows([draw,draw]));});
+test('local overrides persist across official refresh and deletion',()=>{const edit={...draw,bonus:41};assert.deepEqual(mergeVisible([draw],{'1000':edit}),[edit]);assert.deepEqual(mergeVisible([draw],{'1000':null}),[]);});
+test('official schema validated',()=>{assert.deepEqual(parseLottoResponse({data:{list:[row]}})[0],{...draw,date:'2022-01-29'});assert.throws(()=>parseLottoResponse({data:{list:[{...row,bnsWnNo:1}]}}));assert.throws(()=>parseLottoResponse({html:'changed'}));});
+test('collector accepts matching latest round, rejects conflicting results',async()=>{const fetcher=async url=>({ok:true,text:async()=>String(url).includes('selectPst')?JSON.stringify({data:{list:[row]}}):'<option value="1000">1000회</option>'});assert.equal((await collectLotto([],fetcher))[0].round,1000);await assert.rejects(()=>collectLotto([{...draw,bonus:41}],fetcher),/충돌/);});
+test('collector failure does not mutate prior data',async()=>{const prior=[draw],before=JSON.stringify(prior);await assert.rejects(()=>collectLotto(prior,async()=>{throw Error('offline');}));assert.equal(JSON.stringify(prior),before);});
+test('standalone script compiles and uses project-relative data',async()=>{const html=await readFile(new URL('../index.html',import.meta.url),'utf8');const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];new vm.Script(script);assert.ok(html.includes("fetch('./data/lotto.json'"));assert.ok(!/pension|연금|\/api\/|api.github.com|pt720/i.test(html));const module=await readFile(new URL('../scripts/algorithm.mjs',import.meta.url),'utf8');assert.ok(script.includes(module.split('\nexport {')[0]));});
