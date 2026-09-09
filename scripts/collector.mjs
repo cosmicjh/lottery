@@ -1,4 +1,4 @@
-import {validateDraw} from './model.mjs';
+import {validateDraw,validateRows} from './model.mjs';
 export const SOURCE='https://www.dhlottery.co.kr';
 async function fetchText(url,fetcher=fetch){
   const response=await fetcher(url,{headers:{Accept:'application/json,text/html','User-Agent':'LotteryResultReader/2.0'},signal:AbortSignal.timeout(8000),redirect:'error'});
@@ -25,8 +25,37 @@ export async function collectLotto(old=[],fetcher=fetch){
   const matches=[...html.matchAll(/<[^>]+\b(?:data-value|value)=["'](\d{1,4})["'][^>]*>\s*(\d{1,4})회/g)].filter(m=>m[1]===m[2]).map(m=>Number(m[1]));
   if(!matches.length)throw new Error('공식 페이지의 회차 목록을 읽지 못했습니다.');
   const latest=Math.max(...matches);
+  validateRows(old);if(old.some(d=>d.round>latest))throw Error("공식 최신 회차보다 큰 저장 회차: 조회 결과 확인 필요");
   const url=new URL('/lt645/selectPstLt645InfoNew.do',SOURCE);url.searchParams.set('srchDir','center');url.searchParams.set('srchLtEpsd',String(latest));
   const rows=parseLottoResponse(JSON.parse(await fetchText(url.href,fetcher)));
   if(!rows.some(d=>d.round===latest))throw new Error('최신 회차 결과 미발표');
   return mergeOfficial(old,rows);
+}
+
+export function coverage(draws,latest){
+ if(!Number.isInteger(latest)||latest<1||latest>10000)throw Error('최신 회차 오류');
+ const seen=new Set(draws.map(d=>d.round)),missing=[];
+ if(draws.some(d=>d.round>latest))throw Error('공식 최신 회차보다 큰 저장 회차가 있습니다.');
+ for(let r=1;r<=latest;r++)if(!seen.has(r))missing.push(r);
+ return {latest,collected:seen.size,missing,complete:missing.length===0};
+}
+export async function collectHistory(old=[],fetcher=fetch,options={}){
+ const {maxRequests=200,delayMs=1100,pause=ms=>new Promise(r=>setTimeout(r,ms)),onProgress=async()=>{}}=options;
+ if(!Number.isInteger(maxRequests)||maxRequests<1||maxRequests>2000)throw Error('요청 상한 오류');
+ // Confirm the official latest result on every run; only then backfill holes.
+ let draws=await collectLotto(old,fetcher);
+ const latest=draws[0].round;
+ let info=coverage(draws,latest),requests=1;
+ await onProgress({draws,coverage:info});
+ while(!info.complete&&requests<maxRequests){
+  const target=info.missing[0];await pause(delayMs);
+  const url=new URL('/lt645/selectPstLt645InfoNew.do',SOURCE);
+  url.searchParams.set('srchDir','center');url.searchParams.set('srchLtEpsd',String(target));
+  const rows=parseLottoResponse(JSON.parse(await fetchText(url.href,fetcher)));requests++;
+  if(!rows.some(d=>d.round===target))throw Error(target+'회 응답 누락: 조회 형식 확인 필요');
+  if(rows.some(d=>d.round>latest))throw Error('최신 회차를 초과한 응답');
+  draws=mergeOfficial(draws,rows);info=coverage(draws,latest);
+  await onProgress({draws,coverage:info});
+ }
+ return {draws,coverage:info,requests};
 }

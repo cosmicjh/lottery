@@ -1,16 +1,20 @@
 import {readFile,writeFile,rename} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
-import {collectLotto} from './collector.mjs';
+import {collectHistory} from './collector.mjs';
 import {validateRows} from './model.mjs';
 const path=fileURLToPath(new URL('../data/lotto.json',import.meta.url));
-// Invalid existing data aborts before writing: never replace a corrupt history with an empty one.
 const prior=JSON.parse(await readFile(path,'utf8'));
 validateRows(prior.draws);
-const next={...prior,attemptedAt:new Date().toISOString()};
+const next={...prior,attemptedAt:new Date().toISOString(),ok:false};
+async function save(){await writeFile(path+'.tmp',JSON.stringify(next,null,2)+'\n');await rename(path+'.tmp',path);}
 try {
- next.draws=await collectLotto(prior.draws);
- next.checkedAt=new Date().toISOString();next.ok=true;
- next.status=`공식 결과 ${next.draws[0].round}회까지 확인. 최초 실행은 공식 응답의 최근 회차만 수집합니다. 과거 자료는 가져오기로 추가할 수 있습니다.`;
-} catch(e) { next.ok=false;next.status='공식 수집 실패: '+e.message+'. 기존 자료 유지.';process.exitCode=1; }
-await writeFile(path+'.tmp',JSON.stringify(next,null,2)+'\n');await rename(path+'.tmp',path);
-console.log(next.status);
+ const result=await collectHistory(prior.draws,fetch,{onProgress:async p=>{
+  next.draws=p.draws;next.coverage=p.coverage;
+  next.status=`전체 이력 수집 중: ${p.coverage.collected}/${p.coverage.latest}회, 누락 ${p.coverage.missing.length}회. 다음 실행에서 이어서 수집합니다.`;
+  await save();
+ }});
+ next.checkedAt=new Date().toISOString();next.ok=result.coverage.complete;
+ if(next.ok){next.completeAt=next.checkedAt;next.status=`1~${result.coverage.latest}회 전체 ${result.coverage.collected}회 수집 완료. 누락 없음.`;}
+ else{next.status=`이번 실행의 요청 상한 도달. ${result.coverage.collected}/${result.coverage.latest}회 저장, 누락 ${result.coverage.missing.length}회. 다시 실행하면 누락 회차부터 재개합니다.`;process.exitCode=1;}
+} catch(e) {next.ok=false;next.status='공식 수집 중단: '+e.message+'. 이미 검증·저장한 회차는 유지하며 다음 실행에서 재시도합니다.';process.exitCode=1;}
+await save();console.log(next.status);
