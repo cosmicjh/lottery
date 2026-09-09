@@ -16,3 +16,21 @@ test('official schema validated',()=>{assert.deepEqual(parseLottoResponse({data:
 test('collector accepts matching latest round, rejects conflicting results',async()=>{const fetcher=async url=>({ok:true,text:async()=>String(url).includes('selectPst')?JSON.stringify({data:{list:[row]}}):'<option value="1000">1000회</option>'});assert.equal((await collectLotto([],fetcher))[0].round,1000);await assert.rejects(()=>collectLotto([{...draw,bonus:41}],fetcher),/충돌/);});
 test('collector failure does not mutate prior data',async()=>{const prior=[draw],before=JSON.stringify(prior);await assert.rejects(()=>collectLotto(prior,async()=>{throw Error('offline');}));assert.equal(JSON.stringify(prior),before);});
 test('standalone script compiles and uses project-relative data',async()=>{const html=await readFile(new URL('../index.html',import.meta.url),'utf8');const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];new vm.Script(script);assert.ok(html.includes("fetch('./data/lotto.json'"));assert.ok(!/pension|연금|\/api\/|api.github.com|pt720/i.test(html));const module=await readFile(new URL('../scripts/algorithm.mjs',import.meta.url),'utf8');assert.ok(script.includes(module.split('\nexport {')[0]));});
+
+import {collectHistory,coverage} from '../scripts/collector.mjs';
+import {researchForecast,walkForwardResearch} from '../scripts/research.mjs';
+const historyFetcher=(latest,failAt=0,calls=[])=>async url=>{
+ const s=String(url);if(!s.includes('selectPst'))return {ok:true,text:async()=>`<option value="${latest}">${latest}회</option>`};
+ const r=Number(new URL(s).searchParams.get('srchLtEpsd'));calls.push(r);
+ if(r===failAt)throw Error('network interrupted');
+ return {ok:true,text:async()=>JSON.stringify({data:{list:[{...row,ltEpsd:r}]}})};
+};
+test('full collection fetches every hole and skips stored rounds',async()=>{const calls=[];const r=await collectHistory([{...draw,round:2}],historyFetcher(5,0,calls),{pause:async()=>{}});assert.deepEqual(calls,[5,1,3,4]);assert.ok(r.coverage.complete);assert.equal(r.draws.length,5);});
+test('partial checkpoints resume after interruption',async()=>{let saved=[];await assert.rejects(()=>collectHistory([],historyFetcher(5,2),{pause:async()=>{},onProgress:async p=>{saved=p.draws;}}));assert.deepEqual(saved.map(d=>d.round),[5,1]);const calls=[];const r=await collectHistory(saved,historyFetcher(5,0,calls),{pause:async()=>{}});assert.ok(r.coverage.complete);assert.deepEqual(calls,[5,2,3,4]);});
+test('request limit reports incomplete coverage',async()=>{const r=await collectHistory([],historyFetcher(5),{maxRequests:2,pause:async()=>{}});assert.deepEqual(r.coverage.missing,[2,3,4]);assert.equal(r.coverage.complete,false);});
+test('source regression rejected',async()=>{await assert.rejects(()=>collectHistory([{...draw,round:6}],historyFetcher(5),{pause:async()=>{}}),/最新|최신/);assert.throws(()=>coverage([{...draw,round:6}],5));});
+const training=Array.from({length:450},(_,i)=>({...draw,round:i+1,nums:[1,2,3,4,5,6],bonus:7}));
+test('forecast marginal probabilities are valid and sum to six',()=>{for(const id of ['long','hot','cold']){const p=researchForecast(training,id);assert.ok(p.every(v=>v>=0&&v<=1));assert.ok(Math.abs(p.reduce((a,b)=>a+b,0)-6)<1e-10);}});
+test('walk-forward splits data and detects controlled synthetic signal',()=>{const r=walkForwardResearch(training);assert.equal(r.splitRound,351);assert.equal(r.results[0].sections[0].n,250);assert.equal(r.results[0].sections[1].n,100);assert.equal(r.results[0].sections[1].hits,6);assert.ok(r.results[0].sections[1].brier<r.baselineBrier);});
+test('future changes cannot alter development scores',()=>{const changed=training.map((d,i)=>i>=350?{...d,nums:[8,9,10,11,12,13]}:d);const a=walkForwardResearch(training),b=walkForwardResearch(changed);assert.deepEqual(a.results.map(r=>r.sections[0]),b.results.map(r=>r.sections[0]));});
+test('research rejects insufficient or gapped history',()=>{assert.throws(()=>walkForwardResearch(training.slice(0,399)));assert.throws(()=>walkForwardResearch(training.filter(d=>d.round!==200)));});
