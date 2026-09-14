@@ -16135,10 +16135,10 @@
       "date": "2002-12-07"
     }
   ],
-  "ok": true,
+  "ok": false,
   "checkedAt": "2026-09-13T04:52:19.267Z",
-  "attemptedAt": "2026-09-13T04:52:16.142Z",
-  "status": "1~1241회 전체 1241회 수집 완료. 누락 없음.",
+  "attemptedAt": "2026-09-14T05:00:30.452Z",
+  "status": "공식 수집 중단: The operation was aborted due to timeout. 이미 검증·저장한 회차는 유지하며 다음 실행에서 재시도합니다.",
   "coverage": {
     "latest": 1241,
     "collected": 1241,
