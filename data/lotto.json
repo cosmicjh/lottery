@@ -2,6 +2,19 @@
   "schema": 1,
   "draws": [
     {
+      "round": 1246,
+      "nums": [
+        16,
+        22,
+        23,
+        24,
+        27,
+        28
+      ],
+      "bonus": 6,
+      "date": "2026-10-17"
+    },
+    {
       "round": 1245,
       "nums": [
         4,
@@ -16188,14 +16201,14 @@
     }
   ],
   "ok": true,
-  "checkedAt": "2026-10-12T06:03:06.736Z",
-  "attemptedAt": "2026-10-12T06:03:03.142Z",
-  "status": "1~1245회 전체 1245회 수집 완료. 누락 없음.",
+  "checkedAt": "2026-10-18T04:38:39.487Z",
+  "attemptedAt": "2026-10-18T04:38:36.596Z",
+  "status": "1~1246회 전체 1246회 수집 완료. 누락 없음.",
   "coverage": {
-    "latest": 1245,
-    "collected": 1245,
+    "latest": 1246,
+    "collected": 1246,
     "missing": [],
     "complete": true
   },
-  "completeAt": "2026-10-12T06:03:06.736Z"
+  "completeAt": "2026-10-18T04:38:39.487Z"
 }
