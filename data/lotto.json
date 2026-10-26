@@ -2,6 +2,19 @@
   "schema": 1,
   "draws": [
     {
+      "round": 1247,
+      "nums": [
+        8,
+        14,
+        21,
+        22,
+        42,
+        45
+      ],
+      "bonus": 24,
+      "date": "2026-10-24"
+    },
+    {
       "round": 1246,
       "nums": [
         16,
@@ -16200,15 +16213,15 @@
       "date": "2002-12-07"
     }
   ],
-  "ok": false,
-  "checkedAt": "2026-10-19T04:45:35.179Z",
-  "attemptedAt": "2026-10-25T04:46:26.866Z",
-  "status": "공식 수집 중단: The operation was aborted due to timeout. 이미 검증·저장한 회차는 유지하며 다음 실행에서 재시도합니다.",
+  "ok": true,
+  "checkedAt": "2026-10-26T04:52:04.414Z",
+  "attemptedAt": "2026-10-26T04:52:01.384Z",
+  "status": "1~1247회 전체 1247회 수집 완료. 누락 없음.",
   "coverage": {
-    "latest": 1246,
-    "collected": 1246,
+    "latest": 1247,
+    "collected": 1247,
     "missing": [],
     "complete": true
   },
-  "completeAt": "2026-10-19T04:45:35.179Z"
+  "completeAt": "2026-10-26T04:52:04.414Z"
 }
