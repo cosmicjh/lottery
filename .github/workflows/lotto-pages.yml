@@ -3,9 +3,17 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      pension_full_history:
+        description: '연금복권 전체 과거 회차 수집 및 누락 보충 (최대 1000회 개별 조회)'
+        required: false
+        type: boolean
+        default: false
   schedule:
     # UTC Sun/Mon 00:17 = Asia/Seoul Sun/Mon 09:17
     - cron: '17 0 * * 0,1'
+    # UTC Thu 11:20 = Asia/Seoul Thu 20:20 (official pension draw is ~19:05)
+    - cron: '20 11 * * 4'
 permissions:
   contents: write
   pages: write
@@ -34,11 +42,26 @@ jobs:
         id: records
         continue-on-error: true
         run: node scripts/record-weekly.mjs
+      - name: Collect pension720 full history / missing draws (checkpointed)
+        id: pension_collect
+        continue-on-error: true
+        env:
+          PENSION_BACKFILL_FULL: ${{ inputs.pension_full_history || 'false' }}
+        run: |
+          if [ "$PENSION_BACKFILL_FULL" = 'true' ]; then
+            node scripts/collect-pension.mjs --full
+          else
+            node scripts/collect-pension.mjs
+          fi
+      - name: Record pension720 recommendations and research (append only)
+        id: pension_records
+        continue-on-error: true
+        run: node scripts/record-pension.mjs
       - name: Save collection state
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          for f in data/lotto.json data/weekly.json data/study.json; do
+          for f in data/lotto.json data/weekly.json data/study.json data/pension720-results.json data/pension720-weekly.json data/pension720-study.json; do
             if [ -f "$f" ]; then git add "$f"; fi
           done
           if ! git diff --cached --quiet; then
@@ -50,7 +73,8 @@ jobs:
           mkdir -p public/data public/scripts
           cp index.html .nojekyll public/
           cp scripts/portfolio.js public/scripts/
-          for f in data/lotto.json data/weekly.json data/study.json; do
+          cp scripts/pension720.mjs scripts/pension-research.mjs scripts/pension-ui.mjs public/scripts/
+          for f in data/lotto.json data/weekly.json data/study.json data/pension720-results.json data/pension720-weekly.json data/pension720-study.json; do
             if [ -f "$f" ]; then cp "$f" public/data/; fi
           done
       - uses: actions/upload-pages-artifact@v3
@@ -60,7 +84,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
       - name: Report collection failure after publishing preserved data
-        if: steps.collect.outcome == 'failure' || steps.records.outcome == 'failure'
+        if: steps.collect.outcome == 'failure' || steps.records.outcome == 'failure' || steps.pension_collect.outcome == 'failure' || steps.pension_records.outcome == 'failure'
         run: |
           echo 'Official collection failed. Existing data was preserved and the status was published.'
           exit 1
