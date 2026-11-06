@@ -71,3 +71,13 @@ v1과 v2는 번호가 다릅니다. 이미 v1 번호를 구매했다면 그대�
 - 자동 테스트 작성 환경에서 총 **33개 통과**. 원격 배포는 별도 수행 필요.
 
 전체 검증 결과와 적용 방법은 [`lottery-analysis.md`](lottery-analysis.md), [`lottery-deployment.md`](lottery-deployment.md)를 참조한다. **기존 GitHub 저장소의 `data/`가 이 ZIP의 스냅샷보다 최신이라면 ZIP 데이터를 덮어쓰지 말 것.**
+
+
+## 연금복권720+ 독립 모듈 (추가, 2026-11-06)
+
+- 상단 **연금복권720+** 탭에서 1–20장 번호 생성, 동일 5개 조 집중 / 접미부 분산 / 혼합 / 균등 의사난수, 조·번호 수정, 구매비 및 정확한 당첨금 확률분포를 확인합니다.
+- 복권별 JSON을 분리합니다: `data/pension720-results.json`, `data/pension720-weekly.json`, `data/pension720-study.json`. 기존 로또 이력과 `scripts/portfolio.js`의 기능은 유지합니다.
+- 정적 GitHub Pages에서 동작하며 Actions가 연금복권 공식 자료 수집·기록을 별도로 시도합니다. **공식 응답이 검증되지 않으면 수집하지 않습니다.**
+- 공정한 추첨에서 번호 선택 방식이 기대당첨금을 높이는 것은 아닙니다. 과거 출현 빈도와 베이지안 연구는 구매 번호를 변경하지 않습니다.
+- 기존 실험·분석 문서 `lottery-analysis.md`, `lottery-deployment.md`, `research/benchmark-1249.json` 및 `tools/`는 새 원본 그대로 유지합니다.
+- 수집 API의 실제 운영 응답, 브라우저 및 Pages 배포 상태는 적용 후 확인이 필요합니다. 상세: `pension-deployment.md`.

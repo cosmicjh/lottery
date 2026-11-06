@@ -2,7 +2,20 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>로또 분석 · 번호 선택</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#0a0e14;color:#e5e7eb;font:15px/1.65 system-ui,sans-serif}main{max-width:1000px;margin:auto;padding:28px 18px 60px}h1{font-size:26px;margin:0}h2{font-size:18px;margin:0 0 14px}p{margin:10px 0}.muted,small{color:#a0acb9}section{background:#121a24;border:1px solid #293342;border-radius:14px;padding:22px;margin-top:20px}label{display:block;font-size:13px;color:#c7d1dc}input,select,button,textarea{font:inherit;border-radius:7px;border:1px solid #3c4858;background:#0a111a;color:#eef2f7;padding:10px;max-width:100%}input,select{width:100%;margin-top:5px}input[type=checkbox]{width:auto}button{cursor:pointer}button:hover{border-color:#24d6a0}button:disabled{opacity:.5}.primary{background:#24d6a0;color:#06251c;font-weight:700}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.notice{border-left:3px solid #24d6a0;padding-left:14px}.error{color:#ffba98}.result{padding:14px 0;border-bottom:1px solid #293342}.ball{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin:3px;border-radius:50%;font-weight:750;color:#101822;background:#40cdaa}.b1{background:#eac151}.b2{background:#6ba9ed}.b3{background:#ef8a8a}.b4{background:#a8b3c0}.b5{background:#69d4ad}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}td,th{text-align:left;border-bottom:1px solid #293342;padding:10px}th{color:#9dabbc}#histogram{display:grid;grid-template-columns:repeat(15,1fr);gap:5px;margin:18px 0}.freq{text-align:center;border:1px solid #304154;border-radius:5px;font-size:12px;padding:6px 0}.freq b{display:block;color:#39deb0}.status{white-space:pre-line}a{color:#6fdbc0}details{margin-top:15px}textarea{width:100%;min-height:110px}@media(max-width:640px){.grid{grid-template-columns:1fr 1fr}section{padding:16px}main{padding:18px 12px}h1{font-size:23px}#histogram{grid-template-columns:repeat(9,1fr)}.ball{width:33px;height:33px;margin:2px}}@media(max-width:350px){.grid{grid-template-columns:1fr}}
-</style></head><body><main>
+
+/* Pension module uses the same dark base CSS and leaves lottery widgets intact. */ the same design and never changes the existing lottery UI. */
+#p-nav{display:flex;gap:10px;max-width:1000px;margin:20px auto 0;padding:0 18px}
+#p-nav button[aria-pressed="true"]{background:#24d6a0;color:#08231a;font-weight:800}
+[hidden]{display:none!important}
+.p-ticket{display:grid;grid-template-columns:45px 105px minmax(125px,1fr) 100px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #293342}
+.p-ticket input,.p-ticket select{margin:0}
+.p-ticket span{color:#9ca9b7;font-weight:700}
+.p-metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.p-metric{border:1px solid #293342;border-radius:9px;padding:12px;display:grid;gap:5px;min-width:0}
+.p-metric small{font-size:12px}.p-metric strong{font-size:17px;overflow-wrap:anywhere}
+#p-comparison,#p-research,#p-records{overflow-x:auto}
+@media(max-width:640px){.p-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.p-ticket{grid-template-columns:25px 85px minmax(95px,1fr) 80px;gap:5px}.p-ticket button{padding:7px 4px;font-size:12px}}
+</style></head><body><nav id="p-nav" aria-label="복권 종류"><button data-page="lotto" aria-pressed="true" type="button">로또 6/45</button><button data-page="pension" aria-pressed="false" type="button">연금복권720+</button></nav><main id="lotto-view">
 <header><small>LOTTO 6/45</small><h1>로또 분석 · 번호 선택</h1><p class="muted">당첨 결과 확인, 기초 통계, 조건에 맞는 번호 생성</p></header>
 <p class="notice">공정하고 독립적인 추첨에서 모든 6개 조합의 1등 확률은 1 / 8,145,060입니다. 과거 빈도로 다음 번호를 예측할 수 없으며, 이 도구는 수익을 보장하지 않습니다.</p>
 <section><h2>회차별 고정 5게임</h2><label>대상 회차<input id="target" type="number" min="1" max="10000" placeholder="공식 자료 확인 후 자동 설정"></label><p id="targetstatus" class="muted">대상 회차를 확인하세요.</p>
@@ -27,7 +40,29 @@
 <p id="datastatus" role="status"></p><div class="scroll"><table><thead><tr><th>회차</th><th>당첨번호 / 보너스</th><th>자료</th><th>관리</th></tr></thead><tbody id="rows"></tbody></table></div><button id="more" hidden>100회 더 보기</button></section>
 <section><h2>번호별 출현 통계</h2><label>분석 범위<select id="statwindow"><option value="0">전체 보유 자료</option><option value="100">최근 100회</option><option value="300">최근 300회</option></select></label><p id="stats"></p><div id="histogram"></div><p class="muted">보너스를 제외한 6개 번호의 주변 빈도만 확인합니다. 비복원 추출을 반영한 보정 카이제곱 통계량(44/39 배율, 자유도 44)을 사용합니다. 큰 p값도 무작위성·독립성의 증명이나 예측 근거가 아닙니다.</p></section>
 <section><h2>1241회 이후 저빈도 연구 추적</h2><p>구매용 5게임과 별도로 직전 100회 저빈도 가설의 연구용 1게임·번호별 확률을 기록합니다. 주 평가 지표는 Brier 오차이며 균등 기준은 0.115556입니다. 연구용 번호는 구매용에 반영하지 않습니다.</p><p id="studystatus" role="status"></p><div id="studyrecords" class="scroll"></div><p class="muted">자동 작업에서 마감 전에 저장한 기록만 평가합니다. 미기록 회차는 소급 생성하지 않으며 표본 수에 포함하지 않습니다. 1241회 이후 100개 평가 기록 단위로 검토하고 유리한 결과만 선택해 규칙을 바꾸지 않습니다. 저장 시각은 독립 인증이 아니므로 공개 커밋·작업 로그를 함께 확인하세요.</p></section><section><h2>예측 가설 검증</h2><p>누적 빈도·최근 고빈도·최근 저빈도를 균등 확률 기준과 비교합니다. 각 회차 이전 자료만 사용하며, 최근 100회는 개발 구간과 분리해 표시합니다. 평가 회차에서는 매번 직전까지의 실제 결과로 갱신합니다.</p><button id="research">보유 자료로 시계열 검증</button><p id="researchstatus" role="status"></p><div id="researchresult" class="scroll"></div><div id="auditsummary" class="scroll"></div><p class="muted">새로 추가된 표는 실제 6개 번호를 고정 동점 규칙으로 선택하며, 3개·4개 이상 적중 비율과 탐색적 신뢰구간·확률 보정 ECE·3모형 다중검정 보정을 표시합니다. 평균 일치 수는 높을수록, Brier 오차는 낮을수록 좋습니다. 동점 번호는 무작위 선택의 기대 일치 수로 계산합니다. 1등 적중률·수익률을 검증하는 지표는 아닙니다. 여러 방법을 비교한 우연한 우위와 반복 평가에 따른 과적합을 고려해야 하며, 이 결과만으로 생성 방식을 자동 변경하지 않습니다. 수동 수정 자료도 평가에 포함됩니다.</p></section><footer><p class="muted">자동 갱신: GitHub Actions 설정 후 일요일·월요일 오전 9:17 (한국 시간) 수집 시도. 실행 지연이나 공식 사이트 변경으로 실패할 수 있습니다.</p><a href="https://www.dhlottery.co.kr/lt645/result" target="_blank" rel="noopener">동행복권 공식 결과 확인 ↗</a></footer>
-</main><script src="./scripts/portfolio.js"></script><script>
+</main>
+<main id="pension-view" hidden>
+<header><small>PENSION 720+ · 독립 모듈</small><h1>연금복권720+ 구매 조합 및 확률 연구</h1><p class="muted">공식 규칙 · 접미부 커버리지 · 실제 당첨금 분포</p></header>
+<p class="notice">번호 생성은 추첨 결과를 예측하지 않습니다. <strong>동일한 유효 복권 장수에서 기대당첨금은 번호 선택 방식과 무관합니다.</strong> 끝자리 분산은 최소 1장 당첨 확률과 수익 변동성을 바꿀 수 있습니다.</p>
+<section><h2>추천번호 생성</h2><p id="p-official" role="status" class="muted">공식 자료 확인 중…</p>
+<div class="grid">
+<label>대상 회차 (직접 확인)<input id="p-round" type="number" min="1" max="10000" placeholder="공식 확인 전 미입력"></label>
+<label>구매 장수<input id="p-count" type="number" min="1" max="20" value="5"></label>
+<label>구매 조합 전략<select id="p-strategy"><option value="dispersed">접미부 분산 (기본)</option><option value="random">균등 의사난수 기준</option><option value="concentrated">동일번호 5개 조 집중</option><option value="mixed">집중 + 분산 혼합</option></select></label>
+<label>재현용 시드<input id="p-seed" value="pension-2026" maxlength="100" aria-label="재현용 시드"></label>
+<label>연 할인율 (%)<input id="p-discount" type="number" min="0" max="100" value="3" step="0.5"></label>
+<label>연금 원천징수율 (%)<input id="p-tax" type="number" min="0" max="100" value="22" step="1"></label>
+<label>첫 지급 추가 지연 (개월)<input id="p-delay" type="number" min="0" max="120" value="0" step="1"></label>
+</div>
+<div class="buttons"><button id="p-generate" type="button" class="primary">번호 생성</button><button id="p-compare" type="button">전략별 정확 확률 비교</button><button id="p-copy" type="button">추천번호 복사</button></div>
+<p id="p-status" role="status"></p><div id="p-tickets"></div><p class="muted">번호가 매진된 경우 조·번호를 직접 수정하고 재평가할 수 있습니다. 구매 가능 여부는 별도로 확인해야 합니다. 시드는 난수 재현용이며 당첨확률을 높이지 않습니다.</p></section>
+<section><h2>확률 및 손익 (정확한 이산분포 계산)</h2><div id="p-metrics"></div><p class="muted">공식 보너스 재추첨 조건, 다수 당첨 시 최상위 등위만 인정, 연금 현재가치 할인 및 원천징수 조건을 포함합니다. 중앙값·분산은 가정한 금액으로 계산합니다. 할인율은 가정값이며 미래 수익 보장은 아닙니다.</p></section>
+<section><h2>동일 예산 전략 비교</h2><div id="p-comparison"><p class="muted">전략별 정확 확률 비교 버튼을 누르세요.</p></div></section>
+<section><h2>확률 연구 · 공식 데이터 기반</h2><div id="p-research"><p class="muted">자료 조회 중…</p></div><a href="https://www.dhlottery.co.kr/pt720/result" target="_blank" rel="noopener">연금복권 공식 당첨번호 조회</a></section>
+<section><h2>추천 기록 · 공식 결과 대조</h2><p id="p-recordstatus" role="status"></p><div class="buttons"><button id="p-refresh" type="button">배포된 최신 자료 확인</button><button id="p-export" type="button">이 기기 기록 내보내기</button></div><div id="p-records"></div><p class="muted">브라우저 기록은 구입 증빙 및 시점 인증이 아닙니다. 자동 저장 기록은 최초 작성 후 덮어쓰지 않습니다. 공식 API 연결 실패 시 확인되지 않은 추첨번호를 저장하지 않습니다.</p></section>
+<footer><p class="muted">기준: 동행복권 공식 720+ 규칙 · 구매 시 유효한 번호 재확인 · 원천징수율은 시나리오 변수 · 데이터 수집은 GitHub Actions에서 시도합니다.</p></footer>
+</main>
+<script src="./scripts/portfolio.js"></script><script>
 function logGamma(x) {
   const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
     771.32342877765313, -176.61502916214059, 12.507343278686905,
@@ -391,4 +426,4 @@ $('recordexport').onclick=async()=>{await recordsReady;const a=document.createEl
 $('recordimport').onclick=()=>$('recordfile').click();$('recordfile').onchange=async e=>{try{await recordsReady;if(recordLoadError)throw Error('기존 저장 기록 오류를 먼저 확인하세요.');const file=e.target.files[0];if(!file)return;if(file.size>5*1024*1024)throw Error('5 MB 이하 파일만 가능합니다.');const rows=await validateWeeklyRecords(JSON.parse(await file.text()).records),map=new Map(localRecords.map(r=>[r.version+':'+r.round,r]));for(const r of rows)if(!map.has(r.version+':'+r.round))map.set(r.version+':'+r.round,{...r,timing:'unverified'});const next=[...map.values()];localStorage.setItem(RECORD_KEY,JSON.stringify(next));localRecords=next;renderRecords();message('recordstatus','기록 가져오기 완료. 기존 회차는 유지하며 가져온 기록은 시점 미확인으로 표시합니다.');}catch(e){message('recordstatus',e.message,true);}finally{e.target.value='';}};
 const previousRefresh=$('refresh').onclick;$('refresh').onclick=async()=>{await previousRefresh();await refreshRecords();await refreshStudy();};
 (async()=>{await recordsReady;render();await refresh();await refreshRecords();await refreshStudy();if($('target').value)await $('generate').onclick();})();
-</script></body></html>
+</script><script type="module" src="./scripts/pension-ui.mjs"></script></body></html>
