@@ -47,8 +47,9 @@ jobs:
           fi
       - name: Prepare public files
         run: |
-          mkdir -p public/data
+          mkdir -p public/data public/scripts
           cp index.html .nojekyll public/
+          cp scripts/portfolio.js public/scripts/
           for f in data/lotto.json data/weekly.json data/study.json; do
             if [ -f "$f" ]; then cp "$f" public/data/; fi
           done
