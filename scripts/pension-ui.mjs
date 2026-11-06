@@ -29,7 +29,10 @@ function renderRecords(){const e=$('p-records');e.replaceChildren();const union=
  e.append(table(['회차','방식','추천번호','기록 구분','기록일시','대조 (1–7등·보너스)'],rows));
 }
 async function refreshData(){const resp=await fetch('./data/pension720-results.json',{cache:'no-store'});if(!resp.ok)throw Error('HTTP '+resp.status);const data=await resp.json();if(data.product!=='pension720')throw Error('다른 복권 자료 혼입');official=validatePensionRows(data.draws||[]);
- status('p-official',official.length?`공식 확인 ${official.length}개 회차 · 최신 ${official.at(-1).round}회 (${official.at(-1).date})`:'공식 당첨자료가 아직 수집되지 않았습니다. 번호를 임의로 생성하지 않습니다.');
+ const latest=official.at(-1);
+ const known=new Set(official.map(d=>d.round));
+ const gaps=latest?Array.from({length:latest.round},(_,i)=>i+1).filter(r=>!known.has(r)):[];
+ status('p-official',latest?`공식 확인 ${official.length}개 회차 · 최신 ${latest.round}회 (${latest.date}) · 누락 ${gaps.length}회${gaps.length?' (자동 보충 대상)':' (연속 수집)'}`:'공식 당첨자료가 아직 수집되지 않았습니다. 번호를 임의로 생성하지 않습니다.');
  if(official.length&&!$('p-round').value)$('p-round').value=official.at(-1).round+1;
  try{const rec=await fetch('./data/pension720-weekly.json',{cache:'no-store'});if(rec.ok){const d=await rec.json();if(d.product!=='pension720'||!Array.isArray(d.records))throw Error('공개 기록 구조 오류');shared=d.records.filter(r=>r.version===PENSION_VERSION&&Array.isArray(r.tickets));}}catch(e){status('p-recordstatus','공개 기록 확인 필요: '+e.message,true);}
  renderRecords();renderResearch();}

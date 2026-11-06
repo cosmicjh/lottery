@@ -1,16 +1,15 @@
-import {readFile,writeFile,rename} from 'node:fs/promises';
+/** Usage: node scripts/collect-pension.mjs [--full] [--limit=NUMBER] */
 import {fileURLToPath} from 'node:url';
-import {fetchPensionRound,mergePension} from './pension-collector.mjs';
-import {validatePensionRows} from './pension-research.mjs';
+import {collectPensionHistory} from './pension-backfill.mjs';
 const file=fileURLToPath(new URL('../data/pension720-results.json',import.meta.url));
-const prior=JSON.parse(await readFile(file,'utf8'));
-validatePensionRows(prior.draws);let draws=prior.draws;
-try{
- const last=await fetchPensionRound();draws=mergePension(draws,[last]);
- const priorRounds=new Set(draws.map(d=>d.round)),missing=[];for(let r=1;r<=last.round;r++)if(!priorRounds.has(r))missing.push(r);
- // Gradual history backfill: 20 verified requests per run; no phantom dates, no overwrite.
- for(const r of missing.slice(-20).reverse()){const draw=await fetchPensionRound(r);draws=mergePension(draws,[draw]);}
- const next={schema:1,product:'pension720',checkedAt:new Date().toISOString(),lastVerifiedRound:last.round,draws:validatePensionRows(draws).reverse(),status:missing.length>20?'공식 확인 이력 보충 진행 중':'공식 조회 완료'};
- await writeFile(file+'.tmp',JSON.stringify(next,null,2)+'\n');await rename(file+'.tmp',file);
- console.log('연금복권 공식 확인 '+next.draws.length+'회 / 최신 '+last.round+'회');
-}catch(e){console.error('연금복권 수집 중단, 기존 기록 변경 없음:',e.message);process.exitCode=1;}
+const args=process.argv.slice(2),unknown=args.filter(a=>a!=='--full'&&!/^--limit=\d+$/.test(a));
+if(unknown.length){console.error('지원하지 않는 옵션: '+unknown.join(', '));process.exitCode=2;}
+else {
+ const explicit=args.find(a=>a.startsWith('--limit='));
+ const limit=explicit?Number(explicit.split('=')[1]):args.includes('--full')?1000:20;
+ try{
+  const result=await collectPensionHistory({file,maxRequests:limit});
+  console.log(`연금복권 결과: 전체 API ${result.bulkOk?'성공':'미확인'}, 저장 ${result.stored}회, 신규 ${result.added}회, 누락 ${result.missing.length}회`);
+  if(!result.ok){console.error('수집에 오류가 발생했습니다. 성공한 회차는 보존되었고 다음 실행 때 재시도합니다.');process.exitCode=1;}
+ }catch(e){console.error('연금복권 수집 중단, 확인되지 않은 자료는 저장하지 않음:',e.message);process.exitCode=1;}
+}

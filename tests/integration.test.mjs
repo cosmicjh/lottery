@@ -30,3 +30,9 @@ test('original Lotto benchmark research and independent verification tools are r
  assert.equal(typeof benchmark,'object');
  for(const path of ['lottery-analysis.md','lottery-deployment.md','tests/portfolio.test.mjs','tools/benchmark.mjs','tools/exact-enumeration.cpp','tools/verify.py'])await access(new URL(path,root));
 });
+
+test('new pension bulk-history backfill is integrated into existing Actions workflow',async()=>{
+ const workflow=await read('.github/workflows/lotto-pages.yml');
+ for(const token of ['pension_full_history:', 'node scripts/collect-pension.mjs --full', 'node scripts/collect-pension.mjs'])assert.ok(workflow.includes(token),token);
+ for(const file of ['scripts/pension-backfill.mjs','tests/pension-backfill.test.mjs'])await access(new URL(file,root));
+});

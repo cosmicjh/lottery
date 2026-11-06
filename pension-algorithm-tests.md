@@ -6,7 +6,7 @@
 
 ```bash
 node --test tests/*.test.mjs
-# tests 85, pass 85, fail 0
+# tests 101, pass 101, fail 0
 python tools/pension-independent-check.py
 # python independent checks: PASS
 node --check scripts/pension-ui.mjs
@@ -38,3 +38,11 @@ ZIP 압축을 풀고 프로젝트 최상위에서 Node.js 22 이상을 사용한
 ## 기존 파일 SHA-256 무결성
 
 비교 기준은 `lottery-main(2).zip` 내부의 원본 파일이다. **원본과 병합본의 실제 SHA-256 다이제스트를 계산하여 대조**하였다. 동일 파일에는 `scripts/portfolio.js`, `scripts/weekly.mjs`, `scripts/algorithm.mjs`, `tests/portfolio.test.mjs`, `tests/weekly.test.mjs`, `data/lotto.json`, `data/weekly.json`, `data/study.json`, `research/benchmark-1249.json`, `tools/benchmark.mjs`, `tools/exact-enumeration.cpp`, `tools/verify.py`, `lottery-analysis.md`, `lottery-deployment.md`가 포함된다. 기존 `index.html`의 인라인 로또 JavaScript 본문도 추출하여 문자열 완전 일치를 확인하였다.
+
+## 2026-11-06 연금복권 전체 이력 수집 보완 검증
+
+- 검증 명령: `node --test tests/*.test.mjs`.
+- 수집 보완 전: 85개 통과. 수집 보완 후: 총 101개 통과.
+- 새 테스트: 공식 호스트의 전체회차 JSON 구조·6자리 선행 0 보존·날짜 검증·중복 충돌 거부·일괄 수집·회차별 누락 보완·중간 저장·중단 후 재개·API 전면 실패 시 바이트 단위 파일 보존·조회 회차 불일치 거부·멱등성·요청 상한·날짜 간격 경고·연속 실패 회로 차단.
+- 독립 Python 조합론 계산: 기존 `tools/pension-independent-check.py`로 재검증.
+- **미검증:** 동행복권 실서버의 응답 내용, 최초 실제 전체 이력 수집, GitHub Actions 운영 결과, 실제 브라우저 기능. 가상 API 응답에 대한 테스트 통과를 실서버 검증으로 오인하지 않는다.

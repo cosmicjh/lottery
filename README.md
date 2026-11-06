@@ -81,3 +81,11 @@ v1과 v2는 번호가 다릅니다. 이미 v1 번호를 구매했다면 그대�
 - 공정한 추첨에서 번호 선택 방식이 기대당첨금을 높이는 것은 아닙니다. 과거 출현 빈도와 베이지안 연구는 구매 번호를 변경하지 않습니다.
 - 기존 실험·분석 문서 `lottery-analysis.md`, `lottery-deployment.md`, `research/benchmark-1249.json` 및 `tools/`는 새 원본 그대로 유지합니다.
 - 수집 API의 실제 운영 응답, 브라우저 및 Pages 배포 상태는 적용 후 확인이 필요합니다. 상세: `pension-deployment.md`.
+
+## 연금복권720+ 과거 회차 수집 보완
+
+동행복권 웹페이지에서 사용되는 전체 회차 조회 경로를 우선 활용합니다. 미수집 회차가 있으면 개별 조회를 수행하고, 검증 성공마다 `data/pension720-results.json`에 원자적으로 저장합니다. 기존 6/45 원본 파일과 연구 기록은 변경하지 않습니다.
+
+최초 실행 시 GitHub **Actions → Lotto Pages → Run workflow**에서 `pension_full_history`를 선택하거나, Node.js 22 이상 환경에서 `node scripts/collect-pension.mjs --full`을 실행합니다. 누락 수, 연속 회차 수집 범위, 날짜 일관성 경고를 데이터와 화면에서 확인할 수 있습니다. 실제 운영 API 호출 성공 여부는 실환경에서 확인해야 합니다.
+
+상세 절차: `pension-deployment.md`의 8장.
