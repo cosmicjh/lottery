@@ -16,7 +16,7 @@ test('browser startup, deterministic output, and record persistence',async()=>{
  const ids=new Map([...html.matchAll(/id="([^"]+)"/g)].map(m=>[m[1],element()]));
  function element(){return {value:'',textContent:'',hidden:false,disabled:false,children:[],classList:{toggle(){}},append(...x){this.children.push(...x);},replaceChildren(){this.children=[];},click(){},select(){}};}
  const stored=new Map(),context={document:{getElementById:id=>ids.get(id),createElement:element,head:element()},localStorage:{getItem:k=>stored.get(k)??null,setItem:(k,v)=>stored.set(k,v)},crypto:webcrypto,TextEncoder,DataView,Uint32Array,URL,Blob,console,setTimeout,clearTimeout,navigator:{clipboard:{writeText:async()=>{}}},fetch:async url=>({ok:true,json:async()=>String(url).includes('weekly')?{records:[]}:{draws:[]}})};
- context.window=context;vm.createContext(context);vm.runInContext(html.match(/<script>([\s\S]*?)<\/script>/)[1],context);
+ context.window=context;vm.createContext(context);vm.runInContext(await readFile(new URL('../scripts/portfolio.js',import.meta.url),'utf8'),context);ids.get('birthdayfactor').value='1.5';ids.get('othertickets').value='10000000';vm.runInContext(html.match(/<script>([\s\S]*?)<\/script>/)[1],context);
  await new Promise(r=>setTimeout(r,30));ids.get('target').value='1234';await ids.get('generate').onclick();
  const a=JSON.parse(stored.get('lotto-weekly-records-v1'));assert.equal(a.length,1);assert.deepEqual(a[0].games,await weeklyFive(1234));const first=a[0].createdAt;
  await ids.get('generate').onclick();assert.equal(JSON.parse(stored.get('lotto-weekly-records-v1'))[0].createdAt,first);assert.equal(ids.get('generated').children.length,5);

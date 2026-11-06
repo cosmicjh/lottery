@@ -6,8 +6,19 @@
 <header><small>LOTTO 6/45</small><h1>로또 분석 · 번호 선택</h1><p class="muted">당첨 결과 확인, 기초 통계, 조건에 맞는 번호 생성</p></header>
 <p class="notice">공정하고 독립적인 추첨에서 모든 6개 조합의 1등 확률은 1 / 8,145,060입니다. 과거 빈도로 다음 번호를 예측할 수 없으며, 이 도구는 수익을 보장하지 않습니다.</p>
 <section><h2>회차별 고정 5게임</h2><label>대상 회차<input id="target" type="number" min="1" max="10000" placeholder="공식 자료 확인 후 자동 설정"></label><p id="targetstatus" class="muted">대상 회차를 확인하세요.</p>
+<div class="grid"><label>추천번호 구분<select id="recommendmode"><option value="common">공통 추천 · v2</option><option value="personal">개인별 번호 · 선택 기능</option></select></label><label id="personalseedbox" hidden>개인 시드 (저장·전송하지 않음)<input id="personalseed" type="text" maxlength="500" autocomplete="off" spellcheck="false" placeholder="직접 입력하거나 새 시드 생성"><button id="newseed" type="button">임의 시드 생성</button></label></div>
 <div class="buttons"><button id="generate" class="primary">고정 5게임 확인</button><button id="copy">번호 복사</button></div><p id="genstatus" role="status"></p><div id="generated"></div><textarea id="copyfallback" hidden aria-label="복사할 번호"></textarea>
-<p class="muted">같은 회차·버전에서는 모든 기기에 동일한 5게임을 표시합니다. v2 적용 시 v1과 번호가 달라집니다. 이미 구매한 v1 번호는 아래 기록에서 확인하세요. 5게임 전체에서 서로 다른 번호 30개를 사용하며, 가장 확률이 높은 5개라는 의미는 아닙니다. 모든 사용자가 같은 버전을 쓰면 같은 번호를 보게 됩니다. 회당 5,000원 · 매주 구매 시 월평균 약 21,667원(52주/12개월).</p></section>
+<details><summary>5게임 정확한 당첨확률과 기대 당첨 게임 수</summary><p class="muted">동일한 번호를 한 회차에 5게임 구매한 경우가 아니라, 번호가 서로 겹치지 않는 5게임 기준입니다. 1등·2등·3등 판정에는 보너스 번호가 반영됩니다.</p><div id="portfolio-summary" class="scroll">번호를 생성하면 표시됩니다.</div></details>
+<p class="muted">같은 회차·버전에서는 모든 기기에 동일한 5게임을 표시합니다. v2 적용 시 v1과 번호가 달라집니다. 이미 구매한 v1 번호는 아래 기록에서 확인하세요. 5게임 전체에서 서로 다른 번호 30개를 사용하며, 가장 확률이 높은 5개라는 의미는 아닙니다. 공통 모드는 모든 사용자에게 같으며, 개인별 모드는 시드와 회차가 같으면 동일한 결과를 재현합니다. 개인 시드는 사용자가 별도 보관해야 하며 추천 기록에는 저장되지 않습니다. 회당 5,000원 · 매주 구매 시 월평균 약 21,667원(52주/12개월).</p></section>
+<section><h2>조합 비교 · 당첨금 분할 가정</h2><p class="muted">1249회 번호 구조에 대한 전체 8,145,060개 당첨 조합의 정확한 열거 결과입니다. 아래 비교는 번호 예측이나 금전적 우위를 검증한 것이 아닙니다.</p>
+<div class="scroll"><table><thead><tr><th>1249회 비교 사례</th><th>5등 이상</th><th>4등 이상</th><th>1등</th></tr></thead><tbody>
+<tr><td>기존 v1</td><td>11.5434%</td><td>0.6963%</td><td>5 / 8,145,060</td></tr>
+<tr><td>기존 v2 (30개 비중복)</td><td>11.8679%</td><td>0.6967%</td><td>5 / 8,145,060</td></tr>
+<tr><td>1개 번호 중복 사례</td><td>11.8274%</td><td>0.6967%</td><td>5 / 8,145,060</td></tr></tbody></table></div>
+<p class="muted">v1 결과는 1249회 특정 조합에 해당합니다. 다른 회차 v1의 5등 이상 확률은 달라질 수 있습니다. Greedy·Local Search·SA를 통한 비중복 조합도 당첨확률이 같으며, 이 목적의 신규 기본 알고리즘은 채택하지 않았습니다.</p>
+<div class="grid"><label>생일 범위(1–31) 선호 가정<select id="birthdayfactor"><option value="1">선호 없음 · 균등</option><option value="1.5" selected>번호당 1.5배 (가정)</option><option value="2">번호당 2배 (가정)</option></select></label><label>다른 구매자의 총 게임 수 (가정)<select id="othertickets"><option value="1000000">100만 게임</option><option value="10000000" selected>1,000만 게임</option><option value="30000000">3,000만 게임</option></select></label></div>
+<p id="splitresult" class="muted" role="status">번호 생성 후 가정 시나리오 결과를 표시합니다.</p><div id="splitgames" class="scroll"></div>
+<p class="muted">한국 실제 조합별 구매 확률에 관한 관측 자료는 사용하지 않았습니다. 선택 모형은 생일 범위 번호 개수만을 반영한 정규화된 가상 분포입니다. 연속번호·홀짝·번호 합계·용지 배열 등의 실제 영향은 확인되지 않았습니다. 표시되는 당첨금 지분은 1등 당첨을 조건으로 한 이론값이며, 원금 회수·기대수익을 뜻하지 않습니다.</p></section>
 <section><h2>추천 기록 · 당첨 결과 대조</h2><p id="recordstatus" role="status"></p><div class="buttons"><button id="recordexport">이 기기 기록 내보내기</button><button id="recordimport">기록 가져오기</button></div><input id="recordfile" type="file" accept=".json" hidden><div id="recordlist" class="scroll"></div>
 <p class="muted">자동 실행에서 저장한 공개 기록과 이 기기 기록을 구분합니다. 기록은 구매 영수증이 아니며 저장 시각은 독립적으로 인증되지 않습니다. 사후 생성·가져온 기록은 예측 실적 증거로 사용하지 마세요. 등수는 공식 번호로만 대조하며 실제 지급 여부는 복권 원본으로 확인하세요.</p></section>
 <section><h2>공식 당첨 결과</h2><p id="syncstatus" class="status muted" role="status">저장된 결과 확인 중…</p><div class="buttons"><button id="refresh">최신 파일 확인</button><button id="export">자료 내보내기</button><button id="import">자료 가져오기</button><button id="reset">이 기기 수정 초기화</button></div><input id="file" type="file" accept=".json,.csv,.xlsx,.xls" hidden>
@@ -15,8 +26,8 @@
 <details><summary>회차 직접 입력 · 수정</summary><form id="manual"><div class="grid"><label>회차<input id="round" type="number" min="1" max="10000" required></label><label>당첨번호 6개<input id="numbers" placeholder="1, 8, 15, 22, 29, 36" required></label><label>보너스<input id="bonus" type="number" min="1" max="45" required></label></div><div class="buttons"><button type="submit">이 기기에 저장</button></div></form><p>가져오기 형식: JSON 내보내기 파일, 또는 첫 행이 <code>회차,번호1,번호2,번호3,번호4,번호5,번호6,보너스</code>인 CSV/Excel. 기존 9열 형식 <code>No,회차,번호1,…,번호6,보너스</code>도 지원합니다. Excel 읽기는 온라인 연결이 필요합니다.</p></details>
 <p id="datastatus" role="status"></p><div class="scroll"><table><thead><tr><th>회차</th><th>당첨번호 / 보너스</th><th>자료</th><th>관리</th></tr></thead><tbody id="rows"></tbody></table></div><button id="more" hidden>100회 더 보기</button></section>
 <section><h2>번호별 출현 통계</h2><label>분석 범위<select id="statwindow"><option value="0">전체 보유 자료</option><option value="100">최근 100회</option><option value="300">최근 300회</option></select></label><p id="stats"></p><div id="histogram"></div><p class="muted">보너스를 제외한 6개 번호의 주변 빈도만 확인합니다. 비복원 추출을 반영한 보정 카이제곱 통계량(44/39 배율, 자유도 44)을 사용합니다. 큰 p값도 무작위성·독립성의 증명이나 예측 근거가 아닙니다.</p></section>
-<section><h2>1241회 이후 저빈도 연구 추적</h2><p>구매용 5게임과 별도로 직전 100회 저빈도 가설의 연구용 1게임·번호별 확률을 기록합니다. 주 평가 지표는 Brier 오차이며 균등 기준은 0.115556입니다. 연구용 번호는 구매용에 반영하지 않습니다.</p><p id="studystatus" role="status"></p><div id="studyrecords" class="scroll"></div><p class="muted">자동 작업에서 마감 전에 저장한 기록만 평가합니다. 미기록 회차는 소급 생성하지 않으며 표본 수에 포함하지 않습니다. 1241회 이후 100개 평가 기록 단위로 검토하고 유리한 결과만 선택해 규칙을 바꾸지 않습니다. 저장 시각은 독립 인증이 아니므로 공개 커밋·작업 로그를 함께 확인하세요.</p></section><section><h2>예측 가설 검증</h2><p>누적 빈도·최근 고빈도·최근 저빈도를 균등 확률 기준과 비교합니다. 각 회차 이전 자료만 사용하며, 최근 100회는 개발 구간과 분리해 표시합니다. 평가 회차에서는 매번 직전까지의 실제 결과로 갱신합니다.</p><button id="research">보유 자료로 시계열 검증</button><p id="researchstatus" role="status"></p><div id="researchresult" class="scroll"></div><p class="muted">평균 일치 수는 높을수록, Brier 오차는 낮을수록 좋습니다. 동점 번호는 무작위 선택의 기대 일치 수로 계산합니다. 1등 적중률·수익률을 검증하는 지표는 아닙니다. 여러 방법을 비교한 우연한 우위와 반복 평가에 따른 과적합을 고려해야 하며, 이 결과만으로 생성 방식을 자동 변경하지 않습니다. 수동 수정 자료도 평가에 포함됩니다.</p></section><footer><p class="muted">자동 갱신: GitHub Actions 설정 후 일요일·월요일 오전 9:17 (한국 시간) 수집 시도. 실행 지연이나 공식 사이트 변경으로 실패할 수 있습니다.</p><a href="https://www.dhlottery.co.kr/lt645/result" target="_blank" rel="noopener">동행복권 공식 결과 확인 ↗</a></footer>
-</main><script>
+<section><h2>1241회 이후 저빈도 연구 추적</h2><p>구매용 5게임과 별도로 직전 100회 저빈도 가설의 연구용 1게임·번호별 확률을 기록합니다. 주 평가 지표는 Brier 오차이며 균등 기준은 0.115556입니다. 연구용 번호는 구매용에 반영하지 않습니다.</p><p id="studystatus" role="status"></p><div id="studyrecords" class="scroll"></div><p class="muted">자동 작업에서 마감 전에 저장한 기록만 평가합니다. 미기록 회차는 소급 생성하지 않으며 표본 수에 포함하지 않습니다. 1241회 이후 100개 평가 기록 단위로 검토하고 유리한 결과만 선택해 규칙을 바꾸지 않습니다. 저장 시각은 독립 인증이 아니므로 공개 커밋·작업 로그를 함께 확인하세요.</p></section><section><h2>예측 가설 검증</h2><p>누적 빈도·최근 고빈도·최근 저빈도를 균등 확률 기준과 비교합니다. 각 회차 이전 자료만 사용하며, 최근 100회는 개발 구간과 분리해 표시합니다. 평가 회차에서는 매번 직전까지의 실제 결과로 갱신합니다.</p><button id="research">보유 자료로 시계열 검증</button><p id="researchstatus" role="status"></p><div id="researchresult" class="scroll"></div><div id="auditsummary" class="scroll"></div><p class="muted">새로 추가된 표는 실제 6개 번호를 고정 동점 규칙으로 선택하며, 3개·4개 이상 적중 비율과 탐색적 신뢰구간·확률 보정 ECE·3모형 다중검정 보정을 표시합니다. 평균 일치 수는 높을수록, Brier 오차는 낮을수록 좋습니다. 동점 번호는 무작위 선택의 기대 일치 수로 계산합니다. 1등 적중률·수익률을 검증하는 지표는 아닙니다. 여러 방법을 비교한 우연한 우위와 반복 평가에 따른 과적합을 고려해야 하며, 이 결과만으로 생성 방식을 자동 변경하지 않습니다. 수동 수정 자료도 평가에 포함됩니다.</p></section><footer><p class="muted">자동 갱신: GitHub Actions 설정 후 일요일·월요일 오전 9:17 (한국 시간) 수집 시도. 실행 지연이나 공식 사이트 변경으로 실패할 수 있습니다.</p><a href="https://www.dhlottery.co.kr/lt645/result" target="_blank" rel="noopener">동행복권 공식 결과 확인 ↗</a></footer>
+</main><script src="./scripts/portfolio.js"></script><script>
 function logGamma(x) {
   const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
     771.32342877765313, -176.61502916214059, 12.507343278686905,
@@ -156,7 +167,7 @@ const WEEKLY_VERSION='weekly-five-v2-disjoint';
 const LEGACY_WEEKLY_VERSION='weekly-five-v1';
 async function weeklyFive(round,version=WEEKLY_VERSION){
  if(![WEEKLY_VERSION,LEGACY_WEEKLY_VERSION].includes(version))throw Error("지원하지 않는 추천 버전");
- if(!Number.isInteger(round)||round<1||round>10000)throw Error('대상 회차는 1~10000 정수입니다.');
+ if(!Number.isInteger(round)||round<1||round>10000)throw Error('대상 회차는 1–10000 정수입니다.');
  if(!globalThis.crypto?.subtle)throw Error('HTTPS 사이트에서 접속하세요. 이 브라우저는 번호 생성에 필요한 기능을 지원하지 않습니다.');
  let words=[],counter=0;
  async function integer(n){
@@ -198,6 +209,25 @@ async function validateWeeklyRecords(records){
 const $=id=>document.getElementById(id),KEY='lotto-pages-overrides-v1';
 let localRecords=[],sharedRecords=[],recordLoadError=false;
 let official=[],overrides={},visible=[],generated=[],shown=100;
+function renderProbability(games){
+ const target=$('portfolio-summary');target.replaceChildren();const p=globalThis.LotteryPortfolio;
+ const exact=p.disjointExact(games),table=document.createElement('table'),head=document.createElement('tr');
+ for(const x of ['등위 또는 사건','적어도 1게임 확률','기대 당첨 게임 수']){const th=document.createElement('th');th.textContent=x;head.append(th);}table.append(head);
+ const data=[['1등',exact.atLeastOneRank.first,exact.expectedGames.first],['2등',exact.atLeastOneRank.second,exact.expectedGames.second],['3등',exact.atLeastOneRank.third,exact.expectedGames.third],['4등',exact.atLeastOneRank.fourth,exact.expectedGames.fourth],['5등',exact.atLeastOneRank.fifth,exact.expectedGames.fifth],['5등 이상',exact.atLeastOne.threePlus,null],['4등 이상',exact.atLeastOne.fourPlus,null],['3등 이상',exact.atLeastOne.fivePlus,null]];
+ for(const values of data){const tr=document.createElement('tr');for(const v of [values[0],(values[1]*100).toFixed(8)+'%',values[2]===null?'—':values[2].toFixed(9)]){const td=document.createElement('td');td.textContent=v;tr.append(td);}table.append(tr);}
+ target.append(table);
+}
+function renderSplit(){
+ $('splitgames').replaceChildren();if(!generated.length){$('splitresult').textContent='번호 생성 후 표시합니다.';return;}
+ try{const s=globalThis.LotteryPortfolio.splitScenario(generated,{birthdayFactor:Number($('birthdayfactor').value),otherTickets:Number($('othertickets').value)});
+ $('splitresult').textContent=`가상 모형: 1등에 당첨된 해당 게임의 기대 당첨금 지분 ${ (s.meanConditionalShare*100).toFixed(2)}% (균등 선택 모형 ${ (s.uniformShare*100).toFixed(2)}%). 지분 비율 ${s.ratioToUniform.toFixed(3)}배. 실제 구매자 행동에 근거한 추정이 아닙니다.`;
+ const t=document.createElement('table'),h=document.createElement('tr');for(const k of ['게임','1–31 번호 개수','상대 선택 빈도 (가정)','1등 조건부 지분']){const th=document.createElement('th');th.textContent=k;h.append(th);}t.append(h);
+ for(const [i,v] of s.shares.entries()){const tr=document.createElement('tr');for(const val of [i+1,v.birthdays,v.relativePopularity.toFixed(3)+'배',(v.conditionalShare*100).toFixed(2)+'%']){const td=document.createElement('td');td.textContent=val;tr.append(td);}t.append(tr);}$('splitgames').append(t);
+ }catch(e){message('splitresult',e.message,true);}
+}
+$('birthdayfactor').onchange=renderSplit;$('othertickets').onchange=renderSplit;
+$('recommendmode').onchange=()=>{const mode=$('recommendmode').value;$('personalseedbox').hidden=mode!=='personal';generated=[];$('generated').replaceChildren();$('portfolio-summary').replaceChildren();$('copyfallback').hidden=true;renderSplit();message('genstatus',mode==='personal'?'개인 모드: 시드를 입력하거나 생성하세요. 추천 기록에는 보관하지 않습니다.':'공통 추천 모드입니다.');};
+$('newseed').onclick=()=>{$('personalseed').value=globalThis.LotteryPortfolio.makeRandomSecret();};
 function message(id,s,error=false){$(id).textContent=s;$(id).classList.toggle('error',error);}
 function commit(next){localStorage.setItem(KEY,JSON.stringify(next));overrides=next;render();}
 try{const obj=JSON.parse(localStorage.getItem(KEY)||'{}');if(!obj||Array.isArray(obj)||typeof obj!=='object')throw Error('형식');for(const [k,v] of Object.entries(obj)){if(!/^\d+$/.test(k)||+k<1||+k>10000)throw Error('회차');if(v!==null){obj[k]=validateDraw(v);if(+k!==v.round)throw Error('회차');}}overrides=obj;}catch(e){message('datastatus','이 기기 저장 자료를 읽지 못했습니다. 내보낸 백업을 확인하세요.',true);}
@@ -209,7 +239,7 @@ function render(){
  $('more').hidden=visible.length<=shown; $('histogram').replaceChildren();
  if(!visible.length){$('stats').textContent='당첨 자료가 아직 없습니다. 번호 생성은 자료 없이도 가능합니다.';return;}
  const span=Number($('statwindow').value),sample=span?visible.slice(0,span):visible;const a=analyzeLotto(sample),latest=visible[0].round,earliest=visible.at(-1).round,gaps=latest-earliest+1-visible.length;
- $('stats').textContent=`${sample.length}회 분석 (보유 전체 ${earliest}~${latest}회, 보유 범위 내 누락 ${gaps}회). `+(a.N<38?'표본 부족으로 p값 해석을 보류합니다.':`보정 통계량 ${a.test.statistic.toFixed(3)}, p값 ${a.test.pValue.toPrecision(4)}. `+(a.test.pValue<.05?'균등 빈도에서 보기 드문 결과입니다. 자료 오류 등을 먼저 확인하세요.':'균등 빈도를 기각할 근거가 부족합니다.'));
+ $('stats').textContent=`${sample.length}회 분석 (보유 전체 ${earliest}–${latest}회, 보유 범위 내 누락 ${gaps}회). `+(a.N<38?'표본 부족으로 p값 해석을 보류합니다.':`보정 통계량 ${a.test.statistic.toFixed(3)}, p값 ${a.test.pValue.toPrecision(4)}. `+(a.test.pValue<.05?'균등 빈도에서 보기 드문 결과입니다. 자료 오류 등을 먼저 확인하세요.':'균등 빈도를 기각할 근거가 부족합니다.'));
  a.observed.forEach((n,i)=>{const e=document.createElement('div');e.className='freq';e.textContent=(i+1)+'번';const b=document.createElement('b');b.textContent=n+'회';e.append(b);$('histogram').append(e);});
 }
 async function refresh(){
@@ -271,7 +301,12 @@ $('research').onclick=async()=>{
  const table=document.createElement('table'),head=document.createElement('tr');
  for(const name of ['방법','구간','평가 회차 수','평균 일치 수','Brier 오차']){const th=document.createElement('th');th.textContent=name;head.append(th);}table.append(head);
  for(const method of [{label:'균등 확률 기준',sections:[{name:'이론적 기준',n:'—',hits:result.baselineHits,brier:result.baselineBrier}]},...result.results])for(const part of method.sections){const row=document.createElement('tr');for(const value of [method.label,part.name,part.n,part.hits.toFixed(4),part.brier.toFixed(6)]){const td=document.createElement('td');td.textContent=value;row.append(td);}table.append(row);}
- $('researchresult').append(table);message('researchstatus',`${result.start}~${result.end}회 자료 사용. 처음 100회는 학습 전용, ${result.splitRound}회부터 최근 100회 평가 구간. 성능 개선 확정 아님.`);
+ $('researchresult').append(table);
+ const audit=globalThis.LotteryPortfolio.auditWalkForward(visible,researchForecast),auditTable=document.createElement('table'),auditHead=document.createElement('tr');
+ for(const x of ['방법 (최근 100회)','평균 적중','3개 이상','4개 이상','Brier','확률 보정 ECE','균등 대비 Brier 개선','95% 근사 신뢰구간','보정 p값']){const th=document.createElement('th');th.textContent=x;auditHead.append(th);}auditTable.append(auditHead);
+ for(const r of audit.results){const tr=document.createElement('tr');const range=r.confidence95.map(v=>v.toFixed(6)).join(' – ');for(const value of [r.id,r.meanHits.toFixed(4),`${r.threePlus}/${r.n}`,`${r.fourPlus}/${r.n}`,r.brier.toFixed(6),r.calibrationECE.toFixed(6),r.improvement.toFixed(6),range,r.adjustedPValue.toFixed(4)]){const td=document.createElement('td');td.textContent=value;tr.append(td);}auditTable.append(tr);}
+ $('auditsummary').replaceChildren();const heading=document.createElement('p');heading.textContent=`추가 연구 진단: 최근 ${audit.n}회 · 기준 적중 0.8개, Brier ${audit.baseline.brier.toFixed(6)}, 3개 이상 ${(audit.baseline.threePlus*100).toFixed(4)}%, 4개 이상 ${(audit.baseline.fourPlus*100).toFixed(4)}%. p값은 탐색적이며 결과 확인 이후 계산되었습니다.`;$('auditsummary').append(heading,auditTable);
+ message('researchstatus',`${result.start}–${result.end}회 자료 사용. 처음 100회는 학습 전용, ${result.splitRound}회부터 최근 100회 평가 구간. 성능 개선 확정 아님.`);
  }catch(e){$('researchresult').replaceChildren();message('researchstatus',e.message,true);}finally{$('research').disabled=false;}
 };
 
@@ -314,10 +349,10 @@ async function refreshStudy(){
  try{const response=await fetch('./data/study.json',{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);
  const body=await response.json(),records=validateStudy(body.records),result=evaluateStudy(records,official);
  const highest=official.length?Math.max(...official.map(d=>d.round)):1240,eligible=Math.max(0,highest-1240),skipped=Math.max(0,eligible-result.n);
- message('studystatus',`1241회 이후 평가 ${result.n}회 · 미기록/평가 제외 ${skipped}회. `+(result.n?`평균 일치 ${result.meanHits.toFixed(4)}개(기준 0.8), Brier ${result.brier.toFixed(6)}(기준 0.115556). 개선 확정 아님.`:'완료된 사전 기록이 아직 없습니다.')+(body.status?' '+body.status:''));
+ message('studystatus',`1241회 이후 평가 ${result.n}회 · 미기록/평가 제외 ${skipped}회. `+(result.n?`평균 일치 ${result.meanHits.toFixed(4)}개(기준 0.8), Brier ${result.brier.toFixed(6)}(기준 0.115556). 개선 확정 아님.`:'완료된 사전 기록이 아직 없습니다.')+` 연구 3개 이상 적중 ${result.rows.filter(x=>typeof x.hits==='number'&&x.hits>=3).length}회, 4개 이상 ${result.rows.filter(x=>typeof x.hits==='number'&&x.hits>=4).length}회. ${result.n<100?'사전 평가 표본이 100회 미만이므로 검증되지 않음.':'모형 검증에는 별도 통계 검정이 필요함.'}`+(body.status?' '+body.status:''));
  $('studyrecords').replaceChildren();const table=document.createElement('table'),head=document.createElement('tr');
  for(const label of ['회차','연구용 번호','학습 범위','최초 시각(KST)','결과']){const th=document.createElement('th');th.textContent=label;head.append(th);}table.append(head);
- for(const r of [...records].sort((a,b)=>b.round-a.round)){const evaluation=result.rows.find(x=>x.round===r.round),tr=document.createElement('tr');for(const v of [r.round,r.nums.join(', '),`${r.trainingStart}~${r.trainingEnd}`,new Date(r.createdAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}),evaluation?.status||'대기']){const td=document.createElement('td');td.textContent=v;tr.append(td);}table.append(tr);}$('studyrecords').append(table);
+ for(const r of [...records].sort((a,b)=>b.round-a.round)){const evaluation=result.rows.find(x=>x.round===r.round),tr=document.createElement('tr');for(const v of [r.round,r.nums.join(', '),`${r.trainingStart}–${r.trainingEnd}`,new Date(r.createdAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}),evaluation?.status||'대기']){const td=document.createElement('td');td.textContent=v;tr.append(td);}table.append(tr);}$('studyrecords').append(table);
  }catch(e){$('studyrecords').replaceChildren();message('studystatus','연구 기록 확인 필요: '+e.message,true);}
 }
 
@@ -340,16 +375,18 @@ const recordsReady=(async()=>{
 async function refreshRecords(){try{const r=await fetch('./data/weekly.json',{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);sharedRecords=await validateWeeklyRecords((await r.json()).records);if(!recordLoadError)message('recordstatus','공개 기록 '+sharedRecords.length+'회. 이 기기 기록은 내보내기로 보관할 수 있습니다.');renderRecords();}catch(e){if(!recordLoadError)message('recordstatus','공개 기록을 읽지 못했습니다. 이 기기 기록만 사용합니다. '+e.message,true);}}
 $('generate').onclick=async()=>{
  const button=$('generate');button.disabled=true;$('target').disabled=true;
- try{await recordsReady;const round=Number($('target').value);generated=await weeklyFive(round);$('generated').replaceChildren();$('copyfallback').hidden=true;
+ try{await recordsReady;const round=Number($('target').value);const personal=$('recommendmode').value==='personal',secret=$('personalseed').value;
+ generated=personal?await globalThis.LotteryPortfolio.personalFive(round,secret):await weeklyFive(round);$('generated').replaceChildren();$('copyfallback').hidden=true;
  generated.forEach((nums,i)=>{const row=document.createElement('div');row.className='result';const label=document.createElement('small');label.textContent=(i+1)+'게임 ';row.append(label);for(const n of nums){const ball=document.createElement('span');ball.className='ball b'+Math.ceil(n/10);ball.textContent=n;row.append(ball);}$('generated').append(row);});
- message('genstatus',`${round}회 · 고정 5게임 · ${WEEKLY_VERSION}. 다시 확인해도 같은 번호입니다.`);
- if(!localRecords.some(r=>r.round===round&&r.version===WEEKLY_VERSION)&&!recordLoadError){
+ renderProbability(generated);renderSplit();
+ message('genstatus',`${round}회 · 고정 5게임 · ${personal?globalThis.LotteryPortfolio.VERSION:WEEKLY_VERSION} · 총 ${new Set(generated.flat()).size}개 번호 / 중복 ${30-new Set(generated.flat()).size}개. ${personal?'개인 시드는 저장되지 않습니다. 복원하려면 별도로 보관하세요.':'공통 추천번호로 기록합니다.'}`);
+ if(!personal&&!localRecords.some(r=>r.round===round&&r.version===WEEKLY_VERSION)&&!recordLoadError){
  const target=nextWeeklyTarget(official),record={round,version:WEEKLY_VERSION,games:generated,createdAt:new Date().toISOString(),timing:target?.round===round?'before-cutoff':'unverified'};
  const next=[...localRecords,record];try{localStorage.setItem(RECORD_KEY,JSON.stringify(next));localRecords=next;}catch(e){message('recordstatus','번호는 생성했지만 기록 저장에 실패했습니다. '+e.message,true);}}
  renderRecords();
- }catch(e){generated=[];$('generated').replaceChildren();message('genstatus',e.message,true);}finally{button.disabled=false;$('target').disabled=false;}
+ }catch(e){generated=[];$('generated').replaceChildren();$('portfolio-summary').replaceChildren();renderSplit();message('genstatus',e.message,true);}finally{button.disabled=false;$('target').disabled=false;}
 };
-$('target').oninput=()=>{generated=[];$('generated').replaceChildren();$('copyfallback').hidden=true;message('genstatus','변경한 회차의 고정 5게임 확인 버튼을 누르세요.');};
+$('target').oninput=()=>{generated=[];$('generated').replaceChildren();$('portfolio-summary').replaceChildren();renderSplit();$('copyfallback').hidden=true;message('genstatus','변경한 회차의 고정 5게임 확인 버튼을 누르세요.');};
 $('recordexport').onclick=async()=>{await recordsReady;const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({schema:1,records:localRecords},null,2)],{type:'application/json'}));a.href=u;a.download='lotto-weekly-records.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
 $('recordimport').onclick=()=>$('recordfile').click();$('recordfile').onchange=async e=>{try{await recordsReady;if(recordLoadError)throw Error('기존 저장 기록 오류를 먼저 확인하세요.');const file=e.target.files[0];if(!file)return;if(file.size>5*1024*1024)throw Error('5 MB 이하 파일만 가능합니다.');const rows=await validateWeeklyRecords(JSON.parse(await file.text()).records),map=new Map(localRecords.map(r=>[r.version+':'+r.round,r]));for(const r of rows)if(!map.has(r.version+':'+r.round))map.set(r.version+':'+r.round,{...r,timing:'unverified'});const next=[...map.values()];localStorage.setItem(RECORD_KEY,JSON.stringify(next));localRecords=next;renderRecords();message('recordstatus','기록 가져오기 완료. 기존 회차는 유지하며 가져온 기록은 시점 미확인으로 표시합니다.');}catch(e){message('recordstatus',e.message,true);}finally{e.target.value='';}};
 const previousRefresh=$('refresh').onclick;$('refresh').onclick=async()=>{await previousRefresh();await refreshRecords();await refreshStudy();};
