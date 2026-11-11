@@ -16,14 +16,18 @@ export function chiSquareStatistic(counts){const n=counts.reduce((a,b)=>a+b,0);i
 // Marsaglia's accurate chi-square upper-tail implementation (Lanczos + continued fraction).
 function logGamma(z){const p=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.6150291621406,12.507343278686905,-.13857109526572012,9.984369578019572e-6,1.505632735149312e-7];if(z<.5)return Math.log(Math.PI)-Math.log(Math.sin(Math.PI*z))-logGamma(1-z);z-=1;let x=p[0];for(let i=1;i<p.length;i++)x+=p[i]/(z+i);const t=z+7.5;return .5*Math.log(2*Math.PI)+(z+.5)*Math.log(t)-t+Math.log(x);}
 function gammaQ(s,x){if(x<=0)return 1;if(x<s+1){let term=1/s,sum=term;for(let j=1;j<500;j++){term*=x/(s+j);sum+=term;if(Math.abs(term)<Math.abs(sum)*1e-14)break;}return Math.max(0,1-sum*Math.exp(s*Math.log(x)-x-logGamma(s)));}let b=x+1-s,c=1e300,d=1/b,h=d;for(let j=1;j<500;j++){const an=-j*(j-s);b+=2;d=an*d+b;if(Math.abs(d)<1e-300)d=1e-300;c=b+an/c;if(Math.abs(c)<1e-300)c=1e-300;d=1/d;const delta=d*c;h*=delta;if(Math.abs(delta-1)<1e-14)break;}return Math.max(0,Math.min(1,h*Math.exp(s*Math.log(x)-x-logGamma(s))));}
-function normalCDF(x){const z=Math.abs(x)/Math.sqrt(2),t=1/(1+.3275911*z),erf=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-z*z);return (x>=0?1+erf:1-erf)/2;}
+/** Two-sided standard-normal tail P(|Z|>=|z|) = Q(1/2, z^2/2). Uses the same incomplete-gamma routine as the
+ * chi-square p-value, so far tails keep relative accuracy instead of collapsing to 0 at about 1e-7. */
+export function twoSidedNormalP(z){if(!Number.isFinite(z))throw new Error('z 통계량 오류');return gammaQ(.5,z*z/2);}
 export function randomnessSummary(rows){const sorted=validatePensionRows(rows),cols=frequency(sorted);return cols.map((f,i)=>{
  const x=f.counts,n=f.n,chi=chiSquareStatistic(x),expected=n/x.length,values=sorted.map(d=>features(d)[i]);
  const bits=values.map(v=>v>=x.length/2?1:0);const n1=bits.filter(v=>v===1).length,n0=n-n1;let runs=0;for(let j=0;j<bits.length;j++)if(j===0||bits[j]!==bits[j-1])runs++;
  const mu=1+2*n0*n1/(n||1),variance=(2*n0*n1*(2*n0*n1-n))/(n*n*(n-1)||1);
  const runsZ=variance>0?(runs-mu)/Math.sqrt(variance):null;
+ // Normal approximation of the runs test needs both classes reasonably populated.
+ const runsP=n>=30&&n0>=10&&n1>=10&&runsZ!==null?twoSidedNormalP(runsZ):null;
  const m=values.reduce((a,b)=>a+b,0)/(n||1),ss=values.reduce((a,b)=>a+(b-m)**2,0),ac=n>2&&ss?values.slice(1).reduce((a,b,j)=>a+(b-m)*(values[j]-m),0)/ss:null;
- return {...f,entropy:entropy(x),normalizedEntropy:n?entropy(x)/Math.log2(x.length):null,chiSquare:chi,chiPValue:expected>=5?gammaQ((x.length-1)/2,chi/2):null,runs,runsZ,runsPValue:n>=30&&runsZ!==null?2*(1-normalCDF(Math.abs(runsZ))):null,lag1:ac,lag1ApproxP:n>=50&&ac!==null?2*(1-normalCDF(Math.abs(ac)*Math.sqrt(n))):null,adjustedChiP:expected>=5?Math.min(1,13*gammaQ((x.length-1)/2,chi/2)):null,assumptions:'exploratory iid-null; Bonferroni 13; no predictive inference'};
+ return {...f,entropy:entropy(x),normalizedEntropy:n?entropy(x)/Math.log2(x.length):null,chiSquare:chi,chiPValue:expected>=5?gammaQ((x.length-1)/2,chi/2):null,runs,runsZ,runsPValue:runsP,adjustedRunsP:runsP===null?null:Math.min(1,13*runsP),lag1:ac,lag1ApproxP:n>=50&&ac!==null?twoSidedNormalP(ac*Math.sqrt(n)):null,adjustedChiP:expected>=5?Math.min(1,13*gammaQ((x.length-1)/2,chi/2)):null,assumptions:'exploratory iid-null; Bonferroni 13 applied separately to chi-square and runs p-values; no predictive inference'};
  });}
 export function categoricalModel(history,featureIndex,{mode='bayes',alpha=1,window=100}={}){
  if(!['uniform','frequency','recent','bayes'].includes(mode)||!Number.isFinite(alpha)||alpha<=0)throw new Error('통계 모델 설정 오류');
@@ -33,13 +37,26 @@ export function categoricalModel(history,featureIndex,{mode='bayes',alpha=1,wind
  const pseudo=mode==='bayes'?alpha:0,den=eligible.length+k*pseudo;
  return den?counts.map(x=>(x+pseudo)/den):Array(k).fill(1/k);
 }
-export function categoricalMetrics(probs,actual){const k=probs.length;if(!Number.isInteger(actual)||actual<0||actual>=k||probs.some(p=>!Number.isFinite(p)||p<0)||Math.abs(probs.reduce((a,b)=>a+b)-1)>1e-8)throw new Error('확률 벡터 오류');return {logLoss:-Math.log(Math.max(probs[actual],1e-15)),brier:probs.reduce((s,p,i)=>s+(p-(i===actual?1:0))**2,0)/k,accuracy:probs.indexOf(Math.max(...probs))===actual?1:0};}
+export function categoricalMetrics(probs,actual){const k=probs.length;if(!Number.isInteger(actual)||actual<0||actual>=k||probs.some(p=>!Number.isFinite(p)||p<0)||Math.abs(probs.reduce((a,b)=>a+b)-1)>1e-8)throw new Error('확률 벡터 오류');return {logLoss:-Math.log(Math.max(probs[actual],1e-15)),brier:probs.reduce((s,p,i)=>s+(p-(i===actual?1:0))**2,0)/k,accuracy:(()=>{const top=Math.max(...probs),ties=probs.filter(p=>p===top).length;
+  // Ties share credit analytically: a uniform forecast scores exactly 1/k instead of depending on which class is listed first.
+  return probs[actual]===top?1/ties:0;})()};}
 /** Chronological walk-forward, with a fixed final 20% holdout. Results exploratory unless predictions were timestamped prior to each sales deadline. */
 export function backtest(rows,{minTrain=100,alpha=20,window=100}={}){
  const ds=validatePensionRows(rows);if(ds.length<minTrain+10)return {status:'insufficient-data',n:ds.length,minRequired:minTrain+10,models:[]};
- const begin=Math.max(minTrain,Math.floor(ds.length*.8));const modes=['uniform','frequency','recent','bayes'];const results=[];
- for(const mode of modes){let logLoss=0,brier=0,accuracy=0,count=0;for(let j=begin;j<ds.length;j++)for(let i=0;i<13;i++){
- const probs=categoricalModel(ds.slice(0,j),i,{mode,alpha,window});const m=categoricalMetrics(probs,features(ds[j])[i]);logLoss+=m.logLoss;brier+=m.brier;accuracy+=m.accuracy;count++;}
- results.push({mode,logLoss:logLoss/count,brier:brier/count,accuracy:accuracy/count,count});}
- return {status:'exploratory-backtest',minTrain,holdoutStartRound:ds[begin].round,holdoutEndRound:ds.at(-1).round,holdoutRounds:ds.length-begin,models:results,disclaimer:'학습 구간을 사후 검토한 결과입니다. 사전 등록된 미래 예측 우위가 입증된 것은 아닙니다.'};
+ const begin=Math.max(minTrain,Math.floor(ds.length*.8));const modes=['uniform','frequency','recent','bayes'];const results=[],perRound={};
+ for(const mode of modes){let logLoss=0,brier=0,accuracy=0,count=0;perRound[mode]=[];
+  for(let j=begin;j<ds.length;j++){const train=ds.slice(0,j);let roundLoss=0;
+   for(let i=0;i<13;i++){const probs=categoricalModel(train,i,{mode,alpha,window});const m=categoricalMetrics(probs,features(ds[j])[i]);logLoss+=m.logLoss;brier+=m.brier;accuracy+=m.accuracy;roundLoss+=m.logLoss;count++;}
+   perRound[mode].push(roundLoss/13);}
+  results.push({mode,logLoss:logLoss/count,brier:brier/count,accuracy:accuracy/count,count});}
+ // Paired per-round comparison with the uniform baseline (positive = better than uniform). The thirteen positions of
+ // one draw are averaged first, so the sampling unit is the draw, not the digit. Normal approximation, exploratory only.
+ for(const r of results){
+  if(r.mode==='uniform'){r.vsUniform=null;continue;}
+  const diff=perRound.uniform.map((u,k)=>u-perRound[r.mode][k]),n=diff.length,mean=diff.reduce((a,b)=>a+b,0)/n;
+  const se=n>1?Math.sqrt(diff.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)/n):0;
+  const pValue=se>1e-15?twoSidedNormalP(mean/se):(Math.abs(mean)<1e-15?1:0);
+  r.vsUniform={n,meanLogLossImprovement:mean,standardError:se,confidence95:[mean-1.96*se,mean+1.96*se],pValue,adjustedPValue:Math.min(1,3*pValue),exploratorySignificantEdge:mean>0&&3*pValue<.05};
+ }
+ return {status:'exploratory-backtest',minTrain,holdoutStartRound:ds[begin].round,holdoutEndRound:ds.at(-1).round,holdoutRounds:ds.length-begin,models:results,expectedUniformAccuracy:(1/5+12/10)/13,disclaimer:'학습 구간을 사후 검토한 결과입니다. 사전 등록된 미래 예측 우위가 입증된 것은 아닙니다.'};
 }

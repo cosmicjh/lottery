@@ -27,15 +27,46 @@ test('suffix coverage uses unique k-digit suffix, not count of tickets',()=>{con
 test('annuity at zero discount is nominal post-tax amount',()=>{near(annuityPV(7e6,240,0,.22),1_310_400_000,1e-3);near(annuityPV(1e6,120,0,.22),93_600_000,1e-3);});
 test('larger discount rate reduces present value and later payment does too',()=>{assert.ok(annuityPV(1e6,120,.03,.22)>annuityPV(1e6,120,.08,.22));assert.ok(annuityPV(1e6,120,.03,.22)>annuityPV(1e6,120,.03,.22,2));});
 test('invalid tax or time-value settings rejected',()=>{for(const x of [-.01,1.01,NaN])assert.throws(()=>annuityPV(1e6,120,.03,x));});
-test('generate all four modes with 5, 10, and 20 tickets',()=>{for(const strategy of ['random','dispersed','concentrated','mixed'])for(const count of [1,5,10,20]){const a=generatePortfolio({strategy,count,round:400,seed:'abc'});assert.equal(a.length,count);assertPortfolio(a);}});
+test('all five strategies generate valid portfolios at supported sizes',()=>{for(const strategy of ['random','dispersed','concentrated','mixed','recovery'])for(const count of [1,5,10,20]){const a=generatePortfolio({strategy,count,round:400,seed:'abc'});assert.equal(a.length,count);assertPortfolio(a);}});
 test('round, strategy, count, seed stable across calls but changed with round',()=>{const args={strategy:'dispersed',count:5,round:300,seed:'fixed'};assert.deepEqual(generatePortfolio(args),generatePortfolio({...args}));assert.notDeepEqual(generatePortfolio(args),generatePortfolio({...args,round:301}));});
 test('dispersed 10 covers each final digit once; 20 covers all last-two digits separately',()=>{for(const n of [5,10,20]){const a=generatePortfolio({count:n,strategy:'dispersed',round:420});assert.equal(new Set(a.map(t=>t.number.slice(-2))).size,n);assert.equal(new Set(a.map(t=>t.number.slice(-1))).size,Math.min(10,n));}});
 test('concentrated 5 has all five groups same number',()=>{const a=generatePortfolio({count:5,strategy:'concentrated',round:420});assert.equal(new Set(a.map(t=>t.number)).size,1);assert.equal(new Set(a.map(t=>t.group)).size,5);});
+test('concentrated redraws a six-digit number already used by a bundle',()=>{
+ const results=compareStrategies(20,341,'audit-75195');
+ const {tickets}=results.find(row=>row.strategy==='concentrated');
+ const numbers=new Set(tickets.map(t=>t.number));
+ assert.equal(numbers.size,4);
+ for(const number of numbers)assert.equal(new Set(tickets.filter(t=>t.number===number).map(t=>t.group)).size,5);
+});
+test('recovery shares one ending and covers a different bonus number on every ticket',()=>{
+ for(const count of [1,5,20]){
+  const tickets=generatePortfolio({strategy:'recovery',count,round:341,seed:'pension-2026'});
+  const d=exactDistribution(tickets);
+  assert.equal(d.coverage.distinctSuffixes[1],1);
+  assert.equal(d.coverage.distinctSuffixes[6],count);
+  near(d.probabilityRecover,.1+count*(.9e-6+1e-12),1e-13);
+ }
+});
 test('invalid strategy, count, round rejected',()=>{for(const opts of [{count:21},{strategy:'magic'},{round:0}])assert.throws(()=>generatePortfolio(opts));});
 test('exact distribution single ticket is normalized and median zero',()=>{const d=exactDistribution([ticket(1,'000001')]);near(d.distribution.reduce((s,[,p])=>s+p,0),1);near(d.median,0);near(d.coverage.atLeast[7],.1);});
 test('bonus 6-digit reroll reflected in exact probability any: one ticket',()=>{const d=exactDistribution([ticket(1,'000001')]);near(d.probabilityAny,.1+.9e-6+1e-12,1e-10);});
 test('bonus 6-digit reroll reflected in exact probability any: five dispersed',()=>{const t=[0,1,2,3,4].map(i=>ticket(1,'10000'+i));const d=exactDistribution(t);near(d.probabilityAny,.5+2.5e-6+25/(9e12),1e-10);});
 test('bonus and main grade overlaps must NOT pay twice',()=>{const d=exactDistribution([ticket(1,'000001')]);const pay=prizeValues();const p=ONE_TICKET_PROBABILITIES;let expected=p[1]*pay[1]+p[2]*pay[2]+p[3]*pay[3]+p[4]*pay[4]+p[5]*pay[5]+p[6]*pay[6]+p[7]*pay[7]+p.bonus*pay.bonus;for(const grade of [3,4,5,6,7])expected-=p[grade]*pay[grade]/1e6;near(d.expectation,expected,1e-5);});
+test('the official bonus grade takes priority even below a cash prize after discounting',()=>{
+ const opts={annualDiscount:1,taxRate:.22,delayMonths:60};
+ const pay=prizeValues(opts),p=ONE_TICKET_PROBABILITIES;
+ const law=new Map(exactDistribution([ticket(1,'012345')],opts).distribution);
+ assert.ok(pay.bonus<pay[3]);
+ near(law.get(pay.bonus),p[2]+p.bonus,1e-14);
+ near(law.get(pay[3]),p[3]*(1-p.bonus),1e-14);
+});
+test('winning probability includes prizes valued at zero and ignores tax settings',()=>{
+ const tickets=[ticket(1,'012345')],normal=exactDistribution(tickets);
+ const zeroAnnuity=exactDistribution(tickets,{taxRate:1});
+ near(zeroAnnuity.probabilityAny,.1+.9e-6+1e-12,1e-14);
+ assert.equal(zeroAnnuity.probabilityAny,normal.probabilityAny);
+ near(zeroAnnuity.probabilityRecover,.099999*(1-1e-6),1e-14);
+});
 test('every valid single ticket has same expected value',()=>{const a=exactDistribution([ticket(1,'000001')]);for(const t of [ticket(3,'490202'),ticket(5,'999999'),ticket(2,'512000')])near(exactDistribution([t]).expectation,a.expectation,1e-5);});
 test('five concentration and dispersion have equal expected return',()=>{const d=compareStrategies(5,400,'same');for(const r of d)near(r.metrics.expectation,d[0].metrics.expectation,1e-5);});
 test('five concentration has more payout variance than dispersed',()=>{const by=Object.fromEntries(compareStrategies(5,400,'same').map(x=>[x.strategy,x.metrics]));assert.ok(by.concentrated.variance>by.dispersed.variance);near(by.concentrated.coverage.firstAndSecond,1e-6);near(by.dispersed.coverage.firstAndSecond,0);});

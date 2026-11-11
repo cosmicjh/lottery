@@ -3,7 +3,7 @@ import {validatePensionRows,randomnessSummary,backtest} from './pension-research
 const $=id=>document.getElementById(id),ko=v=>Math.round(v).toLocaleString('ko-KR'),pct=v=>(v*100).toFixed(v<.001?6:4)+'%',num=(el)=>Number($(el).value);
 const SKEY='pension720-local-records-v1';
 let tickets=[],official=[],shared=[],local=[],ready=false;
-const names={random:'균등 의사난수',dispersed:'접미부 분산',concentrated:'동일번호 5개 조 집중',mixed:'혼합'};
+const names={random:'균등 의사난수',dispersed:'접미부 분산',concentrated:'동일번호 5개 조 집중',mixed:'혼합',recovery:'끝자리 집중 (구매비 회수 우선)'};
 function element(tag,text,className){const e=document.createElement(tag);if(text!=null)e.textContent=String(text);if(className)e.className=className;return e;}
 function table(headers,rows){const t=document.createElement('table'),h=element('thead'),r=element('tr');for(const label of headers)r.append(element('th',label));h.append(r);t.append(h);const body=element('tbody');for(const row of rows){const tr=element('tr');for(const v of row)tr.append(element('td',v));body.append(tr);}t.append(body);return t;}
 function status(id,msg,err=false){const e=$(id);e.textContent=msg;e.classList.toggle('error',err);}
@@ -37,17 +37,27 @@ async function refreshData(){const resp=await fetch('./data/pension720-results.j
  try{const rec=await fetch('./data/pension720-weekly.json',{cache:'no-store'});if(rec.ok){const d=await rec.json();if(d.product!=='pension720'||!Array.isArray(d.records))throw Error('공개 기록 구조 오류');shared=d.records.filter(r=>r.version===PENSION_VERSION&&Array.isArray(r.tickets));}}catch(e){status('p-recordstatus','공개 기록 확인 필요: '+e.message,true);}
  renderRecords();renderResearch();}
 function renderResearch(){const e=$('p-research');e.replaceChildren();if(!official.length){e.append(element('p','검증된 공식 회차 자료가 없어 연구 결과를 산출하지 않았습니다. 사후 학습 결과를 미래 예측 우위로 표시하지 않습니다.'));return;}
- const stats=randomnessSummary(official),walk=backtest(official);e.append(table(['자리','표본수','엔트로피 (정규화)','카이제곱 p','Bonferroni p','Runs p'],stats.map(x=>[x.label,x.n,x.normalizedEntropy?.toFixed(4)??'-',x.chiPValue?.toFixed(5)??'표본부족',x.adjustedChiP?.toFixed(5)??'표본부족',x.runsPValue?.toFixed(5)??'표본부족'])));
- e.append(element('p','Runs 검정은 자리별 0–4와 5–9 분할 기준입니다. 다중검정 보정 후에도 유의성은 예측 가능성을 입증하지 않습니다.','muted'));
+ const stats=randomnessSummary(official),walk=backtest(official);e.append(table(['자리','표본수','엔트로피 (정규화)','카이제곱 p','카이제곱 보정 p','Runs p','Runs 보정 p'],stats.map(x=>[x.label,x.n,x.normalizedEntropy?.toFixed(4)??'-',x.chiPValue?.toFixed(5)??'표본부족',x.adjustedChiP?.toFixed(5)??'표본부족',x.runsPValue?.toFixed(5)??'표본부족',x.adjustedRunsP?.toFixed(5)??'표본부족'])));
+ e.append(element('p','Runs 검정은 자리별 0–4와 5–9(조는 1–2조와 3–5조) 분할 기준이며, 보정 p는 13개 자리에 대한 Bonferroni 보정입니다. 다중검정 보정 후에도 유의성은 예측 가능성을 입증하지 않습니다.','muted'));
  if(walk.status==='insufficient-data')e.append(element('p',`시계열 검증 보류: 검증 회차 최소 ${walk.minRequired}개 필요, 현재 ${walk.n}개.`));
- else {e.append(element('h3',`과거 시계열 순차검증 · 최종 ${walk.holdoutRounds}개 회차`));e.append(table(['모형','평균 Log Loss','평균 Brier','자리별 정답률'],walk.models.map(r=>[r.mode,r.logLoss.toFixed(6),r.brier.toFixed(6),pct(r.accuracy)])));e.append(element('p',walk.disclaimer,'muted'));}
+ else {e.append(element('h3',`과거 시계열 순차검증 · 최종 ${walk.holdoutRounds}개 회차`));e.append(table(['모형','평균 Log Loss','평균 Brier','자리별 정답률','균등 대비 Log Loss 개선 (95% 구간)','3모형 보정 p'],walk.models.map(r=>[r.mode,r.logLoss.toFixed(6),r.brier.toFixed(6),pct(r.accuracy),r.vsUniform?`${r.vsUniform.meanLogLossImprovement.toFixed(6)} [${r.vsUniform.confidence95[0].toFixed(6)}, ${r.vsUniform.confidence95[1].toFixed(6)}]`:'기준',r.vsUniform?r.vsUniform.adjustedPValue.toFixed(4):'-'])));e.append(element('p',`균등 모형의 이론 정답률은 ${pct(walk.expectedUniformAccuracy)}입니다(동점은 균등 분배). 개선 값은 회차 단위 대응 비교이며 양수가 균등 대비 우위, 구간이 0을 포함하면 차이를 구별할 수 없습니다. `+walk.disclaimer,'muted'));}
 }
 async function init(){
  const nav=$('p-nav');nav.addEventListener('click',e=>{const target=e.target.closest('button[data-page]');if(!target)return;const which=target.dataset.page;$('lotto-view').hidden=which!=='lotto';$('pension-view').hidden=which!=='pension';for(const button of nav.querySelectorAll('button'))button.setAttribute('aria-pressed',String(button===target));});
  try{local=JSON.parse(localStorage.getItem(SKEY)||'[]');if(!Array.isArray(local))throw Error('배열이 아닙니다');}catch(e){local=[];status('p-recordstatus','기록 읽기 실패. 기존 저장내용을 덮어쓰지 않습니다: '+e.message,true);}
  $('p-generate').onclick=()=>{try{const round=selectedRound();tickets=generatePortfolio({count:num('p-count'),strategy:$('p-strategy').value,round,seed:$('p-seed').value});showTickets();renderMetrics();persist();status('p-status',`${round}회 · ${tickets.length}장 · ${PENSION_VERSION} 생성 완료. 판매 여부는 공식 구매화면에서 확인하세요.`);}catch(e){status('p-status',e.message,true);}};
- $('p-compare').onclick=()=>{try{const r=selectedRound(),results=compareStrategies(num('p-count'),r,$('p-seed').value,options()),e=$('p-comparison');e.replaceChildren();e.append(table(['전략','본 7등 이상','본 6등 이상','본 1·2등','본·보너스 포함 ≥1장','1등·2등 동시','기대당첨금(원)','표준편차(원)'],results.map(({strategy,metrics:m})=>[names[strategy],pct(m.coverage.atLeast[7]),pct(m.coverage.atLeast[6]),pct(m.coverage.atLeast[2]),pct(m.probabilityAny),pct(m.coverage.firstAndSecond),ko(m.expectation),ko(m.standardDeviation)])));
- status('p-status','동일 구매 장수 기준 수학적 확률분포를 정확 계산했습니다. 예측 모델은 구매번호에 반영하지 않았습니다.');}catch(e){status('p-status',e.message,true);}};
+ $('p-compare').onclick=()=>{
+  try{
+   const results=compareStrategies(num('p-count'),selectedRound(),$('p-seed').value,options());
+   const headers=['전략','본 7등 이상','본 6등 이상','본 1·2등','본·보너스 포함 ≥1장','구매비 회수 이상','1등·2등 동시','기대당첨금(원)','표준편차(원)'];
+   const rows=results.map(({strategy,metrics:m})=>[
+    names[strategy],pct(m.coverage.atLeast[7]),pct(m.coverage.atLeast[6]),pct(m.coverage.atLeast[2]),
+    pct(m.probabilityAny),pct(m.probabilityRecover),pct(m.coverage.firstAndSecond),ko(m.expectation),ko(m.standardDeviation)
+   ]);
+   $('p-comparison').replaceChildren(table(headers,rows));
+   status('p-status','동일 구매 장수 기준으로 당첨 확률과 구매비 회수 확률을 비교했습니다.');
+  }catch(e){status('p-status',e.message,true);}
+ };
  $('p-copy').onclick=async()=>{try{if(!tickets.length)throw Error('번호를 먼저 생성하세요.');const str=tickets.map((t,i)=>`${i+1}. ${t.group}조 ${t.number}`).join('\n');await navigator.clipboard.writeText(str);status('p-status','번호를 클립보드에 복사했습니다.');}catch(e){status('p-status','복사 제한 또는 오류: '+e.message,true);}};
  $('p-export').onclick=()=>{const blob=new Blob([JSON.stringify({schema:1,records:local},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=element('a');a.href=url;a.download='pension720-local-records.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
  $('p-refresh').onclick=async()=>{try{await refreshData();}catch(e){status('p-official','공식 기록 로딩 실패: '+e.message,true);}};

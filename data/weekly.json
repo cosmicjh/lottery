@@ -2,54 +2,6 @@
   "schema": 1,
   "records": [
     {
-      "round": 1250,
-      "version": "weekly-five-v2-disjoint",
-      "games": [
-        [
-          9,
-          15,
-          20,
-          28,
-          32,
-          40
-        ],
-        [
-          2,
-          3,
-          8,
-          19,
-          36,
-          44
-        ],
-        [
-          10,
-          12,
-          18,
-          26,
-          33,
-          42
-        ],
-        [
-          4,
-          6,
-          23,
-          31,
-          35,
-          41
-        ],
-        [
-          5,
-          7,
-          17,
-          27,
-          34,
-          37
-        ]
-      ],
-      "createdAt": "2026-11-08T06:07:21.045Z",
-      "timing": "before-cutoff"
-    },
-    {
       "round": 1249,
       "version": "weekly-five-v2-disjoint",
       "games": [

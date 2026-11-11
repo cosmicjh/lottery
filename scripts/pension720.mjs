@@ -3,6 +3,7 @@ export const PENSION_VERSION='pension720-suffix-v1';
 export const TOTAL_MAIN=5_000_000, TOTAL_DIGITS=1_000_000;
 export const CASH_PRIZES={3:1_000_000,4:100_000,5:50_000,6:5_000,7:1_000};
 export const PENSION_OFFICIAL='https://www.dhlottery.co.kr/pt720/intro';
+const STRATEGIES=['random','dispersed','concentrated','mixed','recovery'];
 export function assertTicket(t){
  if(!t||!Number.isInteger(t.group)||t.group<1||t.group>5||typeof t.number!=='string'||!/^[0-9]{6}$/.test(t.number))throw new Error('조는 1–5, 번호는 0을 포함한 6자리 문자열이어야 합니다.');
  return t;
@@ -17,7 +18,7 @@ export function validDraw(d){
 export function suffixLength(a,b){let k=0;while(k<6&&a[5-k]===b[5-k])k++;return k;}
 export function mainGrade(t,draw){assertTicket(t);const k=suffixLength(t.number,draw.number);return k===6?(t.group===draw.group?1:2):k>=1?8-k:null;}
 export function ticketGrade(t,d){validDraw(d);const main=mainGrade(t,d),bonus=t.number===d.bonus?'bonus':null;
- // Bonus is an annuity and dominates grades 3–7 at realistic scenario rates.
+ // Official grade priority is independent of the annuity's discounted value.
  return main===1||main===2?main:bonus||main;
 }
 export function assessTicket(t,d){return {ticket:t,grade:ticketGrade(t,d),mainGrade:mainGrade(t,d),bonusHit:t.number===d.bonus};}
@@ -46,12 +47,18 @@ export function seededRandom(seed){let h=2166136261;for(let i=0;i<String(seed).l
 }
 function randint(rng,limit){return Math.floor(rng()*limit);}
 function shuffle(a,rng){for(let i=a.length-1;i>0;i--){const k=randint(rng,i+1);[a[k],a[i]]=[a[i],a[k]];}return a;}
-function randomTicket(rng){return {group:randint(rng,5)+1,number:String(randint(rng,1_000_000)).padStart(6,'0')};}
+function drawUnusedNumber(rng,used,suffix=''){
+ const width=6-suffix.length,limit=10**width;
+ let number;
+ do {number=String(randint(rng,limit)).padStart(width,'0')+suffix;} while(used.has(number));
+ used.add(number);
+ return number;
+}
 function uniqueTicket(existing, rng, suffix=null){const seen=new Set(existing.map(t=>t.group+':'+t.number));for(let i=0;i<1000;i++){
  const n=String(randint(rng,10**(6-(suffix?.length||0)))).padStart(6-(suffix?.length||0),'0')+(suffix??'');const t={group:randint(rng,5)+1,number:n};if(!seen.has(t.group+':'+t.number))return t;
  }throw new Error('중복 없는 번호 생성 실패');}
 export function generatePortfolio({count=5,strategy='dispersed',round=1,seed='default'}={}){
- if(!Number.isInteger(count)||count<1||count>20||!Number.isInteger(round)||round<1||!['random','dispersed','concentrated','mixed'].includes(strategy))throw new Error('생성 조건 오류');
+ if(!Number.isInteger(count)||count<1||count>20||!Number.isInteger(round)||round<1||!STRATEGIES.includes(strategy))throw new Error('생성 조건 오류');
  const rng=seededRandom(`${PENSION_VERSION}|${round}|${seed}|${strategy}|${count}`),out=[];
  if(strategy==='random'){for(let i=0;i<count;i++)out.push(uniqueTicket(out,rng));}
  if(strategy==='dispersed'){
@@ -60,11 +67,30 @@ export function generatePortfolio({count=5,strategy='dispersed',round=1,seed='de
   const endings=shuffle(Array.from({length:10},(_,i)=>i),rng);
   const combinations=[];for(let i=0;i<count;i++){const last=endings[i%10],tens=(Math.floor(i/10)+randint(rng,10))%10;let suf=String(tens)+String(last);while(combinations.includes(suf)){suf=String((Number(suf[0])+1)%10)+String(last);}combinations.push(suf);out.push(uniqueTicket(out,rng,suf));}
  }
- if(strategy==='concentrated'||strategy==='mixed'){
-  const num=String(randint(rng,1_000_000)).padStart(6,'0'),groups=shuffle([1,2,3,4,5],rng),focus=strategy==='concentrated'?count:Math.min(5,Math.max(1,Math.floor(count/2)));
-  for(let i=0;i<Math.min(5,focus);i++)out.push({group:groups[i],number:num});
-  if(strategy==='concentrated')for(let i=5;i<count;i++){const x=String(randint(rng,1_000_000)).padStart(6,'0');const gs=shuffle([1,2,3,4,5],rng);for(let g=0;g<Math.min(5,count-i);g++)out.push({group:gs[g],number:x});i+=Math.min(5,count-i)-1;}
-  else {const endingOptions=shuffle('0123456789'.split('').filter(x=>x!==num[5]),rng);while(out.length<count){const suffix=endingOptions[(out.length-focus)%endingOptions.length];out.push(uniqueTicket(out,rng,suffix));}}
+ if(strategy==='concentrated'){
+  const used=new Set();
+  for(let i=0;i<count;i+=5){
+   const number=drawUnusedNumber(rng,used);
+   const groups=shuffle([1,2,3,4,5],rng);
+   for(const group of groups.slice(0,count-i))out.push({group,number});
+  }
+ }
+ if(strategy==='mixed'){
+  const num=String(randint(rng,TOTAL_DIGITS)).padStart(6,'0'),groups=shuffle([1,2,3,4,5],rng),focus=Math.min(5,Math.max(1,Math.floor(count/2)));
+  for(let i=0;i<focus;i++)out.push({group:groups[i],number:num});
+  const endingOptions=shuffle('0123456789'.split('').filter(x=>x!==num[5]),rng);
+  while(out.length<count){
+   const suffix=endingOptions[(out.length-focus)%endingOptions.length];
+   out.push(uniqueTicket(out,rng,suffix));
+  }
+ }
+ if(strategy==='recovery'){
+  // Sharing the last digit lets the 7th prizes cover the cost together.
+  const suffix=String(randint(rng,10)),used=new Set();
+  for(let i=0;i<count;i++){
+   const number=drawUnusedNumber(rng,used,suffix);
+   out.push({group:randint(rng,5)+1,number});
+  }
  }
  return assertPortfolio(out);
 }
@@ -92,22 +118,26 @@ function gradesForState(tickets,state,group){return state.map((n,i)=>n===6?(tick
  * *six-digit equality*, not equality of any suffix.
  */
 export function exactDistribution(tickets,opts={}){
- assertPortfolio(tickets);const payouts=prizeValues(opts),numMap=new Map();for(const t of tickets){if(!numMap.has(t.number))numMap.set(t.number,[]);numMap.get(t.number).push(t);}
- const keys=[...numMap.keys()],law=new Map(),cost=tickets.length*1000;let totalCellWeight=0;
+ const cov=coverage(tickets),payouts=prizeValues(opts);
+ const numbers=new Set(tickets.map(t=>t.number)),law=new Map(),cost=tickets.length*1000;
+ let totalCellWeight=0;
  const add=(v,p)=>law.set(v,(law.get(v)||0)+p);
  for(const cell of mainCells(tickets)){
-  const mainProb=cell.count/TOTAL_MAIN;totalCellWeight+=5*mainProb;
-  for(let group=1;group<=5;group++){
-   const grades=gradesForState(tickets,cell.states,group);
-   const base=grades.reduce((s,k)=>s+(k?payouts[k]:0),0);
+  // The drawn group only affects tickets whose full six digits match.
+  const groupCount=cell.states.includes(6)?5:1;
+  const cellProb=cell.count/TOTAL_DIGITS,mainProb=cellProb/groupCount;
+  totalCellWeight+=cellProb;
+  for(let group=1;group<=groupCount;group++){
+   const mainPayouts=gradesForState(tickets,cell.states,group).map(grade=>grade?payouts[grade]:0);
+   const base=mainPayouts.reduce((sum,value)=>sum+value,0);
    let totalBonusProbability=0;
-   for(const num of keys){let prob=1/TOTAL_DIGITS;
-    if(cell.number===num)prob=0;
-    else if(cell.number!==null&&cell.number.slice(0,5)===num.slice(0,5))prob+=1/(9*TOTAL_DIGITS);
-    const affected=numMap.get(num);let extra=0;
-    for(const ticket of affected){const index=tickets.indexOf(ticket);extra+=Math.max(payouts.bonus,grades[index]?payouts[grades[index]]:0)-(grades[index]?payouts[grades[index]]:0);}
+   for(const number of numbers){
+    if(cell.number===number)continue;
+    const samePrefix=cell.number!==null&&cell.number.slice(0,5)===number.slice(0,5);
+    const prob=(samePrefix?10:9)/(9*TOTAL_DIGITS);
+    const payout=mainPayouts.reduce((sum,value,i)=>sum+(tickets[i].number===number?payouts.bonus:value),0);
     totalBonusProbability+=prob;
-    add(base+extra,mainProb*prob);
+    add(payout,mainProb*prob);
    }
    add(base,mainProb*(1-totalBonusProbability));
   }
@@ -119,8 +149,11 @@ export function exactDistribution(tickets,opts={}){
  const variance=entries.reduce((s,[v,p])=>s+(v-expectation)**2*p,0);
  let accumulated=0,median=0;for(const [v,p] of entries){accumulated+=p;if(accumulated>=.5){median=v;break;}}
  const probabilityAtLeast=(amount)=>entries.reduce((s,[v,p])=>s+(v>=amount?p:0),0);
- return {expectation,variance,standardDeviation:Math.sqrt(variance),median,cost,netExpected:expectation-cost,probabilityAny:1-(law.get(0)||0),probabilityRecover:probabilityAtLeast(cost),probabilityAtLeast,distribution:entries,coverage:coverage(tickets),assumptions:{...opts,bonusReroll:'same-six-digits-reroll-last-digit',model:'exact',tax:'pension-annuity-withholding-only'}};
+ // For each bonus number, each uncovered ending contributes one same-prefix reroll case.
+ const uncoveredEndings=10-cov.distinctSuffixes[1];
+ const probabilityAny=cov.atLeast[7]+cov.bonusAtLeast*uncoveredEndings*(1/10+1/(9*TOTAL_DIGITS));
+ return {expectation,variance,standardDeviation:Math.sqrt(variance),median,cost,netExpected:expectation-cost,probabilityAny,probabilityRecover:probabilityAtLeast(cost),probabilityAtLeast,distribution:entries,coverage:cov,assumptions:{...opts,bonusReroll:'same-six-digits-reroll-last-digit',model:'exact',tax:'pension-annuity-withholding-only'}};
 }
 export function compareStrategies(count=5,round=1,seed='compare',opts={}){
- return ['random','dispersed','concentrated','mixed'].map(strategy=>{const tickets=generatePortfolio({count,round,seed,strategy});return {strategy,tickets,metrics:exactDistribution(tickets,opts)};});
+ return STRATEGIES.map(strategy=>{const tickets=generatePortfolio({count,round,seed,strategy});return {strategy,tickets,metrics:exactDistribution(tickets,opts)};});
 }

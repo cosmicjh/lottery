@@ -2,38 +2,5 @@
   "schema": 1,
   "product": "pension720",
   "algorithm": "pension720-suffix-v1",
-  "records": [
-    {
-      "round": 341,
-      "version": "pension720-suffix-v1",
-      "tickets": [
-        {
-          "group": 1,
-          "number": "160460"
-        },
-        {
-          "group": 3,
-          "number": "125417"
-        },
-        {
-          "group": 4,
-          "number": "507944"
-        },
-        {
-          "group": 3,
-          "number": "069333"
-        },
-        {
-          "group": 1,
-          "number": "284681"
-        }
-      ],
-      "strategy": "dispersed",
-      "seedHash": "5366ee5af0b41bddad45aef3caaf3a4e53614759f516d8c06c71c954ed426dfc",
-      "createdAt": "2026-11-06T09:44:28.609Z",
-      "cutoff": "2026-11-12T08:00:00.000Z",
-      "trainingEndRound": null,
-      "source": "algorithm-no-data"
-    }
-  ]
+  "records": []
 }
