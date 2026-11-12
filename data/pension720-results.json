@@ -1,13 +1,13 @@
 {
   "schema": 1,
   "product": "pension720",
-  "checkedAt": "2026-11-11T02:15:30.486Z",
-  "lastVerifiedRound": 340,
-  "completeThroughRound": 340,
+  "checkedAt": "2026-11-12T18:57:44.490Z",
+  "lastVerifiedRound": 341,
+  "completeThroughRound": 341,
   "missingCount": 0,
   "missingRounds": [],
   "dateSequenceWarnings": [],
-  "status": "공식 확인 340회까지 연속 수집 완료",
+  "status": "공식 확인 341회까지 연속 수집 완료",
   "draws": [
     {
       "round": 1,
@@ -3066,6 +3066,15 @@
       "group": 4,
       "number": "194892",
       "bonus": "288615",
+      "source": "official",
+      "sourceUrl": "https://www.dhlottery.co.kr/pt720/selectPstPt720WnList.do"
+    },
+    {
+      "round": 341,
+      "date": "2026-11-12",
+      "group": 3,
+      "number": "194929",
+      "bonus": "783820",
       "source": "official",
       "sourceUrl": "https://www.dhlottery.co.kr/pt720/selectPstPt720WnList.do"
     }
