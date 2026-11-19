@@ -66,6 +66,38 @@
       "cutoff": "2026-11-19T08:00:00.000Z",
       "trainingEndRound": null,
       "source": "algorithm-no-data"
+    },
+    {
+      "round": 343,
+      "version": "pension720-suffix-v1",
+      "tickets": [
+        {
+          "group": 2,
+          "number": "118214"
+        },
+        {
+          "group": 3,
+          "number": "180407"
+        },
+        {
+          "group": 3,
+          "number": "750482"
+        },
+        {
+          "group": 4,
+          "number": "583431"
+        },
+        {
+          "group": 1,
+          "number": "626460"
+        }
+      ],
+      "strategy": "dispersed",
+      "seedHash": "5366ee5af0b41bddad45aef3caaf3a4e53614759f516d8c06c71c954ed426dfc",
+      "createdAt": "2026-11-19T19:29:55.577Z",
+      "cutoff": "2026-11-26T08:00:00.000Z",
+      "trainingEndRound": null,
+      "source": "algorithm-no-data"
     }
   ]
 }
