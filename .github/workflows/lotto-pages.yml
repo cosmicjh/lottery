@@ -38,6 +38,10 @@ jobs:
         id: collect
         continue-on-error: true
         run: node scripts/collect-lotto.mjs
+      - name: Estimate number popularity from official winner counts
+        id: popularity
+        continue-on-error: true
+        run: node scripts/build-popularity.mjs
       - name: Record next weekly five
         id: records
         continue-on-error: true
@@ -61,7 +65,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          for f in data/lotto.json data/weekly.json data/study.json data/pension720-results.json data/pension720-weekly.json data/pension720-study.json; do
+          for f in data/lotto.json data/lotto-popularity.json data/weekly.json data/study.json data/pension720-results.json data/pension720-weekly.json data/pension720-study.json; do
             if [ -f "$f" ]; then git add "$f"; fi
           done
           if ! git diff --cached --quiet; then
@@ -74,7 +78,7 @@ jobs:
           cp index.html .nojekyll public/
           cp scripts/portfolio.js public/scripts/
           cp scripts/pension720.mjs scripts/pension-research.mjs scripts/pension-ui.mjs public/scripts/
-          for f in data/lotto.json data/weekly.json data/study.json data/pension720-results.json data/pension720-weekly.json data/pension720-study.json; do
+          for f in data/lotto.json data/lotto-popularity.json data/weekly.json data/study.json data/pension720-results.json data/pension720-weekly.json data/pension720-study.json; do
             if [ -f "$f" ]; then cp "$f" public/data/; fi
           done
       - uses: actions/upload-pages-artifact@v3
@@ -84,7 +88,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
       - name: Report collection failure after publishing preserved data
-        if: steps.collect.outcome == 'failure' || steps.records.outcome == 'failure' || steps.pension_collect.outcome == 'failure' || steps.pension_records.outcome == 'failure'
+        if: steps.collect.outcome == 'failure' || steps.popularity.outcome == 'failure' || steps.records.outcome == 'failure' || steps.pension_collect.outcome == 'failure' || steps.pension_records.outcome == 'failure'
         run: |
           echo 'Official collection failed. Existing data was preserved and the status was published.'
           exit 1
