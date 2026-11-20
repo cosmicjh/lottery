@@ -89,3 +89,7 @@ v1과 v2는 번호가 다릅니다. 이미 v1 번호를 구매했다면 그대�
 최초 실행 시 GitHub **Actions → Lotto Pages → Run workflow**에서 `pension_full_history`를 선택하거나, Node.js 22 이상 환경에서 `node scripts/collect-pension.mjs --full`을 실행합니다. 누락 수, 연속 회차 수집 범위, 날짜 일관성 경고를 데이터와 화면에서 확인할 수 있습니다. 실제 운영 API 호출 성공 여부는 실환경에서 확인해야 합니다.
 
 상세 절차: `pension-deployment.md`의 8장.
+
+## 저인기 번호 비중복 추천 (weekly-five-v3-lowpop)
+
+공통·개인 추천은 다른 구매자가 덜 고르는 30개 번호로 비중복 5게임을 만든다. 당첨 확률은 v2와 같고 1~3등 당첨 시 기대 몫만 커진다. 판매액·등위별 당첨자 수 수집, 인기도 추정·표본 외 검증, 대체 규칙은 `lotto-popularity.md`에 정리했다.

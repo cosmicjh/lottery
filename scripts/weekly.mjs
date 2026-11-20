@@ -1,7 +1,11 @@
-const WEEKLY_VERSION='weekly-five-v2-disjoint';
+import portfolio from './portfolio.js';
+const WEEKLY_VERSION='weekly-five-v3-lowpop';
+const DISJOINT_WEEKLY_VERSION='weekly-five-v2-disjoint';
 const LEGACY_WEEKLY_VERSION='weekly-five-v1';
-async function weeklyFive(round,version=WEEKLY_VERSION){
- if(![WEEKLY_VERSION,LEGACY_WEEKLY_VERSION].includes(version))throw Error("지원하지 않는 추천 버전");
+const WEEKLY_VERSIONS=[WEEKLY_VERSION,DISJOINT_WEEKLY_VERSION,LEGACY_WEEKLY_VERSION];
+/** v3 needs the popularity snapshot ({id, numbers}) it was generated with; v2/v1 ignore it. */
+async function weeklyFive(round,version=WEEKLY_VERSION,popularity=null){
+ if(!WEEKLY_VERSIONS.includes(version))throw Error("지원하지 않는 추천 버전");
  if(!Number.isInteger(round)||round<1||round>10000)throw Error('대상 회차는 1~10000 정수입니다.');
  if(!globalThis.crypto?.subtle)throw Error('HTTPS 사이트에서 접속하세요. 이 브라우저는 번호 생성에 필요한 기능을 지원하지 않습니다.');
  let words=[],counter=0;
@@ -9,7 +13,8 @@ async function weeklyFive(round,version=WEEKLY_VERSION){
   const limit=Math.floor(4294967296/n)*n;
   for(;;){if(!words.length){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(`${version}:${round}:${counter++}`));const view=new DataView(digest);words=Array.from({length:8},(_,i)=>view.getUint32(i*4,false));}const v=words.shift();if(v<limit)return v%n;}
  }
- if(version===WEEKLY_VERSION){
+ if(version===WEEKLY_VERSION)return portfolio.lowPopularityFive(popularity,integer);
+ if(version===DISJOINT_WEEKLY_VERSION){
   const pool=Array.from({length:45},(_,i)=>i+1);
   for(let i=0;i<30;i++){const j=i+await integer(45-i);[pool[i],pool[j]]=[pool[j],pool[i]];}
   return Array.from({length:5},(_,i)=>pool.slice(i*6,i*6+6).sort((a,b)=>a-b));
@@ -35,9 +40,14 @@ function gradeWeekly(games,draw){
 async function validateWeeklyRecords(records){
  if(!Array.isArray(records)||records.length>10000)throw Error('기록 목록 형식 오류');
  const clean=[],seen=new Set();
- for(const r of records){if(![WEEKLY_VERSION,LEGACY_WEEKLY_VERSION].includes(r?.version)||seen.has(r.version+':'+r.round)||!Number.isFinite(Date.parse(r.createdAt))||!['before-cutoff','unverified'].includes(r.timing))throw Error('기록 버전·회차·시각 오류');
- const expected=await weeklyFive(r.round,r.version);if(JSON.stringify(expected)!==JSON.stringify(r.games))throw Error('기록 번호가 고정 규칙과 일치하지 않습니다.');
- seen.add(r.version+':'+r.round);clean.push({round:r.round,version:r.version,games:expected,createdAt:new Date(r.createdAt).toISOString(),timing:r.timing});}
+ for(const r of records){if(!WEEKLY_VERSIONS.includes(r?.version)||seen.has(r.version+':'+r.round)||!Number.isFinite(Date.parse(r.createdAt))||!['before-cutoff','unverified'].includes(r.timing))throw Error('기록 버전·회차·시각 오류');
+ const popularity=r.version===WEEKLY_VERSION?portfolio.validatePopularity(r.popularity):null;
+ const expected=await weeklyFive(r.round,r.version,popularity);if(JSON.stringify(expected)!==JSON.stringify(r.games))throw Error('기록 번호가 고정 규칙과 일치하지 않습니다.');
+ seen.add(r.version+':'+r.round);clean.push({round:r.round,version:r.version,games:expected,...(popularity?{popularity}:{}),createdAt:new Date(r.createdAt).toISOString(),timing:r.timing});}
  return clean.sort((a,b)=>b.round-a.round);
 }
-export {WEEKLY_VERSION,LEGACY_WEEKLY_VERSION,weeklyFive,nextWeeklyTarget,gradeWeekly,validateWeeklyRecords};
+/** The popularity profile file is used only when its out-of-sample validation passed; otherwise v2 applies. */
+function usablePopularity(profile){
+ try{if(profile?.schema!==1||profile.usable!==true)return null;return portfolio.validatePopularity({id:profile.id,numbers:profile.numbers});}catch{return null;}
+}
+export {WEEKLY_VERSION,DISJOINT_WEEKLY_VERSION,LEGACY_WEEKLY_VERSION,WEEKLY_VERSIONS,usablePopularity,weeklyFive,nextWeeklyTarget,gradeWeekly,validateWeeklyRecords};

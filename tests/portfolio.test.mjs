@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {webcrypto} from 'node:crypto';
 import {createRequire} from 'node:module';
-import {weeklyFive,LEGACY_WEEKLY_VERSION} from '../scripts/weekly.mjs';
+import {weeklyFive,LEGACY_WEEKLY_VERSION,DISJOINT_WEEKLY_VERSION} from '../scripts/weekly.mjs';
 import {researchForecast} from '../scripts/research.mjs';
 const require=createRequire(import.meta.url),p=require('../scripts/portfolio.js');
 const simple=Array.from({length:5},(_,i)=>Array.from({length:6},(_,j)=>6*i+j+1));
@@ -27,13 +27,13 @@ test('overlap and invalid tickets are rejected by the exact disjoint method',()=
 test('v1/v2 recommendation bytes unchanged; personal recommendations reproducible and distinct',async()=>{
  const v1=await weeklyFive(1234,LEGACY_WEEKLY_VERSION);
  assert.deepEqual(v1,[[4,10,12,15,31,35],[2,6,12,23,25,26],[16,17,31,38,39,44],[9,10,16,23,27,37],[3,7,17,23,39,45]]);
- const v2=await weeklyFive(1234);
+ const v2=await weeklyFive(1234,DISJOINT_WEEKLY_VERSION);
  assert.deepEqual(v2,[[13,25,31,33,36,41],[1,9,15,17,21,32],[7,20,23,26,43,44],[8,10,18,19,40,45],[6,11,24,30,38,42]]);
  const one=await p.personalFive(1249,'secret-A-32length',webcrypto);
  assert.deepEqual(one,await p.personalFive(1249,'secret-A-32length',webcrypto));
  assert.notDeepEqual(one,await p.personalFive(1249,'different-seed',webcrypto));
  assert.notDeepEqual(one,await p.personalFive(1250,'secret-A-32length',webcrypto));
- assert.notDeepEqual(one,await weeklyFive(1249));
+ assert.notDeepEqual(one,await weeklyFive(1249,DISJOINT_WEEKLY_VERSION));
  assert.equal(p.checkGames(one,true).distinctNumbers,30);
  assert.throws(()=>p.checkGames([...simple.slice(0,4),[1,2,3,4,5,6]],true));
  await assert.rejects(()=>p.personalFive(1249,'',webcrypto));

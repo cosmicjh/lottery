@@ -1,4 +1,4 @@
-import {validateDraw,validateRows} from './model.mjs';
+import {validateDraw,validateRows,validateStats} from './model.mjs';
 export const SOURCE='https://www.dhlottery.co.kr';
 async function fetchText(url,fetcher=fetch){
   const response=await fetcher(url,{headers:{Accept:'application/json,text/html','User-Agent':'LotteryResultReader/2.0'},signal:AbortSignal.timeout(8000),redirect:'error'});
@@ -11,9 +11,19 @@ export function parseLottoResponse(body){
   const rows=body?.data?.list;if(!Array.isArray(rows)||!rows.length)throw new Error('공식 로또 응답 형식 변경 또는 미발표');
   return rows.map(r=>{
     const draw={round:number(r.ltEpsd),nums:[1,2,3,4,5,6].map(i=>number(r[`tm${i}WnNo`])),bonus:number(r.bnsWnNo),date:drawDate(r.ltRflYmd),sourceUrl:SOURCE+'/lt645/result'};
-    for(const [key,field] of Object.entries({sales:'wholEpsdSumNtslAmt',firstWinners:'rnk1WnNope',secondWinners:'rnk2WnNope',thirdWinners:'rnk3WnNope'}))if(r[field]!=null)draw[key]=number(r[field]);
+    const stats=parseStats(r);if(stats)draw.stats=stats;
     return validateDraw(draw);
   });
+}
+const WINNER_FIELDS=['rnk1WnNope','rnk2WnNope','rnk3WnNope','rnk4WnNope','rnk5WnNope'];
+/** Sales and rank 1-5 winner counts. Missing, malformed or not-yet-aggregated values (no 5th-rank winners)
+ * are left out without affecting the drawn numbers, and the round is requested again on a later run. */
+export function parseStats(r){
+  try{
+    if(r.wholEpsdSumNtslAmt==null||WINNER_FIELDS.some(f=>r[f]==null))return null;
+    const stats={sales:number(r.wholEpsdSumNtslAmt),winners:WINNER_FIELDS.map(f=>number(r[f]))};
+    return stats.sales>0&&stats.winners[4]>0?validateStats(stats):null;
+  }catch{return null;}
 }
 function mergeOfficial(old,rows){
   const map=new Map(old.map(d=>[d.round,d]));
@@ -57,5 +67,19 @@ export async function collectHistory(old=[],fetcher=fetch,options={}){
   draws=mergeOfficial(draws,rows);info=coverage(draws,latest);
   await onProgress({draws,coverage:info});
  }
- return {draws,coverage:info,requests};
+ // Once every result is stored, fill in sales and winner counts, newest rounds first.
+ // Each round is asked for at most once per run so an unavailable statistic cannot loop.
+ const asked=new Set();
+ while(info.complete&&requests<maxRequests){
+  const target=draws.find(d=>!d.stats&&!asked.has(d.round))?.round;
+  if(target===undefined)break;
+  asked.add(target);await pause(delayMs);
+  const url=new URL('/lt645/selectPstLt645InfoNew.do',SOURCE);
+  url.searchParams.set('srchDir','center');url.searchParams.set('srchLtEpsd',String(target));
+  const rows=parseLottoResponse(JSON.parse(await fetchText(url.href,fetcher)));requests++;
+  if(rows.some(d=>d.round>latest))throw Error('최신 회차를 초과한 응답');
+  draws=mergeOfficial(draws,rows);
+  await onProgress({draws,coverage:info});
+ }
+ return {draws,coverage:info,requests,statsMissing:draws.filter(d=>!d.stats).length};
 }

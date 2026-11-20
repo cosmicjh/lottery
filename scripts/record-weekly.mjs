@@ -1,5 +1,5 @@
 import {readFile,writeFile,rename} from 'node:fs/promises';
-import {WEEKLY_VERSION,weeklyFive,nextWeeklyTarget,validateWeeklyRecords} from './weekly.mjs';
+import {WEEKLY_VERSION,DISJOINT_WEEKLY_VERSION,usablePopularity,weeklyFive,nextWeeklyTarget,validateWeeklyRecords} from './weekly.mjs';
 import {validateRows} from './model.mjs';
 import {coldRecord,validateStudy} from './prospective.mjs';
 const file=name=>new URL('../data/'+name,import.meta.url);
@@ -8,9 +8,12 @@ async function save(name,obj){await writeFile(file(name+'.tmp'),JSON.stringify(o
 const data=JSON.parse(await readFile(file('lotto.json'),'utf8')),draws=validateRows(data.draws);
 const records=await validateWeeklyRecords((await readRecords('weekly.json')).records);
 const study=validateStudy((await readRecords('study.json')).records),target=nextWeeklyTarget(draws);
-if(target&&!records.some(r=>r.round===target.round&&r.version===WEEKLY_VERSION)){
- const games=await weeklyFive(target.round),now=Date.now();
- if(now<Date.parse(target.cutoff))records.push({round:target.round,version:WEEKLY_VERSION,games,createdAt:new Date(now).toISOString(),timing:'before-cutoff'});
+let popularity=null;
+try{popularity=usablePopularity(JSON.parse(await readFile(file('lotto-popularity.json'),'utf8')));}catch(e){if(e.code!=='ENOENT')console.error('번호 인기도 자료 확인 필요: '+e.message);}
+if(target&&!records.some(r=>r.round===target.round&&[WEEKLY_VERSION,DISJOINT_WEEKLY_VERSION].includes(r.version))){
+ // Without a validated popularity profile the uniform disjoint rule (v2) is recorded instead.
+ const version=popularity?WEEKLY_VERSION:DISJOINT_WEEKLY_VERSION,games=await weeklyFive(target.round,version,popularity),now=Date.now();
+ if(now<Date.parse(target.cutoff))records.push({round:target.round,version,games,...(popularity?{popularity}:{}),createdAt:new Date(now).toISOString(),timing:'before-cutoff'});
 }
 let problem=null;
 if(target&&target.round>=1241&&!study.some(r=>r.round===target.round)){

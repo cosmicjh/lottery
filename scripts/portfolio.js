@@ -1,4 +1,5 @@
-/* Lotto 6/45 portfolio research. This browser/Node module has NO dependency on past draw outcomes.
+/* Lotto 6/45 portfolio research. Number choice never depends on past drawn numbers; the low-popularity mode
+ * uses only an estimate of how OTHER buyers pick (scripts/popularity.mjs), which changes prize sharing, not odds.
  * Exact fractions for identical, disjoint, five-ticket portfolios; optional hypothetical
  * number-choice model; deterministic personal mode; exploratory walk-forward audit.
  */
@@ -10,6 +11,7 @@
   'use strict';
   const TOTAL = 8145060, BASE = 6 / 45;
   const VERSION = 'personal-five-v1-disjoint';
+  const LOWPOP_VERSION = 'personal-five-v2-lowpop';
   function choose(n, k) {
     if (!Number.isInteger(n) || !Number.isInteger(k) || k < 0 || k > n) return 0;
     let r = 1;
@@ -51,7 +53,35 @@
       perGame, expectedGames, atLeastOneRank, atLeastTwoFifth:4000/TOTAL,
       meaning:'당첨확률은 번호의 크기 및 과거 출현 빈도와 무관합니다.'};
   }
-  async function personalFive(round, secret, cryptoApi = globalThis.crypto) {
+  /** Popularity snapshot used for generation: the 30 least-picked numbers, ascending, and the profile id. */
+  function validatePopularity(p) {
+    if (!p || typeof p.id !== 'string' || !p.id || p.id.length > 200 || !Array.isArray(p.numbers) || p.numbers.length !== 30)
+      throw Error('번호 인기도 자료 형식 오류');
+    if (p.numbers.some((n, i) => !Number.isInteger(n) || n < 1 || n > 45 || (i && n <= p.numbers[i - 1])))
+      throw Error('번호 인기도 자료의 번호 목록 오류');
+    return { id: p.id, numbers: [...p.numbers] };
+  }
+  // Widely reported to be over-picked: three or more consecutive numbers, or six numbers with one common step.
+  function isPatternGame(game) {
+    const s = [...game].sort((a, b) => a - b);
+    let run = 1;
+    for (let i = 1; i < s.length; i++) { run = s[i] === s[i - 1] + 1 ? run + 1 : 1; if (run >= 3) return true; }
+    return s.every((n, i) => i < 2 || n - s[i - 1] === s[1] - s[0]);
+  }
+  /** Five disjoint games from the 30 least-picked numbers. `integer(n)` returns a uniform integer in [0, n).
+   * Every disjoint set keeps the same winning probabilities; only the expected share of ranks 1-3 changes.
+   * The partition is reshuffled (same random stream) while a game shows an over-picked pattern. */
+  async function lowPopularityFive(popularity, integer) {
+    const { numbers } = validatePopularity(popularity);
+    for (let attempt = 0; attempt < 200; attempt++) {
+      const pool = [...numbers];
+      for (let i = 0; i < 29; i++) { const j = i + await integer(30 - i); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+      const games = Array.from({ length: 5 }, (_, i) => pool.slice(6 * i, 6 * i + 6).sort((a, b) => a - b));
+      if (!games.some(isPatternGame)) return games;
+    }
+    throw Error('패턴 조건을 만족하는 분할을 찾지 못했습니다.');
+  }
+  async function personalFive(round, secret, cryptoApi = globalThis.crypto, popularity = null) {
     if (!Number.isInteger(round) || round < 1 || round > 10000) throw Error('대상 회차 오류');
     if (typeof secret !== 'string' || !secret.trim() || secret.length > 500) throw Error('개인 시드를 입력하세요(최대 500자).');
     if (!cryptoApi?.subtle) throw Error('개인 번호 생성은 HTTPS 보안 환경이 필요합니다.');
@@ -61,13 +91,14 @@
       const limit = Math.floor(4294967296/n)*n;
       for (;;) {
         if (!words.length) {
-          const input = JSON.stringify([VERSION,round,secret,counter++]);
+          const input = JSON.stringify([popularity ? LOWPOP_VERSION : VERSION,round,secret,counter++]);
           const bytes = await cryptoApi.subtle.digest('SHA-256',new TextEncoder().encode(input));
           const dv = new DataView(bytes);words=Array.from({length:8},(_,i)=>dv.getUint32(i*4,false));
         }
         const v=words.shift();if(v<limit)return v%n;
       }
     }
+    if (popularity) return lowPopularityFive(popularity, integer);
     for(let i=0;i<30;i++){const j=i+await integer(45-i);[pool[i],pool[j]]=[pool[j],pool[i]];}
     return Array.from({length:5},(_,i)=>pool.slice(6*i,6*i+6).sort((a,b)=>a-b));
   }
@@ -150,5 +181,5 @@
       fourPlus:(15*choose(39,2)+6*39+1)/TOTAL},results,n:holdout,
       limitations:'동점은 고정 해시로 정리한 실제 6개 번호 기준. ECE는 5개 확률 구간의 기술통계이며 추정 오차가 큽니다. 정규근사 95% 구간·Bonferroni(3모형) p값은 탐색적 지표이며, 사전 등록된 독립 검증 결과가 아닙니다.'};
   }
-  return {TOTAL,VERSION,choose,checkGames,disjointExact,personalFive,makeRandomSecret,features,splitScenario,selectSix,auditWalkForward};
+  return {TOTAL,VERSION,LOWPOP_VERSION,validatePopularity,isPatternGame,lowPopularityFive,choose,checkGames,disjointExact,personalFive,makeRandomSecret,features,splitScenario,selectSix,auditWalkForward};
 });

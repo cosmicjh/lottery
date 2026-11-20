@@ -14,7 +14,8 @@ try {
   await save();
  }});
  next.checkedAt=new Date().toISOString();next.ok=result.coverage.complete;
- if(next.ok){next.completeAt=next.checkedAt;next.status=`1~${result.coverage.latest}회 전체 ${result.coverage.collected}회 수집 완료. 누락 없음.`;}
+ const stats=result.statsMissing?` 당첨 통계(판매액·등위별 당첨자 수) 미수집 ${result.statsMissing}회는 다음 실행에서 이어서 수집합니다.`:' 당첨 통계도 전 회차 수집 완료.';
+ if(next.ok){next.completeAt=next.checkedAt;next.status=`1~${result.coverage.latest}회 전체 ${result.coverage.collected}회 수집 완료. 누락 없음.`+stats;}
  else{next.status=`이번 실행의 요청 상한 도달. ${result.coverage.collected}/${result.coverage.latest}회 저장, 누락 ${result.coverage.missing.length}회. 다시 실행하면 누락 회차부터 재개합니다.`;process.exitCode=1;}
 } catch(e) {next.ok=false;next.status='공식 수집 중단: '+e.message+'. 이미 검증·저장한 회차는 유지하며 다음 실행에서 재시도합니다.';process.exitCode=1;}
 await save();console.log(next.status);
