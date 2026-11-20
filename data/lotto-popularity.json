@@ -1,9 +1,8 @@
 {
  "schema": 1,
  "version": "popularity-v1",
- "id": "popularity-v1:third-party:601-1250",
- "source": "third-party",
- "sourceNote": "초기 자료. 동행복권 공식 결과를 수집한 공개 저장소 smok95/lotto(results/all.json)의 판매액·등위별 당첨자 수로 추정함. 같은 항목을 420bRM/lottodraw(prize-data.json, lotto-data.json)와 1~1250회 전체 대조하여 일치(1~5등 당첨자 수·판매액, 표기 차이 2건 제외), 당첨번호는 이 저장소의 공식 수집 자료(1~1248회)와 전부 일치. data/lotto.json에 공식 통계가 650회분 이상 쌓이면 공식 자료로 자동 교체됨.",
+ "id": "popularity-v1:official:601-1250",
+ "source": "official",
  "rounds": {
   "first": 601,
   "last": 1250,
